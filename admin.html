@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>게임 추가하기 · 아인이의 놀이터</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--blue:#2563eb;--blue-d:#1d4ed8;
+  --green:#16a34a;--red:#dc2626;--bg:#f8fafc}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Jua','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  background:var(--bg);color:var(--ink);padding:20px 16px 60px;
+  display:flex;flex-direction:column;align-items:center}
+a{color:var(--blue)}
+h1{margin:0 0 4px;font-size:28px}
+.lead{margin:0 0 20px;color:var(--muted);font-size:14px}
+.wrap{width:100%;max-width:920px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;
+  margin-bottom:16px;box-shadow:0 4px 14px rgba(15,23,42,.05)}
+.panel h2{margin:0 0 4px;font-size:18px;font-weight:normal}
+.panel .note{margin:0 0 14px;font-size:12.5px;color:var(--muted);line-height:1.6}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.f{display:flex;flex-direction:column;gap:4px;flex:1;min-width:150px}
+.f label{font-size:12px;color:var(--muted)}
+input,select,textarea{font-family:inherit;font-size:14px;padding:9px 11px;
+  border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid #bfdbfe;border-color:#93c5fd}
+textarea{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+  min-height:230px;line-height:1.5;resize:vertical;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+.btns{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px}
+button{font-family:inherit;font-size:14.5px;padding:10px 18px;border-radius:11px;border:none;
+  cursor:pointer;transition:.12s}
+button:active{transform:translateY(2px)}
+button:disabled{opacity:.5;cursor:default;transform:none}
+.b-main{background:var(--blue);color:#fff;box-shadow:0 3px 0 var(--blue-d)}
+.b-alt{background:#f1f5f9;color:#334155;border:1px solid var(--line)}
+.b-danger{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+.b-ok{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
+.pill{display:inline-block;font-size:11.5px;padding:3px 9px;border-radius:999px;background:#eef2ff;color:#3730a3}
+
+#log{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:12px 14px;font-size:12.5px;
+  font-family:ui-monospace,Menlo,monospace;max-height:190px;overflow:auto;white-space:pre-wrap;line-height:1.6}
+#log .ok{color:#4ade80}
+#log .err{color:#fca5a5}
+#log .warn{color:#fcd34d}
+
+#preview{width:100%;height:440px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.hidden{display:none}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);
+  border-radius:12px;background:#fcfcfd}
+.item .em{font-size:22px}
+.item .t{flex:1;font-size:14px}
+.item .t small{display:block;color:var(--muted);font-size:11.5px}
+.warnbox{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:12px;
+  padding:11px 13px;font-size:12.5px;line-height:1.65;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>🔧 게임 추가하기</h1>
+<p class="lead">새로 만든 게임 코드를 붙여넣고 버튼만 누르면, 놀이터에 자동으로 올라가요.
+<a href="index.html">← 놀이터로 돌아가기</a></p>
+
+<!-- 1. 저장소 설정 -->
+<div class="panel">
+  <h2>1. 깃허브 연결 <span class="pill" id="conn-state">연결 안 됨</span></h2>
+  <p class="note">한 번만 입력하면 이 브라우저에 저장돼요. 토큰은 깃허브 → Settings → Developer settings →
+    Personal access tokens → <b>Fine-grained tokens</b>에서 이 저장소의 <b>Contents: Read and write</b> 권한으로 만들면 돼요.</p>
+  <div class="warnbox">⚠️ 토큰은 이 컴퓨터 브라우저에만 저장돼요(다른 사람에게 전송되지 않아요).
+    아이가 쓰는 태블릿에서는 <b>토큰을 저장하지 마세요</b>. 게임을 올리는 건 어른 컴퓨터에서만 하면 됩니다.</div>
+  <div class="row">
+    <div class="f"><label>깃허브 아이디 (owner)</label><input id="gh-owner" placeholder="예: jcc3590"></div>
+    <div class="f"><label>저장소 이름 (repo)</label><input id="gh-repo" placeholder="예: ain-playground"></div>
+    <div class="f" style="max-width:130px"><label>브랜치</label><input id="gh-branch" value="main"></div>
+  </div>
+  <div class="row">
+    <div class="f"><label>액세스 토큰 (github_pat_… 또는 ghp_…)</label>
+      <input id="gh-token" type="password" placeholder="토큰 붙여넣기"></div>
+  </div>
+  <div class="btns">
+    <button class="b-main" onclick="saveConn()">💾 저장하고 연결 확인</button>
+    <button class="b-alt" onclick="forgetToken()">🚫 이 브라우저에서 토큰 지우기</button>
+  </div>
+</div>
+
+<!-- 2. 게임 정보 -->
+<div class="panel">
+  <h2>2. 게임 정보</h2>
+  <p class="note">놀이터 첫 화면 카드에 보이는 내용이에요.</p>
+  <div class="row">
+    <div class="f" style="max-width:180px"><label>파일 이름 (영어·숫자)</label><input id="g-id" placeholder="예: shadow"></div>
+    <div class="f"><label>게임 이름</label><input id="g-title" placeholder="예: 그림자 맞추기"></div>
+    <div class="f" style="max-width:110px"><label>이모지</label><input id="g-emoji" placeholder="🌗" value="🎮"></div>
+  </div>
+  <div class="row">
+    <div class="f"><label>설명 (한 줄)</label><input id="g-desc" placeholder="예: 그림자를 보고 무엇인지 맞춰요."></div>
+    <div class="f" style="max-width:200px"><label>배우는 것</label><input id="g-skill" placeholder="예: 관찰 · 추론"></div>
+    <div class="f" style="max-width:140px"><label>카드 색</label>
+      <select id="g-color">
+        <option value="green">초록</option><option value="blue">파랑</option>
+        <option value="purple">보라</option><option value="pink">분홍</option>
+        <option value="orange">주황</option><option value="sky">하늘</option>
+        <option value="rose">장미</option><option value="violet">연보라</option>
+        <option value="slate">회색</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- 3. 코드 -->
+<div class="panel">
+  <h2>3. 게임 코드 붙여넣기</h2>
+  <p class="note">HTML 전체(&lt;!DOCTYPE html&gt; 부터)를 그대로 붙여넣으세요.
+    「🏠 놀이터로」 돌아가기 버튼은 자동으로 넣어 드려요.</p>
+  <textarea id="code" placeholder="<!DOCTYPE html> ... 여기에 붙여넣기 ..."></textarea>
+  <div class="btns">
+    <button class="b-alt" onclick="doPreview()">👀 미리보기</button>
+    <button class="b-alt" onclick="closePreview()">닫기</button>
+    <button class="b-alt" onclick="document.getElementById('code').value=''">지우기</button>
+    <span style="flex:1"></span>
+    <button class="b-main" id="btn-publish" onclick="publish()">🚀 놀이터에 올리기</button>
+  </div>
+  <iframe id="preview" class="hidden" title="미리보기"></iframe>
+</div>
+
+<!-- 4. 결과 -->
+<div class="panel">
+  <h2>4. 진행 상황</h2>
+  <div id="log">아직 시작하지 않았어요.</div>
+</div>
+
+<!-- 5. 현재 게임 목록 -->
+<div class="panel">
+  <h2>5. 놀이터에 있는 게임</h2>
+  <p class="note">목록에서 빼면 첫 화면에서 사라져요(파일은 저장소에 그대로 남아요).</p>
+  <div class="btns" style="margin-bottom:12px">
+    <button class="b-alt" onclick="loadList()">🔄 목록 불러오기</button>
+  </div>
+  <div class="list" id="list"></div>
+</div>
+
+</div>
+
+<script>
+"use strict";
+const API='https://api.github.com';
+const LS='ain-gh-conn';
+
+/* ---------- 로그 ---------- */
+function log(msg,cls){
+  const el=document.getElementById('log');
+  const t=new Date().toLocaleTimeString('ko-KR');
+  el.innerHTML+=`\n<span class="${cls||''}">[${t}] ${msg}</span>`;
+  el.scrollTop=el.scrollHeight;
+}
+function clearLog(){ document.getElementById('log').textContent=''; }
+
+/* ---------- 연결 정보 ---------- */
+function conn(){
+  return {
+    owner:document.getElementById('gh-owner').value.trim(),
+    repo:document.getElementById('gh-repo').value.trim(),
+    branch:document.getElementById('gh-branch').value.trim()||'main',
+    token:document.getElementById('gh-token').value.trim()
+  };
+}
+function loadConn(){
+  try{
+    const c=JSON.parse(localStorage.getItem(LS)||'{}');
+    if(c.owner)document.getElementById('gh-owner').value=c.owner;
+    if(c.repo)document.getElementById('gh-repo').value=c.repo;
+    if(c.branch)document.getElementById('gh-branch').value=c.branch;
+    if(c.token)document.getElementById('gh-token').value=c.token;
+    if(c.owner&&c.repo&&c.token) setState('저장됨',true);
+  }catch(e){}
+}
+function setState(text,ok){
+  const el=document.getElementById('conn-state');
+  el.textContent=text;
+  el.style.background=ok?'#dcfce7':'#fee2e2';
+  el.style.color=ok?'#166534':'#991b1b';
+}
+async function saveConn(){
+  const c=conn();
+  if(!c.owner||!c.repo||!c.token){ alert('아이디, 저장소 이름, 토큰을 모두 입력해 주세요.'); return; }
+  try{ localStorage.setItem(LS,JSON.stringify(c)); }catch(e){}
+  clearLog(); log('연결을 확인하는 중…');
+  try{
+    const r=await gh(`/repos/${c.owner}/${c.repo}`);
+    log(`✅ 저장소 확인: ${r.full_name} (기본 브랜치: ${r.default_branch})`,'ok');
+    if(r.default_branch!==c.branch){
+      log(`ℹ️ 브랜치를 '${r.default_branch}' 로 맞춰 두는 게 좋아요.`,'warn');
+    }
+    setState('연결됨 ✓',true);
+    loadList();
+  }catch(e){
+    setState('연결 실패',false);
+    log('❌ '+e.message,'err');
+    log('   → 아이디/저장소 이름 오타, 또는 토큰 권한(Contents: Read and write)을 확인해 주세요.','warn');
+  }
+}
+function forgetToken(){
+  try{
+    const c=JSON.parse(localStorage.getItem(LS)||'{}');
+    delete c.token; localStorage.setItem(LS,JSON.stringify(c));
+  }catch(e){}
+  document.getElementById('gh-token').value='';
+  setState('토큰 지움',false);
+  log('토큰을 이 브라우저에서 지웠어요.','warn');
+}
+
+/* ---------- GitHub API ---------- */
+async function gh(path,opts){
+  const c=conn();
+  const res=await fetch(API+path,Object.assign({
+    headers:{
+      'Authorization':'Bearer '+c.token,
+      'Accept':'application/vnd.github+json',
+      'X-GitHub-Api-Version':'2022-11-28'
+    }
+  },opts||{}));
+  if(res.status===404) throw new Error('찾을 수 없어요 (404). 이름이나 경로를 확인해 주세요.');
+  if(res.status===401) throw new Error('토큰이 올바르지 않아요 (401).');
+  if(res.status===403) throw new Error('권한이 없어요 (403). 토큰의 Contents 권한을 확인해 주세요.');
+  if(!res.ok){
+    let d={}; try{d=await res.json();}catch(e){}
+    throw new Error(`${res.status} ${d.message||res.statusText}`);
+  }
+  if(res.status===204) return null;
+  return res.json();
+}
+/* UTF-8 안전 base64 */
+function b64(str){
+  const bytes=new TextEncoder().encode(str);
+  let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b));
+  return btoa(bin);
+}
+function unb64(b){
+  const bin=atob(b.replace(/\s/g,''));
+  const bytes=Uint8Array.from(bin,ch=>ch.charCodeAt(0));
+  return new TextDecoder('utf-8').decode(bytes);
+}
+async function getFile(path){
+  const c=conn();
+  try{
+    const r=await gh(`/repos/${c.owner}/${c.repo}/contents/${path}?ref=${encodeURIComponent(c.branch)}`);
+    return {sha:r.sha, text:unb64(r.content)};
+  }catch(e){
+    if(e.message.includes('404')) return null;
+    throw e;
+  }
+}
+async function putFile(path,text,message,sha){
+  const c=conn();
+  const body={message,content:b64(text),branch:c.branch};
+  if(sha) body.sha=sha;
+  return gh(`/repos/${c.owner}/${c.repo}/contents/${path}`,
+    {method:'PUT',body:JSON.stringify(body)});
+}
+
+/* ---------- 코드 손보기 ---------- */
+const HOME_LINK=
+`<a href="../index.html" style="position:fixed;top:8px;left:8px;z-index:9999;background:rgba(255,255,255,.9);color:#6b7280;padding:5px 12px;border-radius:999px;font-size:13px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.08);border:1px solid #e5e7eb;font-family:'Jua','Apple SD Gothic Neo',sans-serif">🏠 놀이터로</a>`;
+
+function prepareCode(raw){
+  let html=raw.trim();
+  if(!/^<!DOCTYPE/i.test(html) && !/^<html/i.test(html)){
+    html='<!DOCTYPE html>\n<html lang="ko">\n<head><meta charset="UTF-8">\n'+
+         '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n</head>\n<body>\n'+
+         html+'\n</body>\n</html>';
+  }
+  if(!/놀이터로/.test(html)){
+    if(/<body[^>]*>/i.test(html)) html=html.replace(/(<body[^>]*>)/i,'$1\n'+HOME_LINK+'\n');
+    else html=HOME_LINK+'\n'+html;
+  }
+  return html;
+}
+function doPreview(){
+  const code=document.getElementById('code').value;
+  if(!code.trim()){ alert('먼저 코드를 붙여넣어 주세요.'); return; }
+  const f=document.getElementById('preview');
+  f.classList.remove('hidden');
+  f.srcdoc=prepareCode(code);
+  f.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function closePreview(){
+  const f=document.getElementById('preview');
+  f.srcdoc=''; f.classList.add('hidden');
+}
+
+/* ---------- 올리기 ---------- */
+async function publish(){
+  const c=conn();
+  if(!c.owner||!c.repo||!c.token){ alert('먼저 1번의 깃허브 연결을 저장해 주세요.'); return; }
+  const id=document.getElementById('g-id').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
+  const title=document.getElementById('g-title').value.trim();
+  const code=document.getElementById('code').value;
+  if(!id){ alert('파일 이름을 영어로 적어 주세요. (예: shadow)'); return; }
+  if(!title){ alert('게임 이름을 적어 주세요.'); return; }
+  if(!code.trim()){ alert('게임 코드를 붙여넣어 주세요.'); return; }
+
+  const btn=document.getElementById('btn-publish');
+  btn.disabled=true; btn.textContent='올리는 중…';
+  clearLog();
+
+  try{
+    const path=`games/${id}.html`;
+    log(`1) ${path} 파일을 확인하는 중…`);
+    const existing=await getFile(path);
+    if(existing) log('   이미 있는 파일이에요 → 새 내용으로 바꿉니다.','warn');
+
+    log('2) 게임 파일을 올리는 중…');
+    await putFile(path, prepareCode(code),
+      (existing?'update game: ':'add game: ')+title, existing&&existing.sha);
+    log('   ✅ 게임 파일 완료','ok');
+
+    log('3) games.json 목록을 갱신하는 중…');
+    const cur=await getFile('games.json');
+    let data={title:'아인이의 놀이터',games:[]};
+    if(cur){ try{ data=JSON.parse(cur.text); }catch(e){ log('   games.json 형식이 이상해서 새로 만듭니다.','warn'); } }
+    if(!Array.isArray(data.games)) data.games=[];
+
+    const entry={
+      id, title,
+      emoji:document.getElementById('g-emoji').value.trim()||'🎮',
+      desc:document.getElementById('g-desc').value.trim(),
+      skill:document.getElementById('g-skill').value.trim(),
+      file:path,
+      color:document.getElementById('g-color').value
+    };
+    const i=data.games.findIndex(g=>g.id===id);
+    if(i>=0){ data.games[i]=entry; log('   기존 목록 항목을 새 정보로 바꿨어요.'); }
+    else { data.games.push(entry); log('   목록에 새로 추가했어요.'); }
+    data.updated=new Date().toISOString().slice(0,10);
+
+    await putFile('games.json', JSON.stringify(data,null,2),
+      'update games.json: '+title, cur&&cur.sha);
+    log('   ✅ 목록 갱신 완료','ok');
+
+    const url=`https://${c.owner}.github.io/${c.repo}/`;
+    log(`\n🎉 다 됐어요! 1~2분 뒤에 놀이터에 나타나요.\n   ${url}\n   바로가기: ${url}${path}`,'ok');
+    loadList();
+  }catch(e){
+    log('❌ 실패: '+e.message,'err');
+    log('   토큰 권한(Contents: Read and write)과 브랜치 이름을 확인해 주세요.','warn');
+  }finally{
+    btn.disabled=false; btn.textContent='🚀 놀이터에 올리기';
+  }
+}
+
+/* ---------- 목록 ---------- */
+async function loadList(){
+  const box=document.getElementById('list');
+  box.innerHTML='<div style="color:#6b7280;font-size:13px">불러오는 중…</div>';
+  try{
+    const cur=await getFile('games.json');
+    if(!cur){ box.innerHTML='<div style="color:#6b7280;font-size:13px">아직 games.json이 없어요.</div>'; return; }
+    const data=JSON.parse(cur.text);
+    const games=data.games||[];
+    if(!games.length){ box.innerHTML='<div style="color:#6b7280;font-size:13px">등록된 게임이 없어요.</div>'; return; }
+    box.innerHTML='';
+    games.forEach(g=>{
+      const d=document.createElement('div');
+      d.className='item';
+      d.innerHTML=`<span class="em">${g.emoji||'🎮'}</span>
+        <span class="t">${g.title}<small>${g.file||''} · ${g.skill||''}</small></span>`;
+      const edit=document.createElement('button');
+      edit.className='b-ok'; edit.textContent='정보 불러오기';
+      edit.onclick=()=>{
+        document.getElementById('g-id').value=g.id||'';
+        document.getElementById('g-title').value=g.title||'';
+        document.getElementById('g-emoji').value=g.emoji||'🎮';
+        document.getElementById('g-desc').value=g.desc||'';
+        document.getElementById('g-skill').value=g.skill||'';
+        document.getElementById('g-color').value=g.color||'slate';
+        window.scrollTo({top:0,behavior:'smooth'});
+      };
+      const del=document.createElement('button');
+      del.className='b-danger'; del.textContent='목록에서 빼기';
+      del.onclick=()=>removeFromList(g.id,g.title);
+      d.appendChild(edit); d.appendChild(del);
+      box.appendChild(d);
+    });
+  }catch(e){
+    box.innerHTML=`<div style="color:#b91c1c;font-size:13px">불러오지 못했어요: ${e.message}</div>`;
+  }
+}
+async function removeFromList(id,title){
+  if(!confirm(`「${title}」 을(를) 놀이터 목록에서 뺄까요?\n(게임 파일 자체는 저장소에 남아 있어요)`)) return;
+  clearLog(); log(`목록에서 ${title} 빼는 중…`);
+  try{
+    const cur=await getFile('games.json');
+    const data=JSON.parse(cur.text);
+    data.games=(data.games||[]).filter(g=>g.id!==id);
+    data.updated=new Date().toISOString().slice(0,10);
+    await putFile('games.json',JSON.stringify(data,null,2),'remove from list: '+title,cur.sha);
+    log('✅ 뺐어요.','ok');
+    loadList();
+  }catch(e){ log('❌ '+e.message,'err'); }
+}
+
+loadConn();
+</script>
+</body>
+</html>

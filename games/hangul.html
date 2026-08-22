@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>한글 낱말 만들기 · 아인이의 놀이터</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔤</text></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fef2f2;--ink:#1f2937;--muted:#6b7280;--pink:#f43f5e;--pink-d:#be123c;
+  --green:#22c55e;--green-d:#15803d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font-family:'Jua','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  background:var(--bg);color:var(--ink);user-select:none;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px}
+button{font-family:inherit;cursor:pointer;border:none}
+.home{position:fixed;top:8px;left:8px;z-index:60;background:rgba(255,255,255,.9);color:var(--muted);
+  padding:5px 12px;border-radius:999px;font-size:13px;text-decoration:none;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);border:1px solid #e5e7eb}
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%}
+.screen.on{display:flex;animation:f .25s}
+@keyframes f{from{opacity:0}to{opacity:1}}
+
+h1{font-size:clamp(22px,4vh,38px);color:var(--pink-d);margin:0 0 4px;text-align:center}
+.sub{font-size:clamp(12px,2vh,18px);color:var(--muted);margin:0 0 14px}
+.box{background:#fff;border:3px solid #fecdd3;border-radius:20px;padding:13px 16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);margin-bottom:11px;width:min(620px,94vw)}
+.box h2{margin:0 0 9px;font-size:clamp(13px,2vh,18px);color:var(--pink-d);text-align:center;font-weight:normal}
+.opts{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.opt{background:#f3f4f6;border:2px solid transparent;color:#6b7280;padding:9px 14px;
+  border-radius:12px;font-size:clamp(12px,1.9vh,17px);white-space:nowrap}
+.opt.sel{background:#ffe4e6;border-color:var(--pink);color:var(--pink-d)}
+.big{background:var(--green);color:#fff;font-size:clamp(17px,2.8vh,26px);padding:11px 44px;
+  border-radius:999px;box-shadow:0 5px 0 var(--green-d);transition:.08s}
+.big:active{transform:translateY(5px);box-shadow:0 0 0 var(--green-d)}
+
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  width:min(760px,96vw);margin-bottom:6px}
+.bar .q{font-size:clamp(13px,2vh,18px);color:var(--pink-d)}
+.bar .s{font-size:14px;color:var(--muted)}
+.bar .quit{background:#fecaca;color:#991b1b;font-size:13px;padding:6px 12px;border-radius:10px}
+
+.stage{display:flex;flex-direction:column;align-items:center;gap:clamp(6px,1.4vh,14px)}
+.pic{font-size:clamp(56px,13vh,120px);line-height:1;filter:drop-shadow(0 6px 12px rgba(0,0,0,.12))}
+.hintline{font-size:clamp(12px,1.9vh,17px);color:var(--muted);min-height:22px;text-align:center}
+
+.answer{display:flex;gap:clamp(5px,1.2vh,10px)}
+.cell{width:var(--cs,72px);height:var(--cs,72px);border-radius:14px;background:#fff;
+  border:3px dashed #fda4af;display:flex;align-items:center;justify-content:center;
+  font-size:calc(var(--cs,72px)*.55);color:var(--pink-d);transition:.15s}
+.cell.filled{border-style:solid;border-color:var(--pink);background:#fff1f2}
+.cell.ok{border-color:var(--green);background:#dcfce7;color:var(--green-d);animation:pop .35s}
+.cell.no{border-color:#ef4444;background:#fee2e2;animation:shake .32s}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.14)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.tiles{display:flex;flex-wrap:wrap;gap:clamp(5px,1.2vh,10px);justify-content:center;max-width:min(620px,94vw)}
+.tile{width:var(--cs,72px);height:var(--cs,72px);border-radius:14px;background:#fff;
+  border:3px solid #e5e7eb;font-size:calc(var(--cs,72px)*.5);color:#1f2937;
+  box-shadow:0 4px 0 #d1d5db;transition:.1s}
+.tile:active{transform:translateY(4px);box-shadow:0 0 0 #d1d5db}
+.tile.used{opacity:.28;pointer-events:none;box-shadow:none}
+
+.tools{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tool{background:#fff;border:2px solid #e5e7eb;color:#4b5563;padding:8px 15px;border-radius:12px;font-size:14px}
+.tool.say{background:#e0f2fe;border-color:#7dd3fc;color:#075985}
+.tool.hint{background:#fef9c3;border-color:#fde047;color:#854d0e}
+
+.fb{min-height:28px;font-size:clamp(14px,2.2vh,20px);text-align:center}
+.fb.good{color:var(--green-d)}
+.fb.bad{color:#b91c1c}
+.next{background:var(--pink);color:#fff;font-size:17px;padding:9px 30px;border-radius:999px;
+  box-shadow:0 4px 0 var(--pink-d);display:none}
+.next.on{display:inline-block}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:80}
+.modal.on{display:flex}
+.modal .m{background:#fff;padding:26px 22px;border-radius:24px;text-align:center;max-width:330px;width:88%}
+.modal .em{font-size:54px}
+.modal h2{margin:6px 0;font-size:26px;color:var(--green-d)}
+.modal p{color:var(--muted);margin:0 0 16px}
+.modal button{width:100%;padding:12px;border-radius:14px;font-size:18px;margin-top:8px}
+.m-go{background:var(--pink);color:#fff;box-shadow:0 4px 0 var(--pink-d)}
+.m-alt{background:#e5e7eb;color:#374151}
+.confetti{position:fixed;width:10px;height:10px;animation:fall linear forwards;z-index:90}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.2}}
+</style>
+</head>
+<body>
+
+<a class="home" href="../index.html">🏠 놀이터로</a>
+
+<div id="s-start" class="screen on">
+  <h1>🔤 아인이의 한글 낱말 만들기</h1>
+  <p class="sub">그림을 보고 글자를 순서대로 눌러 낱말을 만들어요!</p>
+
+  <div class="box">
+    <h2>1. 글자 수는 몇 개로 할까요?</h2>
+    <div class="opts" id="lens">
+      <button class="opt sel" data-len="2">두 글자 (사과, 자동차 X)</button>
+      <button class="opt" data-len="3">세 글자 (자동차)</button>
+      <button class="opt" data-len="0">🎲 섞어서</button>
+    </div>
+  </div>
+  <div class="box">
+    <h2>2. 무슨 낱말로 놀까요?</h2>
+    <div class="opts" id="cats"></div>
+  </div>
+  <div class="box">
+    <h2>3. 몇 문제 풀까요?</h2>
+    <div class="opts" id="counts"></div>
+  </div>
+  <button class="big" onclick="start()">시작하기!</button>
+</div>
+
+<div id="s-game" class="screen">
+  <div class="bar">
+    <span class="q" id="qlab">문제 1 / 10</span>
+    <span class="s" id="score">⭕ 0 ❌ 0</span>
+    <button class="quit" onclick="go('s-start')">그만하기</button>
+  </div>
+
+  <div class="stage">
+    <div class="pic" id="pic">🍎</div>
+    <div class="hintline" id="hintline">이 그림은 무엇일까요?</div>
+    <div class="answer" id="answer"></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="tools">
+      <button class="tool" onclick="undo()">↩️ 한 글자 지우기</button>
+      <button class="tool hint" onclick="hint()">💡 힌트</button>
+      <button class="tool say" onclick="speak()">🔊 읽어주기</button>
+    </div>
+    <div class="fb" id="fb"></div>
+    <button class="next" id="next" onclick="nextQ()">다음 문제 ➡</button>
+  </div>
+</div>
+
+<div class="modal" id="end">
+  <div class="m">
+    <div class="em">🎉</div>
+    <h2 id="end-title">다 풀었어요!</h2>
+    <p id="end-msg"></p>
+    <button class="m-go" onclick="start()">한 번 더!</button>
+    <button class="m-alt" onclick="go('s-start')">설정 바꾸기</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+const WORDS=[
+ /* 동물 */
+ {w:'강아지',e:'🐶',c:'animal'},{w:'고양이',e:'🐱',c:'animal'},{w:'토끼',e:'🐰',c:'animal'},
+ {w:'사자',e:'🦁',c:'animal'},{w:'호랑이',e:'🐯',c:'animal'},{w:'코끼리',e:'🐘',c:'animal'},
+ {w:'거북이',e:'🐢',c:'animal'},{w:'병아리',e:'🐤',c:'animal'},{w:'돼지',e:'🐷',c:'animal'},
+ {w:'개구리',e:'🐸',c:'animal'},{w:'공룡',e:'🦖',c:'animal'},{w:'다람쥐',e:'🐿️',c:'animal'},
+ {w:'물고기',e:'🐠',c:'animal'},{w:'나비',e:'🦋',c:'animal'},{w:'하마',e:'🦛',c:'animal'},
+ /* 탈것 */
+ {w:'자동차',e:'🚗',c:'vehicle'},{w:'버스',e:'🚌',c:'vehicle'},{w:'기차',e:'🚆',c:'vehicle'},
+ {w:'비행기',e:'✈️',c:'vehicle'},{w:'로켓',e:'🚀',c:'vehicle'},{w:'자전거',e:'🚲',c:'vehicle'},
+ {w:'배',e:'🚢',c:'vehicle'},{w:'택시',e:'🚕',c:'vehicle'},{w:'헬기',e:'🚁',c:'vehicle'},
+ {w:'트럭',e:'🚚',c:'vehicle'},{w:'로봇',e:'🤖',c:'vehicle'},
+ /* 음식 */
+ {w:'사과',e:'🍎',c:'food'},{w:'바나나',e:'🍌',c:'food'},{w:'딸기',e:'🍓',c:'food'},
+ {w:'수박',e:'🍉',c:'food'},{w:'포도',e:'🍇',c:'food'},{w:'당근',e:'🥕',c:'food'},
+ {w:'우유',e:'🥛',c:'food'},{w:'빵',e:'🍞',c:'food'},{w:'김밥',e:'🍙',c:'food'},
+ {w:'피자',e:'🍕',c:'food'},{w:'라면',e:'🍜',c:'food'},{w:'케이크',e:'🍰',c:'food'},
+ /* 자연·사물 */
+ {w:'나무',e:'🌳',c:'thing'},{w:'구름',e:'☁️',c:'thing'},{w:'무지개',e:'🌈',c:'thing'},
+ {w:'우산',e:'☂️',c:'thing'},{w:'모자',e:'🧢',c:'thing'},{w:'가방',e:'🎒',c:'thing'},
+ {w:'연필',e:'✏️',c:'thing'},{w:'시계',e:'⏰',c:'thing'},{w:'축구공',e:'⚽',c:'thing'},
+ {w:'해',e:'☀️',c:'thing'},{w:'달',e:'🌙',c:'thing'},{w:'별',e:'⭐',c:'thing'},
+ {w:'꽃',e:'🌸',c:'thing'},{w:'집',e:'🏠',c:'thing'},{w:'풍선',e:'🎈',c:'thing'}
+];
+const CATS=[{id:'all',l:'전부 다 🎲'},{id:'animal',l:'동물 🐶'},{id:'vehicle',l:'탈것 🚗'},
+            {id:'food',l:'먹을 것 🍎'},{id:'thing',l:'사물·자연 🌳'}];
+const COUNTS=[5,10,15];
+
+let wantLen=2, cat='all', total=10;
+let pool=[], qi=0, right=0, wrong=0, answered=false, hinted=0;
+let cur=null, filled=[], audioCtx=null;
+
+function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+function beep(t){
+  if(!audioCtx)return;
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.connect(g);g.connect(audioCtx.destination);
+  const c=audioCtx.currentTime;g.gain.setValueAtTime(.08,c);
+  if(t==='tap'){o.type='sine';o.frequency.setValueAtTime(660,c);o.start();o.stop(c+.06);}
+  if(t==='good'){o.type='sine';o.frequency.setValueAtTime(700,c);o.frequency.setValueAtTime(1040,c+.1);o.start();o.stop(c+.24);}
+  if(t==='bad'){o.type='sawtooth';o.frequency.setValueAtTime(230,c);o.frequency.exponentialRampToValueAtTime(120,c+.26);o.start();o.stop(c+.28);}
+  if(t==='win'){o.type='square';[440,590,780,980].forEach((f,i)=>o.frequency.setValueAtTime(f,c+i*.16));o.start();o.stop(c+.7);}
+}
+
+/* 설정 UI */
+document.getElementById('lens').addEventListener('click',e=>{
+  const b=e.target.closest('.opt');if(!b)return;initAudio();beep('tap');
+  wantLen=parseInt(b.dataset.len,10);
+  document.querySelectorAll('#lens .opt').forEach(x=>x.classList.toggle('sel',x===b));});
+const catsEl=document.getElementById('cats');
+CATS.forEach((c,i)=>{const b=document.createElement('button');
+  b.className='opt'+(i===0?' sel':'');b.textContent=c.l;
+  b.onclick=()=>{initAudio();beep('tap');cat=c.id;
+    [...catsEl.children].forEach((x,k)=>x.classList.toggle('sel',k===i));};
+  catsEl.appendChild(b);});
+const countsEl=document.getElementById('counts');
+COUNTS.forEach(c=>{const b=document.createElement('button');
+  b.className='opt'+(c===10?' sel':'');b.textContent=c+' 문제';
+  b.onclick=()=>{initAudio();beep('tap');total=c;
+    [...countsEl.children].forEach((x,k)=>x.classList.toggle('sel',COUNTS[k]===c));};
+  countsEl.appendChild(b);});
+
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.getElementById('end').classList.remove('on');}
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function fit(){
+  const n=cur?Math.max(cur.w.length+2,5):5;
+  const s=Math.max(42,Math.floor(Math.min(window.innerHeight*0.155, (window.innerWidth*0.9)/n, 98)));
+  document.documentElement.style.setProperty('--cs',s+'px');
+}
+window.addEventListener('resize',fit);
+
+function start(){
+  initAudio();
+  let list=WORDS.filter(w=>cat==='all'||w.c===cat);
+  if(wantLen>0) list=list.filter(w=>w.w.length===wantLen);
+  if(list.length<3) list=WORDS.filter(w=>cat==='all'||w.c===cat);
+  pool=shuffle(list.slice());
+  qi=0;right=0;wrong=0;
+  document.getElementById('end').classList.remove('on');
+  go('s-game'); nextQ();
+}
+
+function nextQ(){
+  if(qi>=total){ finish(); return; }
+  qi++;answered=false;hinted=0;filled=[];
+  cur=pool[(qi-1)%pool.length];
+  document.getElementById('qlab').textContent=`문제 ${qi} / ${total}`;
+  document.getElementById('pic').textContent=cur.e;
+  document.getElementById('hintline').textContent=`글자 ${cur.w.length}개예요. 순서대로 눌러보세요!`;
+  document.getElementById('fb').textContent='';
+  document.getElementById('fb').className='fb';
+  document.getElementById('next').classList.remove('on');
+
+  // 정답 칸
+  const ans=document.getElementById('answer');
+  ans.innerHTML='';
+  for(let i=0;i<cur.w.length;i++){
+    const d=document.createElement('div');d.className='cell';d.id='cell-'+i;
+    ans.appendChild(d);
+  }
+  // 글자 타일 = 정답 글자 + 방해 글자
+  const letters=cur.w.split('');
+  const others=shuffle(WORDS.filter(w=>w!==cur).map(w=>w.w).join('').split('')
+                       .filter(ch=>!letters.includes(ch)));
+  const extra=Math.min(3, Math.max(2, 5-letters.length));
+  const tiles=shuffle(letters.concat(others.slice(0,extra)));
+  const tEl=document.getElementById('tiles');
+  tEl.innerHTML='';
+  tiles.forEach((ch,i)=>{
+    const b=document.createElement('button');
+    b.className='tile';b.textContent=ch;b.dataset.i=i;
+    b.onclick=()=>tap(b,ch);
+    tEl.appendChild(b);
+  });
+  fit(); updateScore();
+}
+
+function tap(btn,ch){
+  if(answered||filled.length>=cur.w.length) return;
+  initAudio();beep('tap');
+  btn.classList.add('used');
+  filled.push({ch,btn});
+  const cell=document.getElementById('cell-'+(filled.length-1));
+  cell.textContent=ch; cell.classList.add('filled');
+  if(filled.length===cur.w.length) judge();
+}
+function undo(){
+  if(answered||!filled.length) return;
+  initAudio();beep('tap');
+  const last=filled.pop();
+  last.btn.classList.remove('used');
+  const cell=document.getElementById('cell-'+filled.length);
+  cell.textContent='';cell.className='cell';
+}
+function judge(){
+  const made=filled.map(f=>f.ch).join('');
+  if(made===cur.w){
+    answered=true;right++;beep('good');
+    for(let i=0;i<cur.w.length;i++)document.getElementById('cell-'+i).className='cell ok';
+    const f=document.getElementById('fb');
+    f.className='fb good';
+    f.textContent=hinted?`정답! 「${cur.w}」 ${cur.e} 잘했어요!`:`정답이에요! 「${cur.w}」 ${cur.e} 참 잘했어요! 🎉`;
+    speak();
+    document.getElementById('next').classList.add('on');
+  }else{
+    beep('bad');
+    // 어디가 틀렸는지 알려주기 (스스로 고칠 기회)
+    for(let i=0;i<cur.w.length;i++){
+      const c=document.getElementById('cell-'+i);
+      c.className='cell '+(filled[i].ch===cur.w[i]?'ok':'no');
+    }
+    const f=document.getElementById('fb');
+    f.className='fb bad';
+    f.textContent='초록 칸은 맞았어요! 빨간 칸만 다시 골라볼까요? 🤔';
+    // 틀린 글자만 되돌려주기
+    setTimeout(()=>{
+      for(let i=cur.w.length-1;i>=0;i--){
+        if(filled[i] && filled[i].ch!==cur.w[i]){
+          filled[i].btn.classList.remove('used');
+          const c=document.getElementById('cell-'+i);
+          c.textContent='';c.className='cell';
+          filled.splice(i,1);
+        }
+      }
+      // 남은 것들을 앞에서부터 다시 채움
+      const keep=filled.slice(); filled=[];
+      keep.forEach((k,i)=>{
+        filled.push(k);
+        const c=document.getElementById('cell-'+i);
+        c.textContent=k.ch;c.className='cell ok';
+      });
+    },1100);
+  }
+  updateScore();
+}
+function hint(){
+  if(answered) return;
+  initAudio();beep('tap');
+  hinted++;
+  const i=filled.length;
+  if(i>=cur.w.length) return;
+  const want=cur.w[i];
+  document.getElementById('hintline').textContent=`💡 ${i+1}번째 글자는 「${want}」 예요!`;
+  // 해당 타일을 반짝이게
+  document.querySelectorAll('.tile').forEach(t=>{
+    if(t.textContent===want && !t.classList.contains('used')){
+      t.style.borderColor='#facc15';t.style.background='#fef9c3';
+      setTimeout(()=>{t.style.borderColor='';t.style.background='';},1400);
+    }
+  });
+}
+function speak(){
+  if(!('speechSynthesis' in window)) return;
+  try{
+    const u=new SpeechSynthesisUtterance(cur.w);
+    u.lang='ko-KR'; u.rate=0.85;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){}
+}
+function updateScore(){ document.getElementById('score').textContent=`⭕ ${right}  ❌ ${wrong}`; }
+
+function finish(){
+  beep('win');confetti();
+  document.getElementById('end-title').textContent = right===total?'전부 다 맞췄어요! 🌟':'다 풀었어요! 🎉';
+  document.getElementById('end-msg').textContent=`${total}문제 중 ${right}낱말을 만들었어요!`;
+  document.getElementById('end').classList.add('on');
+}
+function confetti(){
+  const colors=['#fce18a','#ff726d','#b48def','#f4306d','#3fe0d0','#fde047'];
+  for(let i=0;i<45;i++){
+    const d=document.createElement('div');d.className='confetti';
+    d.style.left=Math.random()*100+'vw';d.style.top='-14px';
+    d.style.background=colors[Math.floor(Math.random()*colors.length)];
+    if(Math.random()>.5)d.style.borderRadius='50%';
+    d.style.animationDuration=(Math.random()*2+1.3)+'s';
+    document.body.appendChild(d);setTimeout(()=>d.remove(),3600);
+  }
+}
+fit();
+</script>
+</body>
+</html>

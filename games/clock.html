@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>시계 읽기 대탐험 · 아인이의 놀이터</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕐</text></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff7ed;--ink:#1f2937;--muted:#6b7280;--o:#f97316;--o-d:#c2410c;
+  --hour:#ef4444;--min:#2563eb;--green:#22c55e;--green-d:#15803d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font-family:'Jua','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  background:var(--bg);color:var(--ink);user-select:none;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px}
+button{font-family:inherit;cursor:pointer;border:none}
+.home{position:fixed;top:8px;left:8px;z-index:60;background:rgba(255,255,255,.9);color:var(--muted);
+  padding:5px 12px;border-radius:999px;font-size:13px;text-decoration:none;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);border:1px solid #e5e7eb}
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%}
+.screen.on{display:flex;animation:f .25s}
+@keyframes f{from{opacity:0}to{opacity:1}}
+
+h1{font-size:clamp(22px,4vh,38px);color:var(--o-d);margin:0 0 4px;text-align:center}
+.sub{font-size:clamp(12px,2vh,18px);color:var(--muted);margin:0 0 14px}
+.box{background:#fff;border:3px solid #fed7aa;border-radius:20px;padding:14px 16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);margin-bottom:12px;width:min(560px,94vw)}
+.box h2{margin:0 0 9px;font-size:clamp(13px,2vh,18px);color:var(--o-d);text-align:center;font-weight:normal}
+.opts{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.opt{background:#f3f4f6;border:2px solid transparent;color:#6b7280;padding:9px 14px;
+  border-radius:12px;font-size:clamp(12px,1.9vh,17px);white-space:nowrap}
+.opt.sel{background:#ffedd5;border-color:var(--o);color:var(--o-d)}
+.big{background:var(--green);color:#fff;font-size:clamp(17px,2.8vh,26px);padding:11px 44px;
+  border-radius:999px;box-shadow:0 5px 0 var(--green-d);transition:.08s}
+.big:active{transform:translateY(5px);box-shadow:0 0 0 var(--green-d)}
+
+/* 게임 */
+.bar{display:flex;justify-content:space-between;align-items:center;width:min(700px,96vw);margin-bottom:6px}
+.bar .q{font-size:clamp(13px,2vh,18px);color:var(--o-d)}
+.bar .sc{font-size:14px;color:var(--muted)}
+.bar .quit{background:#fecaca;color:#991b1b;font-size:13px;padding:6px 12px;border-radius:10px}
+
+.play{display:flex;gap:clamp(10px,2.5vw,26px);align-items:center;justify-content:center;flex-wrap:wrap}
+canvas#clock{width:var(--cs,300px);height:var(--cs,300px);
+  filter:drop-shadow(0 8px 18px rgba(0,0,0,.12))}
+.side{display:flex;flex-direction:column;align-items:center;gap:9px}
+.ask{font-size:clamp(15px,2.4vh,22px);color:var(--o-d);text-align:center}
+.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.ch{background:#fff;border:3px solid #e5e7eb;border-radius:14px;padding:13px 18px;
+  font-size:clamp(17px,3vh,26px);min-width:132px;transition:.1s;white-space:nowrap}
+.ch:hover{transform:translateY(-2px)}
+.ch.right{background:#dcfce7;border-color:var(--green);color:var(--green-d)}
+.ch.wrong{background:#fee2e2;border-color:#ef4444;color:#991b1b}
+.ch:disabled{cursor:default}
+
+.setclock{display:flex;flex-direction:column;gap:8px;align-items:center}
+.setrow{display:flex;align-items:center;gap:8px}
+.setrow .lab{width:78px;font-size:15px;text-align:right}
+.setrow button{width:44px;height:44px;border-radius:12px;font-size:20px;color:#fff}
+.h-btn{background:var(--hour);box-shadow:0 4px 0 #b91c1c}
+.m-btn{background:var(--min);box-shadow:0 4px 0 #1e40af}
+.setrow .val{min-width:56px;text-align:center;font-size:24px}
+.ok{background:var(--green);color:#fff;font-size:19px;padding:11px 34px;border-radius:999px;
+  box-shadow:0 4px 0 var(--green-d)}
+.ok:active{transform:translateY(4px);box-shadow:0 0 0 var(--green-d)}
+
+.fb{margin-top:10px;font-size:clamp(14px,2.2vh,20px);min-height:30px;text-align:center}
+.fb.good{color:var(--green-d)}
+.fb.bad{color:#b91c1c}
+.next{margin-top:8px;background:var(--o);color:#fff;font-size:17px;padding:9px 30px;
+  border-radius:999px;box-shadow:0 4px 0 var(--o-d);display:none}
+.next.on{display:inline-block}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:80}
+.modal.on{display:flex}
+.modal .m{background:#fff;padding:26px 22px;border-radius:24px;text-align:center;max-width:330px;width:88%}
+.modal .em{font-size:54px}
+.modal h2{margin:6px 0;font-size:26px;color:var(--green-d)}
+.modal p{color:var(--muted);margin:0 0 16px}
+.modal button{width:100%;padding:12px;border-radius:14px;font-size:18px;margin-top:8px}
+.m-go{background:var(--o);color:#fff;box-shadow:0 4px 0 var(--o-d)}
+.m-alt{background:#e5e7eb;color:#374151}
+</style>
+</head>
+<body>
+
+<a class="home" href="../index.html">🏠 놀이터로</a>
+
+<div id="s-start" class="screen on">
+  <h1>🕐 아인이의 시계 읽기 대탐험</h1>
+  <p class="sub">시계 바늘을 보고 몇 시인지 알아맞혀 볼까요?</p>
+
+  <div class="box">
+    <h2>1. 어떤 시간까지 배울까요?</h2>
+    <div class="opts" id="diffs"></div>
+  </div>
+  <div class="box">
+    <h2>2. 어떻게 풀까요?</h2>
+    <div class="opts" id="modes">
+      <button class="opt sel" data-mode="read">시계 보고 시간 고르기</button>
+      <button class="opt" data-mode="set">시간 보고 바늘 돌리기</button>
+      <button class="opt" data-mode="mix">🎲 섞어서</button>
+    </div>
+  </div>
+  <div class="box">
+    <h2>3. 몇 문제 풀까요?</h2>
+    <div class="opts" id="counts"></div>
+  </div>
+  <button class="big" onclick="start()">시작하기!</button>
+</div>
+
+<div id="s-game" class="screen">
+  <div class="bar">
+    <span class="q" id="qlab">문제 1 / 10</span>
+    <span class="sc" id="score">⭕ 0 ❌ 0</span>
+    <button class="quit" onclick="go('s-start')">그만하기</button>
+  </div>
+
+  <div class="play">
+    <canvas id="clock" width="600" height="600"></canvas>
+    <div class="side">
+      <div class="ask" id="ask">지금 몇 시일까요?</div>
+      <div class="choices" id="choices"></div>
+      <div class="setclock" id="setclock" style="display:none">
+        <div class="setrow">
+          <span class="lab" style="color:var(--hour)">짧은 바늘</span>
+          <button class="h-btn" onclick="bump('h',-1)">−</button>
+          <span class="val" id="hv">3시</span>
+          <button class="h-btn" onclick="bump('h',1)">+</button>
+        </div>
+        <div class="setrow">
+          <span class="lab" style="color:var(--min)">긴 바늘</span>
+          <button class="m-btn" onclick="bump('m',-1)">−</button>
+          <span class="val" id="mv">00분</span>
+          <button class="m-btn" onclick="bump('m',1)">+</button>
+        </div>
+        <button class="ok" onclick="checkSet()">이거예요! ✅</button>
+      </div>
+      <div class="fb" id="fb"></div>
+      <button class="next" id="next" onclick="nextQ()">다음 문제 ➡</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="end">
+  <div class="m">
+    <div class="em">🎉</div>
+    <h2 id="end-title">다 풀었어요!</h2>
+    <p id="end-msg"></p>
+    <button class="m-go" onclick="start()">한 번 더!</button>
+    <button class="m-alt" onclick="go('s-start')">설정 바꾸기</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+const DIFFS=[
+ {id:'oclock',label:'정각만 (1시, 2시…)',step:60},
+ {id:'half',  label:'30분까지 (2시 30분)',step:30},
+ {id:'quarter',label:'15분까지',step:15},
+ {id:'five',  label:'5분까지 (7시 45분)',step:5}
+];
+const COUNTS=[5,10,15];
+let diff=0, mode='read', total=10;
+let qi=0, right=0, wrong=0, answered=false;
+let target={h:3,m:0}, guess={h:12,m:0}, curMode='read';
+let audioCtx=null;
+
+function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+function beep(t){
+  if(!audioCtx)return;
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.connect(g);g.connect(audioCtx.destination);
+  const c=audioCtx.currentTime;g.gain.setValueAtTime(.08,c);
+  if(t==='tick'){o.type='sine';o.frequency.setValueAtTime(700,c);o.start();o.stop(c+.06);}
+  if(t==='good'){o.type='sine';o.frequency.setValueAtTime(660,c);o.frequency.setValueAtTime(990,c+.1);o.start();o.stop(c+.24);}
+  if(t==='bad'){o.type='sawtooth';o.frequency.setValueAtTime(220,c);o.frequency.exponentialRampToValueAtTime(120,c+.28);o.start();o.stop(c+.3);}
+  if(t==='win'){o.type='square';[440,590,780,980].forEach((f,i)=>o.frequency.setValueAtTime(f,c+i*.16));o.start();o.stop(c+.7);}
+}
+
+/* 설정 UI */
+const diffsEl=document.getElementById('diffs');
+DIFFS.forEach((d,i)=>{const b=document.createElement('button');
+  b.className='opt'+(i===0?' sel':'');b.textContent=d.label;
+  b.onclick=()=>{initAudio();beep('tick');diff=i;
+    [...diffsEl.children].forEach((x,k)=>x.classList.toggle('sel',k===i));};
+  diffsEl.appendChild(b);});
+document.getElementById('modes').addEventListener('click',e=>{
+  const b=e.target.closest('.opt'); if(!b)return;
+  initAudio();beep('tick');mode=b.dataset.mode;
+  document.querySelectorAll('#modes .opt').forEach(x=>x.classList.toggle('sel',x===b));});
+const countsEl=document.getElementById('counts');
+COUNTS.forEach((c,i)=>{const b=document.createElement('button');
+  b.className='opt'+(c===10?' sel':'');b.textContent=c+' 문제';
+  b.onclick=()=>{initAudio();beep('tick');total=c;
+    [...countsEl.children].forEach((x,k)=>x.classList.toggle('sel',COUNTS[k]===c));};
+  countsEl.appendChild(b);});
+
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.getElementById('end').classList.remove('on');}
+
+/* ===== 시계 그리기 ===== */
+const cv=document.getElementById('clock'), cx=cv.getContext('2d');
+const S=600, C=300, R=252;
+function fit(){
+  const s=Math.max(180,Math.floor(Math.min(window.innerHeight-180, window.innerWidth*0.42, 380)));
+  document.documentElement.style.setProperty('--cs',s+'px');
+}
+window.addEventListener('resize',fit);
+
+function drawClock(h,m,opts){
+  opts=opts||{};
+  cx.clearRect(0,0,S,S);
+  // 테두리
+  cx.fillStyle='#fff';cx.beginPath();cx.arc(C,C,R,0,Math.PI*2);cx.fill();
+  cx.lineWidth=16;cx.strokeStyle='#fb923c';cx.stroke();
+  cx.lineWidth=6;cx.strokeStyle='#fed7aa';cx.beginPath();cx.arc(C,C,R-18,0,Math.PI*2);cx.stroke();
+
+  // 분 눈금
+  for(let i=0;i<60;i++){
+    const a=i*Math.PI/30-Math.PI/2, big=i%5===0;
+    cx.strokeStyle=big?'#334155':'#cbd5e1';cx.lineWidth=big?6:3;
+    cx.beginPath();
+    cx.moveTo(C+Math.cos(a)*(R-30),C+Math.sin(a)*(R-30));
+    cx.lineTo(C+Math.cos(a)*(R-(big?54:42)),C+Math.sin(a)*(R-(big?54:42)));
+    cx.stroke();
+  }
+  // 시 숫자
+  cx.textAlign='center';cx.textBaseline='middle';
+  for(let i=1;i<=12;i++){
+    const a=i*Math.PI/6-Math.PI/2;
+    cx.fillStyle='#1f2937';cx.font='bold 54px sans-serif';
+    cx.fillText(i,C+Math.cos(a)*(R-92),C+Math.sin(a)*(R-92)+3);
+    // 분 도우미 숫자 (5, 10, 15 …)
+    if(opts.minuteHelp!==false){
+      cx.fillStyle='#93c5fd';cx.font='bold 26px sans-serif';
+      cx.fillText(((i*5)%60),C+Math.cos(a)*(R-146),C+Math.sin(a)*(R-146)+2);
+    }
+  }
+
+  const ma=(m/60)*Math.PI*2-Math.PI/2;
+  const ha=((h%12)/12 + m/720)*Math.PI*2-Math.PI/2;
+
+  // 짧은 바늘 (시)
+  cx.strokeStyle='#ef4444';cx.lineWidth=20;cx.lineCap='round';
+  cx.beginPath();cx.moveTo(C,C);cx.lineTo(C+Math.cos(ha)*(R-130),C+Math.sin(ha)*(R-130));cx.stroke();
+  // 긴 바늘 (분)
+  cx.strokeStyle='#2563eb';cx.lineWidth=13;
+  cx.beginPath();cx.moveTo(C,C);cx.lineTo(C+Math.cos(ma)*(R-58),C+Math.sin(ma)*(R-58));cx.stroke();
+  // 가운데
+  cx.fillStyle='#1f2937';cx.beginPath();cx.arc(C,C,17,0,Math.PI*2);cx.fill();
+  cx.fillStyle='#fff';cx.beginPath();cx.arc(C,C,7,0,Math.PI*2);cx.fill();
+
+  // 범례
+  cx.font='bold 24px sans-serif';cx.textAlign='left';
+  cx.fillStyle='#ef4444';cx.fillText('■ 짧은 바늘 = 시',24,S-52);
+  cx.fillStyle='#2563eb';cx.fillText('■ 긴 바늘 = 분',24,S-20);
+}
+
+/* ===== 문제 ===== */
+function fmt(h,m){ return m===0 ? `${h}시` : `${h}시 ${m}분`; }
+function randTime(){
+  const step=DIFFS[diff].step;
+  const h=1+Math.floor(Math.random()*12);
+  const m=Math.floor(Math.random()*(60/step))*step % 60;
+  return {h,m:m===60?0:m};
+}
+function start(){
+  initAudio();
+  qi=0;right=0;wrong=0;
+  document.getElementById('end').classList.remove('on');
+  go('s-game'); fit(); nextQ();
+}
+function nextQ(){
+  if(qi>=total){ finish(); return; }
+  qi++;answered=false;
+  document.getElementById('qlab').textContent=`문제 ${qi} / ${total}`;
+  document.getElementById('fb').textContent='';
+  document.getElementById('fb').className='fb';
+  document.getElementById('next').classList.remove('on');
+
+  curMode = mode==='mix' ? (Math.random()<0.5?'read':'set') : mode;
+  target=randTime();
+
+  if(curMode==='read'){
+    document.getElementById('setclock').style.display='none';
+    document.getElementById('choices').style.display='grid';
+    document.getElementById('ask').textContent='지금 몇 시 몇 분일까요?';
+    drawClock(target.h,target.m);
+    buildChoices();
+  }else{
+    document.getElementById('choices').style.display='none';
+    document.getElementById('setclock').style.display='flex';
+    document.getElementById('ask').innerHTML=
+      `<b style="font-size:1.25em;color:#c2410c">${fmt(target.h,target.m)}</b><br>가 되도록 바늘을 돌려요!`;
+    guess={h:12,m:0};
+    updateSet();
+  }
+  updateScore();
+}
+function buildChoices(){
+  const step=DIFFS[diff].step;
+  const set=new Set([`${target.h}:${target.m}`]);
+  const opts=[{...target}];
+  let guard=0;
+  while(opts.length<4 && guard++<200){
+    let t;
+    const r=Math.random();
+    if(r<0.45) t={h:target.h, m:(target.m + step*(1+Math.floor(Math.random()*3)))%60};   // 분만 다름
+    else if(r<0.85) t={h:(target.h % 12)+1, m:target.m};                                  // 시만 다름
+    else t=randTime();
+    if(t.m===60)t.m=0;
+    const k=`${t.h}:${t.m}`;
+    if(!set.has(k)){ set.add(k); opts.push(t); }
+  }
+  opts.sort(()=>Math.random()-0.5);
+  const box=document.getElementById('choices');
+  box.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='ch'; b.textContent=fmt(o.h,o.m);
+    b.onclick=()=>pick(b,o);
+    box.appendChild(b);
+  });
+}
+function pick(btn,o){
+  if(answered) return;
+  answered=true;
+  const ok = o.h===target.h && o.m===target.m;
+  document.querySelectorAll('.ch').forEach(b=>b.disabled=true);
+  if(ok){
+    btn.classList.add('right'); right++; beep('good');
+    feedback(true,'정답이에요! 참 잘했어요! 🎉');
+  }else{
+    btn.classList.add('wrong'); wrong++; beep('bad');
+    document.querySelectorAll('.ch').forEach(b=>{ if(b.textContent===fmt(target.h,target.m)) b.classList.add('right'); });
+    feedback(false,`짧은 바늘은 ${target.h}, 긴 바늘은 ${target.m}분을 가리켜요. 정답은 ${fmt(target.h,target.m)} 😊`);
+  }
+  updateScore();
+  document.getElementById('next').classList.add('on');
+}
+
+/* 바늘 돌리기 모드 */
+function bump(which,dir){
+  if(answered) return;
+  initAudio(); beep('tick');
+  const step=DIFFS[diff].step;
+  if(which==='h'){ guess.h=((guess.h-1+dir+12)%12)+1; }
+  else { guess.m=(guess.m+dir*step+60)%60; }
+  updateSet();
+}
+function updateSet(){
+  document.getElementById('hv').textContent=guess.h+'시';
+  document.getElementById('mv').textContent=String(guess.m).padStart(2,'0')+'분';
+  drawClock(guess.h,guess.m);
+}
+function checkSet(){
+  if(answered) return;
+  answered=true;
+  const ok = guess.h===target.h && guess.m===target.m;
+  if(ok){ right++; beep('good'); feedback(true,'딱 맞췄어요! 시계 박사님! 🎉'); }
+  else{
+    wrong++; beep('bad');
+    feedback(false,`아쉬워요! ${fmt(target.h,target.m)}는 이렇게 생겼어요 👀`);
+    setTimeout(()=>drawClock(target.h,target.m),400);
+  }
+  updateScore();
+  document.getElementById('next').classList.add('on');
+}
+
+function feedback(good,text){
+  const f=document.getElementById('fb');
+  f.textContent=text; f.className='fb '+(good?'good':'bad');
+}
+function updateScore(){ document.getElementById('score').textContent=`⭕ ${right}  ❌ ${wrong}`; }
+
+function finish(){
+  beep('win');
+  document.getElementById('end-title').textContent = wrong===0?'전부 다 맞췄어요! 🌟':'다 풀었어요! 🎉';
+  document.getElementById('end-msg').textContent = `${total}문제 중 ${right}문제 정답!`;
+  document.getElementById('end').classList.add('on');
+}
+
+fit();
+drawClock(3,0);
+</script>
+</body>
+</html>

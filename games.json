@@ -1,0 +1,78 @@
+{
+  "title": "아인이의 놀이터",
+  "updated": "2026-08-22",
+  "games": [
+    {
+      "id": "maze",
+      "title": "미로 대탐험",
+      "emoji": "🌀",
+      "desc": "공룡·자동차·로켓을 골라서 미로를 탈출해요. 지나온 길이 표시돼요.",
+      "skill": "길찾기 · 방향 감각",
+      "file": "games/maze.html",
+      "color": "green"
+    },
+    {
+      "id": "math",
+      "title": "큐브 산수",
+      "emoji": "🧮",
+      "desc": "덧셈·뺄셈·곱셈·나눗셈을 색깔 블록으로 눈으로 보며 배워요.",
+      "skill": "수와 연산",
+      "file": "games/math.html",
+      "color": "purple"
+    },
+    {
+      "id": "coding",
+      "title": "코딩 대탐험",
+      "emoji": "🤖",
+      "desc": "상·하·좌·우 명령을 순서대로 놓아 로봇을 배터리까지 보내요.",
+      "skill": "순서 · 논리",
+      "file": "games/coding.html",
+      "color": "blue"
+    },
+    {
+      "id": "puzzle",
+      "title": "그림 퍼즐",
+      "emoji": "🧩",
+      "desc": "공룡 정글, 우주, 바닷속 등 여섯 가지 그림을 조각으로 맞춰요.",
+      "skill": "공간 지각 · 집중",
+      "file": "games/puzzle.html",
+      "color": "pink"
+    },
+    {
+      "id": "clock",
+      "title": "시계 읽기",
+      "emoji": "🕐",
+      "desc": "짧은 바늘·긴 바늘을 읽고, 직접 바늘을 돌려 시간을 맞춰요.",
+      "skill": "시간 개념",
+      "file": "games/clock.html",
+      "color": "orange"
+    },
+    {
+      "id": "memory",
+      "title": "기억력 짝 맞추기",
+      "emoji": "🃏",
+      "desc": "같은 그림, 숫자와 개수, 덧셈식과 답의 짝을 기억해서 찾아요.",
+      "skill": "기억력 · 집중",
+      "file": "games/memory.html",
+      "color": "sky"
+    },
+    {
+      "id": "hangul",
+      "title": "한글 낱말 만들기",
+      "emoji": "🔤",
+      "desc": "그림을 보고 글자 조각을 순서대로 눌러 낱말을 완성해요.",
+      "skill": "한글 · 어휘",
+      "file": "games/hangul.html",
+      "color": "rose"
+    },
+    {
+      "id": "pattern",
+      "title": "규칙 찾기",
+      "emoji": "🔍",
+      "desc": "그림과 숫자가 줄지어 있어요. 규칙을 찾아 빈칸을 채워요.",
+      "skill": "규칙 · 추론",
+      "file": "games/pattern.html",
+      "color": "violet"
+    }
+  ]
+}

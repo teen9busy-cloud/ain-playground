@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>규칙 찾기 대탐험 · 아인이의 놀이터</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f3ff;--ink:#1f2937;--muted:#6b7280;--v:#8b5cf6;--v-d:#6d28d9;
+  --green:#22c55e;--green-d:#15803d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font-family:'Jua','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  background:var(--bg);color:var(--ink);user-select:none;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px}
+button{font-family:inherit;cursor:pointer;border:none}
+.home{position:fixed;top:8px;left:8px;z-index:60;background:rgba(255,255,255,.9);color:var(--muted);
+  padding:5px 12px;border-radius:999px;font-size:13px;text-decoration:none;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);border:1px solid #e5e7eb}
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%}
+.screen.on{display:flex;animation:f .25s}
+@keyframes f{from{opacity:0}to{opacity:1}}
+
+h1{font-size:clamp(22px,4vh,38px);color:var(--v-d);margin:0 0 4px;text-align:center}
+.sub{font-size:clamp(12px,2vh,18px);color:var(--muted);margin:0 0 14px}
+.box{background:#fff;border:3px solid #ddd6fe;border-radius:20px;padding:13px 16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);margin-bottom:11px;width:min(620px,94vw)}
+.box h2{margin:0 0 9px;font-size:clamp(13px,2vh,18px);color:var(--v-d);text-align:center;font-weight:normal}
+.opts{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.opt{background:#f3f4f6;border:2px solid transparent;color:#6b7280;padding:9px 14px;
+  border-radius:12px;font-size:clamp(12px,1.9vh,17px);white-space:nowrap}
+.opt.sel{background:#ede9fe;border-color:var(--v);color:var(--v-d)}
+.big{background:var(--green);color:#fff;font-size:clamp(17px,2.8vh,26px);padding:11px 44px;
+  border-radius:999px;box-shadow:0 5px 0 var(--green-d);transition:.08s}
+.big:active{transform:translateY(5px);box-shadow:0 0 0 var(--green-d)}
+
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  width:min(820px,96vw);margin-bottom:8px}
+.bar .q{font-size:clamp(13px,2vh,18px);color:var(--v-d)}
+.bar .s{font-size:14px;color:var(--muted)}
+.bar .quit{background:#fecaca;color:#991b1b;font-size:13px;padding:6px 12px;border-radius:10px}
+
+.ask{font-size:clamp(14px,2.3vh,21px);color:var(--v-d);margin-bottom:10px;text-align:center}
+.seq{display:flex;gap:clamp(4px,1vh,10px);align-items:center;justify-content:center;
+  flex-wrap:wrap;max-width:97vw;margin-bottom:6px}
+.item{width:var(--is,70px);height:var(--is,70px);border-radius:16px;background:#fff;
+  border:3px solid #e5e7eb;display:flex;align-items:center;justify-content:center;
+  font-size:calc(var(--is,70px)*.5);box-shadow:0 3px 8px rgba(0,0,0,.06);position:relative}
+.item.q{border-style:dashed;border-color:var(--v);background:#f5f3ff;color:var(--v)}
+.item.q.ok{border-style:solid;border-color:var(--green);background:#dcfce7;animation:pop .35s}
+.item.hi{outline:4px solid #fde047;outline-offset:2px}
+.item .no{position:absolute;bottom:-18px;font-size:12px;color:#9ca3af}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.15)}100%{transform:scale(1)}}
+.arrow{font-size:clamp(14px,2.4vh,22px);color:#c4b5fd}
+
+.rule{min-height:26px;font-size:clamp(12px,2vh,17px);color:#7c3aed;margin:10px 0 4px;text-align:center}
+
+.choices{display:flex;gap:clamp(6px,1.4vh,12px);flex-wrap:wrap;justify-content:center;margin-top:6px}
+.ch{width:var(--is,70px);height:var(--is,70px);border-radius:16px;background:#fff;
+  border:3px solid #e5e7eb;font-size:calc(var(--is,70px)*.46);box-shadow:0 4px 0 #d1d5db;transition:.1s}
+.ch:active{transform:translateY(4px);box-shadow:0 0 0 #d1d5db}
+.ch.right{background:#dcfce7;border-color:var(--green);color:var(--green-d)}
+.ch.wrong{background:#fee2e2;border-color:#ef4444}
+.ch:disabled{cursor:default}
+
+.fb{margin-top:10px;min-height:28px;font-size:clamp(14px,2.2vh,20px);text-align:center}
+.fb.good{color:var(--green-d)}
+.fb.bad{color:#b91c1c}
+.next{margin-top:6px;background:var(--v);color:#fff;font-size:17px;padding:9px 30px;
+  border-radius:999px;box-shadow:0 4px 0 var(--v-d);display:none}
+.next.on{display:inline-block}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:80}
+.modal.on{display:flex}
+.modal .m{background:#fff;padding:26px 22px;border-radius:24px;text-align:center;max-width:330px;width:88%}
+.modal .em{font-size:54px}
+.modal h2{margin:6px 0;font-size:26px;color:var(--green-d)}
+.modal p{color:var(--muted);margin:0 0 16px}
+.modal button{width:100%;padding:12px;border-radius:14px;font-size:18px;margin-top:8px}
+.m-go{background:var(--v);color:#fff;box-shadow:0 4px 0 var(--v-d)}
+.m-alt{background:#e5e7eb;color:#374151}
+.confetti{position:fixed;width:10px;height:10px;animation:fall linear forwards;z-index:90}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.2}}
+</style>
+</head>
+<body>
+
+<a class="home" href="../index.html">🏠 놀이터로</a>
+
+<div id="s-start" class="screen on">
+  <h1>🔍 아인이의 규칙 찾기 대탐험</h1>
+  <p class="sub">줄지어 있는 것들의 규칙을 찾아 빈칸을 채워요!</p>
+
+  <div class="box">
+    <h2>1. 어떤 규칙으로 놀까요?</h2>
+    <div class="opts" id="kinds">
+      <button class="opt sel" data-k="pic">그림 반복 규칙 🦖🚗🦖🚗</button>
+      <button class="opt" data-k="num">숫자 규칙 2·4·6·8</button>
+      <button class="opt" data-k="shape">크기·색깔 규칙 🔴🔵</button>
+      <button class="opt" data-k="mix">🎲 모두 섞어서</button>
+    </div>
+  </div>
+  <div class="box">
+    <h2>2. 얼마나 어렵게 할까요?</h2>
+    <div class="opts" id="levels">
+      <button class="opt sel" data-l="1">쉬움 (두 개씩 반복)</button>
+      <button class="opt" data-l="2">보통 (세 개씩 반복)</button>
+      <button class="opt" data-l="3">어려움 (가운데 빈칸도!)</button>
+    </div>
+  </div>
+  <div class="box">
+    <h2>3. 몇 문제 풀까요?</h2>
+    <div class="opts" id="counts"></div>
+  </div>
+  <button class="big" onclick="start()">시작하기!</button>
+</div>
+
+<div id="s-game" class="screen">
+  <div class="bar">
+    <span class="q" id="qlab">문제 1 / 10</span>
+    <span class="s" id="score">⭕ 0 ❌ 0</span>
+    <button class="quit" onclick="go('s-start')">그만하기</button>
+  </div>
+
+  <div class="ask" id="ask">❓ 자리에는 무엇이 들어갈까요?</div>
+  <div class="seq" id="seq"></div>
+  <div class="rule" id="rule"></div>
+  <div class="choices" id="choices"></div>
+  <div class="fb" id="fb"></div>
+  <button class="next" id="next" onclick="nextQ()">다음 문제 ➡</button>
+</div>
+
+<div class="modal" id="end">
+  <div class="m">
+    <div class="em">🎉</div>
+    <h2 id="end-title">다 풀었어요!</h2>
+    <p id="end-msg"></p>
+    <button class="m-go" onclick="start()">한 번 더!</button>
+    <button class="m-alt" onclick="go('s-start')">설정 바꾸기</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+const PICS=['🦖','🚗','⚽','🚀','🤖','🍎','⭐','🐶','🌈','🎈','🐠','🍌'];
+const SHAPES=['🔴','🔵','🟡','🟢','🟣','🟠'];
+const SIZES=['🔺','🔻'];
+const COUNTS=[5,10,15];
+
+let kind='pic', level=1, total=10;
+let qi=0,right=0,wrong=0,answered=false;
+let cur=null, audioCtx=null;
+
+function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+function beep(t){
+  if(!audioCtx)return;
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.connect(g);g.connect(audioCtx.destination);
+  const c=audioCtx.currentTime;g.gain.setValueAtTime(.08,c);
+  if(t==='tap'){o.type='sine';o.frequency.setValueAtTime(660,c);o.start();o.stop(c+.06);}
+  if(t==='good'){o.type='sine';o.frequency.setValueAtTime(700,c);o.frequency.setValueAtTime(1040,c+.1);o.start();o.stop(c+.24);}
+  if(t==='bad'){o.type='sawtooth';o.frequency.setValueAtTime(230,c);o.frequency.exponentialRampToValueAtTime(120,c+.26);o.start();o.stop(c+.28);}
+  if(t==='win'){o.type='square';[440,590,780,980].forEach((f,i)=>o.frequency.setValueAtTime(f,c+i*.16));o.start();o.stop(c+.7);}
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function pickN(arr,n){return shuffle(arr.slice()).slice(0,n);}
+
+/* 설정 */
+document.getElementById('kinds').addEventListener('click',e=>{
+  const b=e.target.closest('.opt');if(!b)return;initAudio();beep('tap');kind=b.dataset.k;
+  document.querySelectorAll('#kinds .opt').forEach(x=>x.classList.toggle('sel',x===b));});
+document.getElementById('levels').addEventListener('click',e=>{
+  const b=e.target.closest('.opt');if(!b)return;initAudio();beep('tap');level=parseInt(b.dataset.l,10);
+  document.querySelectorAll('#levels .opt').forEach(x=>x.classList.toggle('sel',x===b));});
+const countsEl=document.getElementById('counts');
+COUNTS.forEach(c=>{const b=document.createElement('button');
+  b.className='opt'+(c===10?' sel':'');b.textContent=c+' 문제';
+  b.onclick=()=>{initAudio();beep('tap');total=c;
+    [...countsEl.children].forEach((x,k)=>x.classList.toggle('sel',COUNTS[k]===c));};
+  countsEl.appendChild(b);});
+
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.getElementById('end').classList.remove('on');}
+
+function fit(){
+  const n=cur?cur.seq.length+1:8;
+  const s=Math.max(38,Math.floor(Math.min(window.innerHeight*0.155,(window.innerWidth*0.92)/n,94)));
+  document.documentElement.style.setProperty('--is',s+'px');
+}
+window.addEventListener('resize',fit);
+
+/* ===== 문제 만들기 ===== */
+function makeProblem(){
+  let k=kind;
+  if(k==='mix') k=['pic','num','shape'][Math.floor(Math.random()*3)];
+
+  if(k==='num'){
+    const stepsEasy=[1,2,5,10], stepsHard=[2,3,4,5,10];
+    const step=(level===1?stepsEasy:stepsHard)[Math.floor(Math.random()*(level===1?stepsEasy.length:stepsHard.length))];
+    const down=level>=2 && Math.random()<0.35;
+    const len=6;
+    let startV;
+    if(down) startV=step*len+Math.floor(Math.random()*10)+1;
+    else startV=Math.floor(Math.random()*5)+ (step>=5?0:1);
+    const full=[];
+    for(let i=0;i<len;i++) full.push(down? startV-step*i : startV+step*i);
+    const qIdx=(level>=3 && Math.random()<0.5) ? 2+Math.floor(Math.random()*(len-3)) : len-1;
+    const answer=full[qIdx];
+    // 보기
+    const set=new Set([answer]);
+    const opts=[answer];
+    while(opts.length<4){
+      const cand=answer+(Math.random()<.5?1:-1)*(1+Math.floor(Math.random()*Math.max(2,step+1)));
+      if(cand>=0 && !set.has(cand)){set.add(cand);opts.push(cand);}
+    }
+    return {kind:'num',seq:full.map(String),qIdx,answer:String(answer),
+      opts:shuffle(opts.map(String)),
+      rule:(down?`${step}씩 작아지는 규칙이에요!`:`${step}씩 커지는 규칙이에요!`),
+      cycle:null};
+  }
+
+  const src = k==='shape' ? SHAPES : PICS;
+  const cycleLen = level===1?2:(Math.random()<0.5?3:2);
+  const cycle = pickN(src, cycleLen);
+  const len = cycleLen===2?8:9;
+  const full=[];
+  for(let i=0;i<len;i++) full.push(cycle[i%cycleLen]);
+  const qIdx=(level>=3 && Math.random()<0.5)? cycleLen+Math.floor(Math.random()*(len-cycleLen-1)) : len-1;
+  const answer=full[qIdx];
+  const others=src.filter(x=>x!==answer);
+  const opts=shuffle([answer].concat(pickN(others,3)));
+  return {kind:k,seq:full,qIdx,answer,opts,
+    rule:`${cycle.join(' ')} 가 계속 반복되는 규칙이에요!`,
+    cycle:cycleLen};
+}
+
+/* ===== 진행 ===== */
+function start(){
+  initAudio();
+  qi=0;right=0;wrong=0;
+  document.getElementById('end').classList.remove('on');
+  go('s-game'); nextQ();
+}
+function nextQ(){
+  if(qi>=total){finish();return;}
+  qi++;answered=false;
+  cur=makeProblem();
+  document.getElementById('qlab').textContent=`문제 ${qi} / ${total}`;
+  document.getElementById('rule').textContent='';
+  document.getElementById('fb').textContent='';
+  document.getElementById('fb').className='fb';
+  document.getElementById('next').classList.remove('on');
+  document.getElementById('ask').textContent =
+    cur.qIdx===cur.seq.length-1 ? '❓ 다음에는 무엇이 올까요?' : '❓ 빈칸에는 무엇이 들어갈까요?';
+
+  const s=document.getElementById('seq');
+  s.innerHTML='';
+  cur.seq.forEach((v,i)=>{
+    const d=document.createElement('div');
+    d.className='item'+(i===cur.qIdx?' q':'');
+    d.id='it-'+i;
+    d.textContent = i===cur.qIdx ? '❓' : v;
+    if(cur.kind==='num') d.style.fontSize='calc(var(--is,70px)*.42)';
+    s.appendChild(d);
+  });
+
+  const c=document.getElementById('choices');
+  c.innerHTML='';
+  cur.opts.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='ch';b.textContent=o;
+    if(cur.kind==='num') b.style.fontSize='calc(var(--is,70px)*.4)';
+    b.onclick=()=>pick(b,o);
+    c.appendChild(b);
+  });
+  fit(); updateScore();
+}
+function pick(btn,val){
+  if(answered)return;
+  answered=true;initAudio();
+  document.querySelectorAll('.ch').forEach(b=>b.disabled=true);
+  const cell=document.getElementById('it-'+cur.qIdx);
+  const f=document.getElementById('fb');
+
+  if(val===cur.answer){
+    right++;beep('good');
+    btn.classList.add('right');
+    cell.textContent=cur.answer;cell.classList.add('ok');
+    f.className='fb good';f.textContent='정답이에요! 규칙을 잘 찾았어요! 🎉';
+  }else{
+    wrong++;beep('bad');
+    btn.classList.add('wrong');
+    document.querySelectorAll('.ch').forEach(b=>{if(b.textContent===cur.answer)b.classList.add('right');});
+    cell.textContent=cur.answer;cell.classList.add('ok');
+    f.className='fb bad';f.textContent=`정답은 ${cur.answer} 였어요. 규칙을 같이 살펴볼까요? 😊`;
+  }
+  showRule();
+  document.getElementById('next').classList.add('on');
+  updateScore();
+}
+/* 규칙을 눈으로 보여주기 (과정 시각화) */
+function showRule(){
+  document.getElementById('rule').textContent='💡 '+cur.rule;
+  if(cur.cycle){
+    // 반복 묶음을 순서대로 반짝
+    let g=0;
+    const timer=setInterval(()=>{
+      document.querySelectorAll('.item').forEach(x=>x.classList.remove('hi'));
+      for(let i=g*cur.cycle;i<Math.min((g+1)*cur.cycle,cur.seq.length);i++){
+        const el=document.getElementById('it-'+i); if(el)el.classList.add('hi');
+      }
+      g++;
+      if(g*cur.cycle>=cur.seq.length){
+        clearInterval(timer);
+        setTimeout(()=>document.querySelectorAll('.item').forEach(x=>x.classList.remove('hi')),500);
+      }
+    },420);
+  }else{
+    let i=0;
+    const timer=setInterval(()=>{
+      document.querySelectorAll('.item').forEach(x=>x.classList.remove('hi'));
+      const el=document.getElementById('it-'+i); if(el)el.classList.add('hi');
+      i++;
+      if(i>=cur.seq.length){clearInterval(timer);
+        setTimeout(()=>document.querySelectorAll('.item').forEach(x=>x.classList.remove('hi')),500);}
+    },300);
+  }
+}
+function updateScore(){document.getElementById('score').textContent=`⭕ ${right}  ❌ ${wrong}`;}
+function finish(){
+  beep('win');confetti();
+  document.getElementById('end-title').textContent= right===total?'전부 다 맞췄어요! 🌟':'다 풀었어요! 🎉';
+  document.getElementById('end-msg').textContent=`${total}문제 중 ${right}문제 정답!`;
+  document.getElementById('end').classList.add('on');
+}
+function confetti(){
+  const colors=['#fce18a','#ff726d','#b48def','#f4306d','#3fe0d0','#fde047'];
+  for(let i=0;i<45;i++){
+    const d=document.createElement('div');d.className='confetti';
+    d.style.left=Math.random()*100+'vw';d.style.top='-14px';
+    d.style.background=colors[Math.floor(Math.random()*colors.length)];
+    if(Math.random()>.5)d.style.borderRadius='50%';
+    d.style.animationDuration=(Math.random()*2+1.3)+'s';
+    document.body.appendChild(d);setTimeout(()=>d.remove(),3600);
+  }
+}
+fit();
+</script>
+</body>
+</html>

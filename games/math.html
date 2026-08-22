@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아인이의 산수 큐브 게임</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
+
+    <style>
+        /* [폰트 설정] Pretendard */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        /* [테마 색상 설정] */
+        :root {
+            --primary: #6C5CE7;
+            --success: #00B894;
+            --error: #FF7675;
+            --warning: #FDCB6E;
+            --bg-color: #F4F1EA;
+            --panel-bg: #FFFFFF;
+            --text-main: #2D3436;
+            --text-muted: #636E72;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+            user-select: none;
+        }
+
+        html, body { height: 100%; overflow: hidden; }
+
+        .game-wrapper {
+            display: flex;
+            gap: clamp(8px, 1.4vw, 20px);
+            width: 1200px;
+            max-width: 98vw;
+            height: min(750px, 96vh);
+            position: relative;
+        }
+
+        .home-link {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 200;
+            background: rgba(255,255,255,0.85);
+            color: #636E72;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #eee;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border-radius: clamp(16px, 2.4vh, 28px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+            padding: clamp(12px, 2vh, 24px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ========================================= */
+        /* 1. 왼쪽 패널 (문제 출제 및 숫자 키패드 영역) */
+        /* ========================================= */
+        .panel-left {
+            flex: 1.3;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(145deg, #83a4d4, #b6fbff);
+            color: white;
+            text-align: center;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.5), 0 15px 35px rgba(0,0,0,0.06);
+            padding: clamp(14px,2.4vh,30px) clamp(12px,2vh,24px);
+        }
+
+        .q-number {
+            font-size: clamp(13px,1.9vh,20px);
+            font-weight: 700;
+            margin-bottom: clamp(8px,1.8vh,20px);
+            background: rgba(0,0,0,0.15);
+            padding: clamp(5px,1vh,8px) clamp(10px,2vh,20px);
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diff-indicator {
+            font-size: 14px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .problem-text {
+            font-size: clamp(34px,6.4vh,65px);
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-shadow: 3px 6px 12px rgba(0,0,0,0.15);
+            margin-bottom: clamp(8px,1.8vh,20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .problem-text .question-mark {
+            color: #ffeaa7; /* 물음표 강조 색상 */
+            text-shadow: 0 0 10px rgba(255, 234, 167, 0.8);
+        }
+
+        .input-display {
+            width: 90%;
+            height: clamp(48px,8vh,75px);
+            background: #FFFFFF;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(28px,5vh,45px);
+            font-weight: 800;
+            margin-bottom: clamp(8px,1.5vh,15px);
+            color: var(--primary);
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.08);
+            border: 3px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .btn-hint-main {
+            background: #FDCB6E;
+            color: #2D3436;
+            border: none;
+            padding: clamp(5px,1vh,8px) 20px;
+            border-radius: 20px;
+            font-size: clamp(14px,1.9vh,18px);
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #E1B12C;
+            margin-bottom: clamp(8px,1.5vh,15px);
+            transition: 0.1s;
+        }
+        .btn-hint-main:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #E1B12C;
+        }
+        .btn-hint-main.hidden { display: none; }
+
+        .keypad-container {
+            display: flex;
+            gap: clamp(8px,1.4vw,16px);
+            width: 90%;
+            justify-content: center;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(5px,1vh,10px);
+            flex: 1;
+        }
+
+        .keypad button {
+            background: #FFFFFF;
+            border: none;
+            border-radius: 14px;
+            height: clamp(38px,6.2vh,56px);
+            font-size: clamp(17px,3vh,24px);
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+            white-space: nowrap; /* 글자 줄바꿈 방지 */
+        }
+
+        .keypad button:active {
+            transform: translateY(5px);
+            box-shadow: 0 0 0 rgba(0,0,0,0.15);
+        }
+
+        .btn-del { color: var(--error) !important; }
+
+        .btn-action {
+            background: var(--primary) !important;
+            color: white !important;
+            box-shadow: 0 5px 0 #5A4BDB !important;
+            font-size: 20px !important; /* 확인 글자가 깨지지 않도록 조정 */
+        }
+        .btn-action:active { box-shadow: 0 0 0 #5A4BDB !important; }
+
+        .btn-next {
+            width: 85px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 0 #00997B;
+
+            visibility: hidden;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+        }
+
+        .btn-next.show {
+            visibility: visible;
+            opacity: 1;
+            transform: scale(1);
+        }
+        .btn-next.show:active {
+            transform: scale(1) translateY(5px);
+            box-shadow: 0 0 0 #00997B;
+        }
+
+        /* ========================================= */
+        /* 2. 가운데 패널 (정답 및 힌트 큐브 시각화 영역) */
+        /* ========================================= */
+        .panel-center {
+            flex: 1.8;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(12px,2.2vh,30px);
+        }
+
+        .visualization-area {
+            width: 100%;
+            height: 100%;
+            background: #FDFDFD;
+            border: 2px dashed #DFE6E9;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            padding: clamp(12px,2.4vh,30px) 16px;
+            box-sizing: border-box;
+            visibility: hidden;
+            overflow: hidden;
+        }
+
+        .visual-equation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .equation-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .grouped-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dashed-box {
+            border: 3px dashed #A4B0BE;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+        }
+
+        .hint-box {
+            border: 4px dashed #FF7675;
+            background: rgba(255, 118, 117, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #FF7675;
+            font-weight: bold;
+            border-radius: 14px;
+        }
+
+        .drop-jelly {
+            opacity: 0;
+            transform: translateY(-40px) scale(0.8);
+            animation: dropJelly 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes dropJelly {
+            0% { opacity: 0; transform: translateY(-40px) scale(0.8); }
+            40% { opacity: 1; transform: translateY(0) scale(1.05, 0.95); }
+            60% { transform: scale(0.95, 1.05); }
+            80% { transform: scale(1.02, 0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1, 1); }
+        }
+
+        .visual-divider {
+            width: 75%;
+            height: 3px;
+            background-color: #B2BEC3;
+            border-radius: 2px;
+            margin: 15px 0;
+        }
+
+        .cube-group-10 { display: flex; flex-direction: column; align-items: flex-start; }
+        .cube-stack { display: flex; flex-direction: column; align-items: flex-start; }
+        .cube-row { display: flex; justify-content: flex-start; width: 100%; }
+        .cube { flex-shrink: 0; transition: transform 0.2s; }
+        .cube:hover { transform: scale(1.1); }
+        .empty-cube { visibility: hidden; }
+
+        .visual-operator {
+            font-size: clamp(26px,4.4vh,45px);
+            font-weight: 900;
+            color: #636E72;
+            margin: 0 10px;
+            display: inline-block;
+        }
+
+        .feedback-msg {
+            margin-top: clamp(12px,2.4vh,30px);
+            font-size: clamp(16px,2.6vh,26px);
+            font-weight: 800;
+            min-height: clamp(22px,3.4vh,35px);
+            text-align: center;
+            width: 100%;
+        }
+
+        .multiplication-hint {
+            font-size: 20px;
+            color: #6C5CE7;
+            background: #F0EFFF;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 10px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        /* ========================================= */
+        /* 3. 오른쪽 패널 (진행 상황 트래커) */
+        /* ========================================= */
+        .panel-right {
+            width: clamp(96px,10vw,130px);
+            background: var(--panel-bg);
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tracker-title {
+            font-size: 16px; /* 크기 축소 */
+            font-weight: 800;
+            margin-bottom: 12px;
+            text-align: center;
+            color: var(--text-main);
+            padding-bottom: 10px;
+            border-bottom: 2px solid #F1F2F6;
+        }
+
+        .tracker-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .tracker-list::-webkit-scrollbar { width: 6px; }
+        .tracker-list::-webkit-scrollbar-track { background: #FDFDFD; border-radius: 10px; }
+        .tracker-list::-webkit-scrollbar-thumb { background: #DFE6E9; border-radius: 10px; }
+
+        .tracker-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #F8F9FA;
+            padding: 8px 10px; /* 패딩 축소 */
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px; /* 글자 크기 축소 */
+            color: var(--text-muted);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .tracker-item.active {
+            background: #F0EFFF;
+            color: var(--primary);
+            transform: scale(1.03);
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.1);
+        }
+
+        .mark {
+            font-size: 18px;
+        }
+
+        /* ========================================= */
+        /* 시작/종료 오버레이 화면 */
+        /* ========================================= */
+        .overlay-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 28px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .overlay-screen.hidden { display: none; }
+
+        .overlay-screen h2 { font-size: clamp(24px,4.6vh,46px); color: var(--primary); margin-bottom: clamp(8px,2vh,20px); }
+        .overlay-screen p { font-size: clamp(16px,2.6vh,26px); color: var(--text-main); font-weight: 700; margin-bottom: clamp(16px,3.4vh,40px); line-height: 1.5; }
+
+        .settings-box {
+            background: #F8F9FA;
+            padding: clamp(12px,2.6vh,30px);
+            border-radius: 20px;
+            border: 2px solid #DFE6E9;
+            margin-bottom: clamp(14px,3vh,40px);
+            width: 80%;
+            max-width: 450px;
+            text-align: left;
+        }
+
+        .settings-box label {
+            font-size: clamp(14px,2.2vh,22px);
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: clamp(7px,1.4vh,15px);
+        }
+
+        .op-selector {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(5px,1vh,10px);
+            margin-bottom: clamp(12px,2.4vh,30px);
+        }
+        .op-selector label.op-label {
+            background: #FFFFFF;
+            padding: clamp(7px,1.4vh,12px) 15px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: clamp(14px,1.9vh,18px);
+            font-weight: 800;
+            border: 2px solid #DFE6E9;
+            transition: all 0.2s;
+            display: block; /* 기본 label의 flex 속성 덮어쓰기 */
+            margin-bottom: 0;
+            color: var(--text-muted);
+        }
+        .op-selector input[type="radio"] {
+            display: none;
+        }
+        .op-selector input[type="radio"]:checked + label.op-label {
+            background: #F0EFFF;
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.1);
+        }
+
+        .settings-box input[type="range"] {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: #DFE6E9;
+            outline: none;
+            -webkit-appearance: none;
+            margin-bottom: clamp(12px,2.4vh,30px);
+        }
+        .settings-box input[type="range"]:last-child {
+            margin-bottom: 0;
+        }
+        .settings-box input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 26px;
+            height: 26px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-restart {
+            padding: clamp(11px,2.2vh,20px) clamp(26px,5vw,50px);
+            font-size: clamp(18px,3vh,28px);
+            font-weight: 800;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #5A4BDB;
+            transition: 0.1s;
+        }
+        .btn-restart:active { transform: translateY(8px); box-shadow: 0 0 0 #5A4BDB; }
+
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="home-link">🏠 놀이터로</a>
+
+    <div class="game-wrapper">
+        <!-- [시작 화면] -->
+        <div class="overlay-screen" id="start-screen">
+            <h2>아인이의 큐브 산수 대탐험 🎈</h2>
+            <div class="settings-box">
+                <label>
+                    <span>어떤 계산을 할까요?</span>
+                </label>
+                <div class="op-selector">
+                    <input type="radio" id="op-add-sub" name="op-type" value="add-sub" checked>
+                    <label class="op-label" for="op-add-sub">➕ 더하기 / 빼기 ➖</label>
+
+                    <input type="radio" id="op-mul-div" name="op-type" value="mul-div">
+                    <label class="op-label" for="op-mul-div">✖️ 곱하기 / 나누기 ➗</label>
+
+                    <input type="radio" id="op-all" name="op-type" value="all">
+                    <label class="op-label" for="op-all">🎲 모두 섞어서 (어려움!)</label>
+                </div>
+
+                <label for="max-answer">
+                    <span>시작 최대 숫자 (난이도)</span>
+                    <span id="max-val-display" style="color: var(--primary);">20</span>
+                </label>
+                <input type="range" id="max-answer" min="5" max="100" value="20" oninput="document.getElementById('max-val-display').innerText = this.value">
+
+                <label for="max-questions">
+                    <span>문제 개수</span>
+                    <span><span id="max-q-display" style="color: var(--primary);">10</span> 문제</span>
+                </label>
+                <input type="range" id="max-questions" min="5" max="20" value="10" oninput="document.getElementById('max-q-display').innerText = this.value">
+            </div>
+            <button class="btn-restart" onclick="startGame()">탐험 시작! 🚀</button>
+        </div>
+
+        <div class="panel panel-left">
+            <div class="q-number" id="q-number-container">
+                <span id="q-number">문제 1 / 10</span>
+                <span class="diff-indicator" id="diff-indicator">난이도: 20</span>
+            </div>
+            <div class="problem-text" id="problem">? + ? = ?</div>
+
+            <button class="btn-hint-main" id="btn-hint" onclick="showHint()">💡 힌트 보기</button>
+
+            <div class="input-display" id="input-display"></div>
+
+            <div class="keypad-container">
+                <div class="keypad" id="keypad">
+                    <button onclick="inputNumber(1)">1</button>
+                    <button onclick="inputNumber(2)">2</button>
+                    <button onclick="inputNumber(3)">3</button>
+                    <button onclick="inputNumber(4)">4</button>
+                    <button onclick="inputNumber(5)">5</button>
+                    <button onclick="inputNumber(6)">6</button>
+                    <button onclick="inputNumber(7)">7</button>
+                    <button onclick="inputNumber(8)">8</button>
+                    <button onclick="inputNumber(9)">9</button>
+                    <button class="btn-del" onclick="deleteNumber()">⌫</button>
+                    <button onclick="inputNumber(0)">0</button>
+                    <button class="btn-action" onclick="submitAnswer()">확인</button>
+                </div>
+                <button class="btn-next" id="btn-next" onclick="nextQuestion()">다음<br>문제<br>➡</button>
+            </div>
+        </div>
+
+        <div class="panel panel-center">
+            <div class="visualization-area" id="visualization-area">
+                <div class="visual-equation" id="visual-equation">
+                    <!-- 수식이 위/아래로 쌓임 -->
+                </div>
+                <div class="feedback-msg" id="feedback-msg"></div>
+            </div>
+        </div>
+
+        <div class="panel panel-right">
+            <div class="tracker-title" id="tracker-title">진행 상황 🚀</div>
+            <div class="tracker-list" id="tracker-list">
+            </div>
+        </div>
+
+        <div class="overlay-screen hidden" id="end-screen"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- [JavaScript] -->
+    <!-- ========================================== -->
+    <script>
+        // 전역 상태 변수
+        let baseMaxQuestions = 10;
+        let currentDifficulty = 20; // 동적 난이도 조절용 변수
+        let consecutiveCorrect = 0; // 연속 정답 카운트 (난이도 상향 조건)
+        let opMode = 'add-sub'; // 선택된 연산 종류
+
+        let currentQuestion = 1;
+        let score = 0;
+
+        // 현재 문제 정보
+        let currentProblem = null;
+        let userInput = "";
+        let isAnswerChecked = false;
+        let attemptCount = 0; // 문제당 시도 횟수 (0: 첫시도, 1: 두번째 시도)
+
+        let errorQueue = [];
+        let isRetryMode = false;
+
+        let animCounter = 0;
+
+        // [넘버블럭스 스타일 색상 팔레트]
+        // 1~9 고유 색상, 10은 특별한 색상
+        const numberColors = {
+            1: { bg: '#FF4757', shadow: '#E84118' }, // 빨강
+            2: { bg: '#FFA502', shadow: '#E67E22' }, // 주황
+            3: { bg: '#F1C40F', shadow: '#F39C12' }, // 노랑
+            4: { bg: '#2ED573', shadow: '#27AE60' }, // 초록
+            5: { bg: '#1E90FF', shadow: '#2980B9' }, // 파랑
+            6: { bg: '#9B59B6', shadow: '#8E44AD' }, // 보라
+            7: { bg: '#FD79A8', shadow: '#E84393' }, // 핑크
+            8: { bg: '#A4B0BE', shadow: '#747D8C' }, // 은색/회색
+            9: { bg: '#34495E', shadow: '#2C3E50' }, // 진회색
+            0: { bg: '#FFFFFF', shadow: '#DFE6E9' }  // 흰색 (기본)
+        };
+
+        // 숫자에 맞는 색상 반환 (1의 자리를 기준으로 하되 10은 특별처리)
+        function getColorConfig(num) {
+            if (num === 10) return { bg: '#F8EFBA', shadow: '#F5CD79' }; // 10은 황금색
+            let lastDigit = num % 10;
+            return numberColors[lastDigit] || numberColors[0];
+        }
+
+        function showStartScreen() {
+            document.getElementById('end-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+
+        function startGame() {
+            currentDifficulty = parseInt(document.getElementById('max-answer').value);
+            baseMaxQuestions = parseInt(document.getElementById('max-questions').value);
+            opMode = document.querySelector('input[name="op-type"]:checked').value;
+
+            document.getElementById('start-screen').classList.add('hidden');
+
+            currentQuestion = 1;
+            score = 0;
+            consecutiveCorrect = 0;
+            errorQueue = [];
+            isRetryMode = false;
+
+            document.getElementById('tracker-title').innerText = "진행 상황 🚀";
+            const trackerList = document.getElementById('tracker-list');
+            trackerList.innerHTML = '';
+            for (let i = 1; i <= baseMaxQuestions; i++) {
+                const item = document.createElement('div');
+                item.className = 'tracker-item';
+                item.id = `track-item-${i}`;
+                item.innerHTML = `<span>문제 ${i}</span> <span class="mark" id="track-mark-${i}">-</span>`;
+                trackerList.appendChild(item);
+            }
+
+            generateProblem();
+        }
+
+        // 동적 난이도를 반영한 문제 생성
+        function getMathLogic(maxVal) {
+            let operators = [];
+            if (opMode === 'add-sub') {
+                operators = ['+', '+', '-']; // 더하기/빼기 위주
+            } else if (opMode === 'mul-div') {
+                operators = ['×', '÷']; // 곱하기/나누기 위주
+            } else {
+                operators = ['+', '-', '×', '÷']; // 모두 섞어서
+            }
+
+            let op = operators[Math.floor(Math.random() * operators.length)];
+
+            let n1, n2, ans;
+            if (op === '+') {
+                ans = Math.floor(Math.random() * (maxVal - 1)) + 2;
+                n1 = Math.floor(Math.random() * (ans - 1)) + 1;
+                n2 = ans - n1;
+            } else if (op === '-') {
+                n1 = Math.floor(Math.random() * (maxVal - 1)) + 2;
+                n2 = Math.floor(Math.random() * (n1 - 1)) + 1;
+                ans = n1 - n2;
+            } else if (op === '×') {
+                let maxFactor = Math.min(9, Math.max(5, Math.floor(maxVal/2))); // 곱하기는 너무 커지지 않게
+                n1 = Math.floor(Math.random() * (maxFactor - 1)) + 2;
+                let maxN2 = Math.floor(maxVal / n1);
+                if (maxN2 < 1) maxN2 = 1;
+                n2 = Math.floor(Math.random() * maxN2) + 1;
+                ans = n1 * n2;
+            } else if (op === '÷') {
+                let maxDivisor = Math.min(9, Math.max(5, Math.floor(maxVal/2)));
+                n2 = Math.floor(Math.random() * (maxDivisor - 1)) + 2;
+                let maxAns = Math.floor(maxVal / n2);
+                if (maxAns < 1) maxAns = 1;
+                ans = Math.floor(Math.random() * maxAns) + 1;
+                n1 = ans * n2;
+            }
+            return { n1, n2, op, ans };
+        }
+
+        function generateProblem() {
+            userInput = "";
+            isAnswerChecked = false;
+            attemptCount = 0;
+            updateDisplay();
+
+            document.getElementById('keypad').style.pointerEvents = 'auto';
+            document.getElementById('keypad').style.opacity = '1';
+            document.getElementById('btn-next').classList.remove('show');
+            document.getElementById('input-display').style.borderColor = 'transparent';
+
+            const visArea = document.getElementById('visualization-area');
+            visArea.style.opacity = '0';
+            visArea.style.visibility = 'hidden';
+
+            document.getElementById('btn-hint').classList.remove('hidden');
+            document.getElementById('diff-indicator').innerText = `난이도: ${currentDifficulty}`;
+
+            animCounter = 0;
+
+            if (!isRetryMode) {
+                // 일반 게임 모드
+                document.querySelectorAll('.tracker-item').forEach(el => el.classList.remove('active'));
+                const curTrack = document.getElementById(`track-item-${currentQuestion}`);
+                if(curTrack) {
+                    curTrack.classList.add('active');
+                    curTrack.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                document.getElementById('q-number').innerText = `문제 ${currentQuestion} / ${baseMaxQuestions}`;
+
+                let logic = getMathLogic(currentDifficulty);
+
+                // 빈칸 위치 및 수식 형태 결정 (대수학적 사고)
+                // blankPos: 'ans'(기본), 'n1'(앞 숫자), 'n2'(뒤 숫자)
+                let blankPos = 'ans';
+                let rand = Math.random();
+                if (logic.op === '+' || logic.op === '-') {
+                    if (rand > 0.8) blankPos = 'n1';
+                    else if (rand > 0.6) blankPos = 'n2';
+                }
+
+                // eqFormat: 'left' (A + B = C), 'right' (C = A + B)
+                let eqFormat = Math.random() > 0.8 ? 'right' : 'left';
+
+                // 구해야 하는 타겟 정답 설정
+                let targetAnswer = logic.ans;
+                if (blankPos === 'n1') targetAnswer = logic.n1;
+                else if (blankPos === 'n2') targetAnswer = logic.n2;
+
+                currentProblem = { ...logic, blankPos, eqFormat, targetAnswer };
+
+            } else {
+                // 오답 다시 풀기 모드 (저장된 문제 그대로 출제)
+                document.getElementById('tracker-title').innerText = "오답 다시 풀기 💪";
+                currentProblem = errorQueue.shift();
+
+                document.getElementById('q-number').innerText = `틀린 문제 복습 (남은 문제: ${errorQueue.length + 1})`;
+                document.querySelectorAll('.tracker-item').forEach(el => el.classList.remove('active'));
+            }
+
+            renderProblemText();
+        }
+
+        // 수식 텍스트 렌더링 (빈칸 위치에 따라 다름)
+        function renderProblemText() {
+            let p = currentProblem;
+            let strN1 = p.blankPos === 'n1' ? '<span class="question-mark">?</span>' : p.n1;
+            let strN2 = p.blankPos === 'n2' ? '<span class="question-mark">?</span>' : p.n2;
+            let strAns = p.blankPos === 'ans' ? '<span class="question-mark">?</span>' : p.ans;
+
+            let text = "";
+            if (p.eqFormat === 'left') {
+                text = `${strN1} ${p.op} ${strN2} = ${strAns}`;
+            } else {
+                text = `${strAns} = ${strN1} ${p.op} ${strN2}`;
+            }
+            document.getElementById('problem').innerHTML = text;
+        }
+
+        // 키패드 입력
+        function inputNumber(num) {
+            if (isAnswerChecked) return;
+            if (userInput.length < 3) {
+                userInput += num.toString();
+                updateDisplay();
+            }
+        }
+
+        function deleteNumber() {
+            if (isAnswerChecked) return;
+            userInput = userInput.slice(0, -1);
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('input-display').innerText = userInput;
+        }
+
+        // 시각화 큐브 사이즈 계산
+        function getSizeConfig(maxVal) {
+            if (maxVal > 70) return { s: 10, g: 2, boxP: 4, groupGap: 6, shadowX: 1, shadowY: 2 };
+            if (maxVal > 40) return { s: 14, g: 3, boxP: 5, groupGap: 8, shadowX: 1, shadowY: 2 };
+            if (maxVal > 20) return { s: 18, g: 3, boxP: 6, groupGap: 10, shadowX: 2, shadowY: 3 };
+            if (maxVal > 10) return { s: 22, g: 4, boxP: 8, groupGap: 12, shadowX: 2, shadowY: 3 };
+            return { s: 28, g: 4, boxP: 10, groupGap: 14, shadowX: 2, shadowY: 4 };
+        }
+
+        function getNextDelay() {
+            let delay = animCounter * 0.12;
+            animCounter++;
+            return delay;
+        }
+
+        function renderOperator(op) {
+            let delay = getNextDelay();
+            return `<span class="visual-operator drop-jelly" style="animation-delay: ${delay}s;">${op}</span>`;
+        }
+
+        function renderDivider() {
+            let delay = getNextDelay();
+            return `<div class="visual-divider drop-jelly" style="animation-delay: ${delay}s;"></div>`;
+        }
+
+        // isQuestion이 true면 색상 큐브 대신 빈 힌트 박스 렌더링
+        function renderCubesHTML(count, cfg, isGrouped = false, isQuestion = false) {
+            let stackW = (cfg.s * 5) + (cfg.g * 4);
+
+            if (isQuestion) {
+                let h = (cfg.s * 2) + cfg.g + (cfg.g*2); // 대략 2줄 높이
+                let animStyle = `animation-delay: ${getNextDelay()}s;`;
+                return `<div class="hint-box drop-jelly" style="width: ${Math.max(stackW, 60)}px; height: ${Math.max(h, 60)}px; ${animStyle}">?</div>`;
+            }
+
+            // 개수에 따른 넘버블럭스 색상 가져오기
+            let color = getColorConfig(count);
+
+            let html = `<div class="cube-stack" style="width: ${stackW}px;">`;
+            let remaining = count;
+
+            if (remaining === 0) {
+                 let animClass = isGrouped ? "" : "drop-jelly";
+                 let animStyle = isGrouped ? "" : `animation-delay: ${getNextDelay()}s;`;
+                 return `<div class="cube-stack" style="width: ${stackW}px;"><div class="cube-group-10 ${animClass}" style="${animStyle}"><div class="cube-row"><div class="cube empty-cube" style="width: ${cfg.s}px; height: ${cfg.s}px;"></div></div></div></div>`;
+            }
+
+            while (remaining > 0) {
+                let groupCount = Math.min(10, remaining);
+                let animClass = isGrouped ? "" : "drop-jelly";
+                let animStyle = isGrouped ? "" : `animation-delay: ${getNextDelay()}s;`;
+
+                let botMargin = (!isGrouped && remaining > 10) ? cfg.g * 2 : 0;
+
+                html += `<div class="cube-group-10 ${animClass}" style="${animStyle} gap: ${cfg.g}px; margin-bottom: ${botMargin}px;">`;
+
+                let gRemain = groupCount;
+                while (gRemain > 0) {
+                    let rowCount = Math.min(5, gRemain);
+                    html += `<div class="cube-row" style="gap: ${cfg.g}px;">`;
+                    for(let i = 0; i < rowCount; i++) {
+                        let radius = Math.max(2, cfg.s/4);
+                        html += `<div class="cube" style="width: ${cfg.s}px; height: ${cfg.s}px; border-radius: ${radius}px; background-color: ${color.bg}; box-shadow: ${cfg.shadowX}px ${cfg.shadowY}px 0 ${color.shadow};"></div>`;
+                    }
+                    html += '</div>';
+                    gRemain -= rowCount;
+                }
+                html += '</div>';
+                remaining -= groupCount;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        // 힌트 보기 로직
+        function showHint() {
+            animCounter = 0;
+            const visArea = document.getElementById('visualization-area');
+            const msgEl = document.getElementById('feedback-msg');
+
+            visArea.style.visibility = 'visible';
+            visArea.style.opacity = '1';
+            msgEl.innerText = "힌트를 보고 블록 개수를 세어보세요! 👀";
+            msgEl.style.color = 'var(--warning)';
+
+            renderVisualization(true); // 힌트 모드로 렌더링
+            document.getElementById('btn-hint').classList.add('hidden');
+        }
+
+        // 정답 제출 (첫 시도 틀릴 경우 힌트 제공)
+        function submitAnswer() {
+            if (userInput === "" || isAnswerChecked) return;
+
+            const ans = parseInt(userInput);
+            const isCorrect = (ans === currentProblem.targetAnswer);
+            const msgEl = document.getElementById('feedback-msg');
+            const inputDisplay = document.getElementById('input-display');
+
+            if (isCorrect) {
+                // 정답 처리
+                isAnswerChecked = true;
+                animCounter = 0;
+                consecutiveCorrect++;
+
+                // 난이도 상향 조정 (연속 2번 정답시)
+                if(consecutiveCorrect >= 2) {
+                    currentDifficulty += Math.floor(currentDifficulty * 0.2) + 1;
+                    if(currentDifficulty > 100) currentDifficulty = 100;
+                    consecutiveCorrect = 0;
+                }
+
+                if (!isRetryMode) {
+                    const markEl = document.getElementById(`track-mark-${currentQuestion}`);
+                    markEl.innerText = '⭕';
+                    markEl.style.color = 'var(--success)';
+                    score++;
+                }
+
+                document.getElementById('visualization-area').style.visibility = 'visible';
+                document.getElementById('visualization-area').style.opacity = '1';
+                renderVisualization(false); // 정답 모드로 렌더링
+
+                msgEl.innerText = "정답이에요! 참 잘했어요! 🎉";
+                // 곱하기 설명 추가
+                if(currentProblem.op === '×') {
+                    msgEl.innerHTML += `<br><span class="multiplication-hint">${currentProblem.n1}을(를) ${currentProblem.n2}번 더한 것과 같아요!</span>`;
+                }
+                msgEl.style.color = 'var(--success)';
+                inputDisplay.style.borderColor = 'var(--success)';
+
+                document.getElementById('keypad').style.pointerEvents = 'none';
+                document.getElementById('keypad').style.opacity = '0.4';
+                document.getElementById('btn-hint').classList.add('hidden');
+                document.getElementById('btn-next').classList.add('show');
+
+            } else {
+                // 오답 처리
+                if (attemptCount === 0) {
+                    // 첫 번째 시도 실패: 두 번째 기회 및 힌트 제공
+                    attemptCount = 1;
+                    userInput = ""; // 입력값 초기화
+                    updateDisplay();
+                    inputDisplay.style.borderColor = 'var(--error)';
+
+                    showHint(); // 힌트 자동 표시
+                    msgEl.innerText = "아쉬워요! 힌트를 보고 한번 더 생각해볼까요? 🤔";
+                    msgEl.style.color = 'var(--error)';
+
+                } else {
+                    // 두 번째 시도 실패: 완전 오답 처리
+                    isAnswerChecked = true;
+                    animCounter = 0;
+
+                    // 난이도 하향 조정
+                    consecutiveCorrect = 0;
+                    currentDifficulty = Math.max(5, currentDifficulty - Math.floor(currentDifficulty * 0.2) - 1);
+
+                    errorQueue.push(currentProblem);
+
+                    if (!isRetryMode) {
+                        const markEl = document.getElementById(`track-mark-${currentQuestion}`);
+                        markEl.innerText = '❌';
+                        markEl.style.color = 'var(--error)';
+                    }
+
+                    renderVisualization(false); // 정답 렌더링
+
+                    msgEl.innerText = `아쉬워요! 정답은 ${currentProblem.targetAnswer} 였어요. 😢`;
+                    msgEl.style.color = 'var(--error)';
+                    inputDisplay.style.borderColor = 'var(--error)';
+                    inputDisplay.innerText = currentProblem.targetAnswer; // 정답 보여주기
+
+                    document.getElementById('keypad').style.pointerEvents = 'none';
+                    document.getElementById('keypad').style.opacity = '0.4';
+                    document.getElementById('btn-hint').classList.add('hidden');
+                    document.getElementById('btn-next').classList.add('show');
+                }
+            }
+        }
+
+        function renderVisualization(isHintMode) {
+            const visEq = document.getElementById('visual-equation');
+            const p = currentProblem;
+
+            const maxValInEq = Math.max(p.n1, p.n2, p.ans);
+            const cfg = getSizeConfig(maxValInEq);
+
+            let equationHTML = "";
+
+            // 힌트 모드일 때 빈칸 처리
+            let hideN1 = isHintMode && p.blankPos === 'n1';
+            let hideN2 = isHintMode && p.blankPos === 'n2';
+            let hideAns = isHintMode && p.blankPos === 'ans';
+
+            if (p.op === '+' || p.op === '-') {
+                let eq1 = renderCubesHTML(p.n1, cfg, false, hideN1);
+                let op1 = renderOperator(p.op);
+                let eq2 = renderCubesHTML(p.n2, cfg, false, hideN2);
+
+                let row1 = `<div class="equation-row">${eq1}${op1}${eq2}</div>`;
+                let divider = renderDivider();
+
+                let op2 = renderOperator('=');
+                let eq3 = renderCubesHTML(p.ans, cfg, false, hideAns);
+
+                let row2 = `<div class="equation-row">${op2}${eq3}</div>`;
+
+                // 좌우 포맷에 따라 순서 변경
+                if(p.eqFormat === 'right') {
+                    equationHTML = row2 + divider + row1;
+                } else {
+                    equationHTML = row1 + divider + row2;
+                }
+
+            }
+            // 곱하기: [그룹 박스들] -> [구분선] -> [정답]
+            else if (p.op === '×') {
+                let groupsHTML = `<div class="grouped-container" style="gap: ${cfg.groupGap}px;">`;
+                for(let i=0; i<p.n2; i++) {
+                    let borderW = Math.max(1, cfg.boxP/3);
+                    let delay = getNextDelay();
+                    // 힌트 모드에서 n1을 구해야하면 그룹 박스 안을 ?로 채움
+                    groupsHTML += `<div class="dashed-box drop-jelly" style="padding: ${cfg.boxP}px; border-width: ${borderW}px; animation-delay: ${delay}s;">${renderCubesHTML(p.n1, cfg, true, hideN1)}</div>`;
+                }
+                groupsHTML += '</div>';
+
+                // 만약 n2(그룹 수)를 모르는 경우 전체 그룹을 하나로 묶어 ? 처리하기는 UI상 복잡하므로
+                // 곱셈/나눗셈에서는 n1, n2 빈칸을 최대한 배제하거나 숫자로 렌더링 유지
+                if (hideN2) {
+                    groupsHTML = `<div class="hint-box drop-jelly" style="padding:20px; animation-delay: ${getNextDelay()}s;">몇 묶음일까요? ?</div>`;
+                }
+
+                let row1 = `<div class="equation-row">${groupsHTML}</div>`;
+                let divider = renderDivider();
+                let op2 = renderOperator('=');
+                let eq3 = renderCubesHTML(p.ans, cfg, false, hideAns);
+
+                let row2 = `<div class="equation-row">${op2}${eq3}</div>`;
+
+                if(p.eqFormat === 'right') equationHTML = row2 + divider + row1;
+                else equationHTML = row1 + divider + row2;
+
+            }
+            // 나누기: [원래 블록] -> [구분선] -> [÷ N = 연산기호 + 그룹 박스들]
+            else if (p.op === '÷') {
+                let eq1 = renderCubesHTML(p.n1, cfg, false, hideN1);
+                let row1 = `<div class="equation-row">${eq1}</div>`;
+
+                let divider = renderDivider();
+                let op1 = renderOperator(`÷ ${hideN2 ? '?' : p.n2} =`);
+
+                let groupsHTML = `<div class="grouped-container" style="gap: ${cfg.groupGap}px;">`;
+                // n2를 모르는 경우 그룹 렌더링이 어려우므로 임시 개수(ans)로 렌더
+                let loopCount = hideN2 ? 1 : p.n2;
+                if(hideN2) {
+                     groupsHTML += `<div class="hint-box drop-jelly" style="padding:20px; animation-delay: ${getNextDelay()}s;">몇 개로 나눌까요? ?</div>`;
+                } else {
+                    for(let i=0; i<loopCount; i++) {
+                        let borderW = Math.max(1, cfg.boxP/3);
+                        let delay = getNextDelay();
+                        groupsHTML += `<div class="dashed-box drop-jelly" style="padding: ${cfg.boxP}px; border-width: ${borderW}px; animation-delay: ${delay}s;">${renderCubesHTML(p.ans, cfg, true, hideAns)}</div>`;
+                    }
+                }
+                groupsHTML += '</div>';
+
+                let row2 = `<div class="equation-row" style="margin-bottom: 10px;">${op1}</div>`;
+                let row3 = `<div class="equation-row">${groupsHTML}</div>`;
+
+                equationHTML = row1 + divider + row2 + row3;
+            }
+
+            visEq.innerHTML = equationHTML;
+        }
+
+        function nextQuestion() {
+            if (!isRetryMode) {
+                if (currentQuestion >= baseMaxQuestions) {
+                    if (errorQueue.length > 0) {
+                        showRetryPromptScreen();
+                    } else {
+                        showFinalEndScreen();
+                    }
+                } else {
+                    currentQuestion++;
+                    generateProblem();
+                }
+            } else {
+                if (errorQueue.length === 0) {
+                    showFinalEndScreen();
+                } else {
+                    generateProblem();
+                }
+            }
+        }
+
+        function showRetryPromptScreen() {
+            const endScreen = document.getElementById('end-screen');
+            endScreen.innerHTML = `
+                <h2>아쉬워요! 😢</h2>
+                <p>${baseMaxQuestions}문제 중 ${score}문제를 맞혔어요.<br>틀린 ${errorQueue.length}문제를 다시 풀어볼까요?</p>
+                <button class="btn-restart" onclick="startRetryMode()">다시 풀기 💪</button>
+            `;
+            endScreen.classList.remove('hidden');
+        }
+
+        function startRetryMode() {
+            isRetryMode = true;
+            document.getElementById('end-screen').classList.add('hidden');
+            generateProblem();
+        }
+
+        function showFinalEndScreen() {
+            const endScreen = document.getElementById('end-screen');
+            let msg = score === baseMaxQuestions ? "모든 문제를 한 번에 맞혔어요! 천재인가요? 🌟" : "틀린 문제까지 모두 잘 풀어냈어요! 정말 대단해요! 👏";
+
+            endScreen.innerHTML = `
+                <h2>탐험 완료! 🎉</h2>
+                <p>${msg}</p>
+                <button class="btn-restart" onclick="showStartScreen()">새 게임 하기 🔄</button>
+            `;
+            endScreen.classList.remove('hidden');
+        }
+
+        window.addEventListener('keydown', function(e) {
+            if(!document.getElementById('start-screen').classList.contains('hidden') ||
+               !document.getElementById('end-screen').classList.contains('hidden')) {
+                if(e.key === 'Enter') {
+                    if(!document.getElementById('start-screen').classList.contains('hidden')) startGame();
+                    else if(!document.getElementById('end-screen').classList.contains('hidden')) {
+                        const btn = document.getElementById('end-screen').querySelector('button');
+                        if(btn) btn.click();
+                    }
+                }
+                return;
+            }
+
+            if(e.key >= '0' && e.key <= '9') inputNumber(e.key);
+            else if(e.key === 'Backspace') deleteNumber();
+            else if(e.key === 'Enter') {
+                if(isAnswerChecked && document.getElementById('btn-next').classList.contains('show')) {
+                    nextQuestion();
+                } else if(!isAnswerChecked && userInput !== "") {
+                    submitAnswer();
+                }
+            }
+        });
+
+        window.onload = showStartScreen;
+    </script>
+</body>
+</html>

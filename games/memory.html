@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>기억력 짝 맞추기 · 아인이의 놀이터</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eff6ff;--ink:#1f2937;--muted:#6b7280;--blue:#3b82f6;--blue-d:#1d4ed8;
+  --green:#22c55e;--green-d:#15803d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font-family:'Jua','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  background:var(--bg);color:var(--ink);user-select:none;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px}
+button{font-family:inherit;cursor:pointer;border:none}
+.home{position:fixed;top:8px;left:8px;z-index:60;background:rgba(255,255,255,.9);color:var(--muted);
+  padding:5px 12px;border-radius:999px;font-size:13px;text-decoration:none;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);border:1px solid #e5e7eb}
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%}
+.screen.on{display:flex;animation:f .25s}
+@keyframes f{from{opacity:0}to{opacity:1}}
+
+h1{font-size:clamp(22px,4vh,38px);color:var(--blue-d);margin:0 0 4px;text-align:center}
+.sub{font-size:clamp(12px,2vh,18px);color:var(--muted);margin:0 0 14px}
+.box{background:#fff;border:3px solid #dbeafe;border-radius:20px;padding:13px 16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);margin-bottom:11px;width:min(620px,94vw)}
+.box h2{margin:0 0 9px;font-size:clamp(13px,2vh,18px);color:var(--blue-d);text-align:center;font-weight:normal}
+.opts{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.opt{background:#f3f4f6;border:2px solid transparent;color:#6b7280;padding:9px 14px;
+  border-radius:12px;font-size:clamp(12px,1.9vh,17px);white-space:nowrap}
+.opt.sel{background:#dbeafe;border-color:var(--blue);color:var(--blue-d)}
+.big{background:var(--green);color:#fff;font-size:clamp(17px,2.8vh,26px);padding:11px 44px;
+  border-radius:999px;box-shadow:0 5px 0 var(--green-d);transition:.08s}
+.big:active{transform:translateY(5px);box-shadow:0 0 0 var(--green-d)}
+
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  width:min(860px,97vw);margin-bottom:7px}
+.bar .t{font-size:clamp(14px,2.2vh,19px);color:var(--blue-d)}
+.bar .s{font-size:14px;color:var(--muted)}
+.bar .quit{background:#fecaca;color:#991b1b;font-size:13px;padding:6px 12px;border-radius:10px}
+
+.grid{display:grid;gap:clamp(5px,1vh,10px);justify-content:center}
+.card{perspective:800px;width:var(--cw,92px);height:var(--ch,92px);cursor:pointer}
+.inner{position:relative;width:100%;height:100%;transition:transform .38s;transform-style:preserve-3d}
+.card.open .inner,.card.done .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.back{background:linear-gradient(140deg,#60a5fa,#3b82f6);color:#fff;font-size:calc(var(--ch,92px)*.42)}
+.front{background:#fff;border:3px solid #cbd5e1;transform:rotateY(180deg);
+  font-size:calc(var(--ch,92px)*.42);color:#1f2937;flex-direction:column;gap:2px;padding:4px;text-align:center}
+.front .small{font-size:calc(var(--ch,92px)*.24)}
+.card.done .front{border-color:var(--green);background:#dcfce7;animation:pop .35s}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.12)}100%{transform:scale(1)}}
+.dots{display:grid;grid-template-columns:repeat(5,1fr);gap:calc(var(--ch,92px)*.035);padding:2px}
+.dot{width:calc(var(--ch,92px)*.13);height:calc(var(--ch,92px)*.13);border-radius:3px;background:#f97316}
+
+.fb{margin-top:9px;min-height:26px;font-size:clamp(13px,2vh,18px);color:var(--green-d);text-align:center}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:80}
+.modal.on{display:flex}
+.modal .m{background:#fff;padding:26px 22px;border-radius:24px;text-align:center;max-width:330px;width:88%}
+.modal .em{font-size:54px}
+.modal h2{margin:6px 0;font-size:26px;color:var(--green-d)}
+.modal p{color:var(--muted);margin:0 0 16px}
+.modal button{width:100%;padding:12px;border-radius:14px;font-size:18px;margin-top:8px}
+.m-go{background:var(--blue);color:#fff;box-shadow:0 4px 0 var(--blue-d)}
+.m-alt{background:#e5e7eb;color:#374151}
+.confetti{position:fixed;width:10px;height:10px;animation:fall linear forwards;z-index:90}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.2}}
+</style>
+</head>
+<body>
+
+<a class="home" href="../index.html">🏠 놀이터로</a>
+
+<div id="s-start" class="screen on">
+  <h1>🃏 아인이의 기억력 짝 맞추기</h1>
+  <p class="sub">카드를 뒤집어서 짝을 찾아보세요!</p>
+
+  <div class="box">
+    <h2>1. 어떤 짝을 맞출까요?</h2>
+    <div class="opts" id="modes">
+      <button class="opt sel" data-m="pic">같은 그림 짝 맞추기 🦖</button>
+      <button class="opt" data-m="count">숫자와 개수 맞추기 🔢</button>
+      <button class="opt" data-m="add">덧셈식과 답 맞추기 ➕</button>
+      <button class="opt" data-m="word">낱말과 그림 맞추기 🍎</button>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2>2. 카드는 몇 장으로 할까요?</h2>
+    <div class="opts" id="sizes"></div>
+  </div>
+
+  <button class="big" onclick="start()">시작하기!</button>
+</div>
+
+<div id="s-game" class="screen">
+  <div class="bar">
+    <span class="t" id="title">같은 그림 짝 맞추기</span>
+    <span class="s" id="stat">0 / 6 짝 · 0번 뒤집음</span>
+    <button class="quit" onclick="go('s-start')">그만하기</button>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="fb" id="fb"></div>
+</div>
+
+<div class="modal" id="end">
+  <div class="m">
+    <div class="em">🏆</div>
+    <h2>모두 찾았어요!</h2>
+    <p id="end-msg"></p>
+    <button class="m-go" onclick="start()">한 번 더!</button>
+    <button class="m-alt" onclick="go('s-start')">다른 놀이로</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+const PICS=['🦖','🦕','🚗','🚕','🚀','🛸','🤖','⚽','🏀','🐬','🦁','🐸','🍎','🌈','⭐','🎈','🐝','🍄'];
+const WORDS=[['사과','🍎'],['바나나','🍌'],['자동차','🚗'],['비행기','✈️'],['공룡','🦖'],['로켓','🚀'],
+             ['강아지','🐶'],['고양이','🐱'],['나무','🌳'],['꽃','🌸'],['별','⭐'],['물고기','🐠']];
+const SIZES=[{p:4,c:3,r:3,l:'쉬움 (8장)'},{p:6,c:4,r:3,l:'보통 (12장)'},
+             {p:8,c:4,r:4,l:'어려움 (16장)'},{p:10,c:5,r:4,l:'도전! (20장)'}];
+
+let mode='pic', sizeIdx=1;
+let deck=[], open=[], matched=0, flips=0, lock=false, audioCtx=null;
+
+function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+function beep(t){
+  if(!audioCtx)return;
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.connect(g);g.connect(audioCtx.destination);
+  const c=audioCtx.currentTime;g.gain.setValueAtTime(.08,c);
+  if(t==='flip'){o.type='sine';o.frequency.setValueAtTime(620,c);o.start();o.stop(c+.07);}
+  if(t==='match'){o.type='sine';o.frequency.setValueAtTime(700,c);o.frequency.setValueAtTime(1050,c+.1);o.start();o.stop(c+.24);}
+  if(t==='no'){o.type='triangle';o.frequency.setValueAtTime(240,c);o.start();o.stop(c+.16);}
+  if(t==='win'){o.type='square';[440,590,780,980].forEach((f,i)=>o.frequency.setValueAtTime(f,c+i*.16));o.start();o.stop(c+.7);}
+}
+
+document.getElementById('modes').addEventListener('click',e=>{
+  const b=e.target.closest('.opt'); if(!b)return;
+  initAudio();beep('flip');mode=b.dataset.m;
+  document.querySelectorAll('#modes .opt').forEach(x=>x.classList.toggle('sel',x===b));});
+const sizesEl=document.getElementById('sizes');
+SIZES.forEach((s,i)=>{const b=document.createElement('button');
+  b.className='opt'+(i===1?' sel':'');b.textContent=s.l;
+  b.onclick=()=>{initAudio();beep('flip');sizeIdx=i;
+    [...sizesEl.children].forEach((x,k)=>x.classList.toggle('sel',k===i));};
+  sizesEl.appendChild(b);});
+
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.getElementById('end').classList.remove('on');}
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function dotsHTML(n){
+  let h='<div class="dots">';
+  for(let i=0;i<n;i++)h+='<div class="dot"></div>';
+  return h+'</div>';
+}
+
+/* 짝 카드 생성: {key, html} 두 장씩 */
+function buildDeck(pairs){
+  const cards=[];
+  if(mode==='pic'){
+    shuffle(PICS.slice()).slice(0,pairs).forEach((p,i)=>{
+      cards.push({k:'p'+i,html:p}); cards.push({k:'p'+i,html:p});
+    });
+  }else if(mode==='count'){
+    const nums=shuffle([1,2,3,4,5,6,7,8,9,10]).slice(0,pairs);
+    nums.forEach((n,i)=>{
+      cards.push({k:'c'+i,html:`<span>${n}</span>`});
+      cards.push({k:'c'+i,html:dotsHTML(n)});
+    });
+  }else if(mode==='add'){
+    const used=new Set();
+    let i=0, guard=0;
+    while(i<pairs && guard++<300){
+      const a=1+Math.floor(Math.random()*9), b=1+Math.floor(Math.random()*9);
+      const key=a+'+'+b;
+      if(used.has(key)||used.has(b+'+'+a)) continue;
+      used.add(key);
+      cards.push({k:'a'+i,html:`<span class="small">${a} + ${b}</span>`});
+      cards.push({k:'a'+i,html:`<span>${a+b}</span>`});
+      i++;
+    }
+  }else{
+    shuffle(WORDS.slice()).slice(0,pairs).forEach((w,i)=>{
+      cards.push({k:'w'+i,html:`<span class="small">${w[0]}</span>`});
+      cards.push({k:'w'+i,html:w[1]});
+    });
+  }
+  return shuffle(cards);
+}
+
+function start(){
+  initAudio();
+  document.getElementById('end').classList.remove('on');
+  const cfg=SIZES[sizeIdx];
+  deck=buildDeck(cfg.p);
+  open=[];matched=0;flips=0;lock=false;
+  document.getElementById('title').textContent=
+    document.querySelector('#modes .opt.sel').textContent;
+  document.getElementById('fb').textContent='';
+
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  g.style.gridTemplateColumns=`repeat(${cfg.c},auto)`;
+  deck.forEach((card,i)=>{
+    const d=document.createElement('div');
+    d.className='card'; d.dataset.i=i;
+    d.innerHTML=`<div class="inner">
+        <div class="face back">❔</div>
+        <div class="face front">${card.html}</div>
+      </div>`;
+    d.onclick=()=>flip(d,i);
+    g.appendChild(d);
+  });
+  fit(cfg);
+  go('s-game');
+  updateStat();
+}
+function fit(cfg){
+  cfg=cfg||SIZES[sizeIdx];
+  const gapy=10, availH=window.innerHeight-110, availW=window.innerWidth*0.96;
+  const h=Math.floor(Math.min(availH/cfg.r - gapy, availW/cfg.c - gapy, 116));
+  const s=Math.max(48,h);
+  document.documentElement.style.setProperty('--cw',s+'px');
+  document.documentElement.style.setProperty('--ch',s+'px');
+}
+window.addEventListener('resize',()=>fit());
+
+function flip(el,i){
+  if(lock||el.classList.contains('done')||el.classList.contains('open')) return;
+  initAudio();beep('flip');
+  el.classList.add('open');
+  open.push({el,i});
+  flips++;
+  updateStat();
+  if(open.length===2){
+    lock=true;
+    const [a,b]=open;
+    if(deck[a.i].k===deck[b.i].k){
+      setTimeout(()=>{
+        a.el.classList.add('done');b.el.classList.add('done');
+        beep('match'); matched++; open=[];lock=false;updateStat();
+        say(['짝을 찾았어요! 👏','좋아요! 잘 기억했어요! 🎯','대단해요! ⭐'][Math.floor(Math.random()*3)]);
+        if(matched===SIZES[sizeIdx].p) setTimeout(win,420);
+      },420);
+    }else{
+      setTimeout(()=>{
+        beep('no');
+        a.el.classList.remove('open');b.el.classList.remove('open');
+        open=[];lock=false;
+        say('아쉬워요! 어디 있었는지 기억해 두었다가 다시 찾아봐요 🤔');
+      },880);
+    }
+  }
+}
+function say(t){ document.getElementById('fb').textContent=t; }
+function updateStat(){
+  document.getElementById('stat').textContent=
+    `${matched} / ${SIZES[sizeIdx].p} 짝 · ${flips}번 뒤집음`;
+}
+function win(){
+  beep('win');confetti();
+  const best=SIZES[sizeIdx].p*2;
+  document.getElementById('end-msg').textContent=
+    flips<=best ? `단 ${flips}번 만에! 기억력 천재예요! 🌟` : `${flips}번 뒤집어서 모두 찾았어요!`;
+  document.getElementById('end').classList.add('on');
+}
+function confetti(){
+  const colors=['#fce18a','#ff726d','#b48def','#f4306d','#3fe0d0','#fde047'];
+  for(let i=0;i<45;i++){
+    const d=document.createElement('div');d.className='confetti';
+    d.style.left=Math.random()*100+'vw';d.style.top='-14px';
+    d.style.background=colors[Math.floor(Math.random()*colors.length)];
+    if(Math.random()>.5)d.style.borderRadius='50%';
+    d.style.animationDuration=(Math.random()*2+1.3)+'s';
+    document.body.appendChild(d);setTimeout(()=>d.remove(),3600);
+  }
+}
+</script>
+</body>
+</html>
