@@ -2,213 +2,240 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소싸움 대회 · 아인이의 놀이터</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐂</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&display=swap" rel="stylesheet">
+<!-- 도트(비트맵) 한글 글꼴. 못 불러와도 아래 fallback 으로 잘 돌아갑니다. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri/dist/galmuri.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css">
 <style>
+/* ══════════════════════════════════════════════
+   레트로 도트 테마
+   ══════════════════════════════════════════════ */
 :root{
-  --bg:#2b1f14; --sand:#d9b380; --ink:#241a10; --paper:#fffaf2;
-  --muted:#8a7a68;
-  --red:#dc2626; --red-d:#991b1b;
-  --blue:#2563eb; --blue-d:#1d4ed8;
-  --gold:#f59e0b; --gold-d:#b45309;
-  --green:#16a34a; --green-d:#15803d;
+  --ink:#0d0a14;
+  --panel:#1b1430;
+  --panel2:#2a1f4a;
+  --line:#5b4a8c;
+  --paper:#f4ecd8;
+  --cream:#ffe9b8;
+  --gold:#ffc32b;   --gold-d:#a8700a;
+  --red:#e8433f;    --red-d:#8f1f1c;
+  --blue:#3b7dd8;   --blue-d:#1d4a8f;
+  --green:#3fbf5f;  --green-d:#1e7a36;
+  --pink:#f06fa8;
+  --grey:#7d7596;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0}
+html{min-height:100%}
 body{
-  font-family:'Jua','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
-  background:
-    radial-gradient(900px 420px at 50% 0%, #4a3520 0%, transparent 60%),
-    linear-gradient(#3a2a1a, #241a10);
-  color:var(--paper); user-select:none; overflow:hidden;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  padding:6px;
+  margin:0; min-height:100vh;
+  font-family:'Galmuri11','Galmuri9','DungGeunMo','Neo둥근모','Jua',
+              'Apple SD Gothic Neo','Malgun Gothic',monospace;
+  background:var(--ink);
+  background-image:
+    linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+  background-size:4px 4px;
+  color:var(--paper);
+  overflow-x:hidden; overflow-y:auto;
+  display:flex; flex-direction:column; align-items:center;
+  -webkit-font-smoothing:none; font-smooth:never;
+  letter-spacing:.5px;
 }
-button{font-family:inherit;cursor:pointer;border:none;color:inherit}
-.home{position:fixed;top:8px;left:8px;z-index:70;background:rgba(255,255,255,.88);
-  color:#6b5a48;padding:5px 12px;border-radius:999px;font-size:13px;text-decoration:none;
-  box-shadow:0 2px 8px rgba(0,0,0,.3)}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit;letter-spacing:.5px}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+
+/* 도트 테두리 (모서리 각지게) */
+.px{border:4px solid var(--line);box-shadow:0 6px 0 rgba(0,0,0,.55)}
+
+.home{position:fixed;top:10px;left:10px;z-index:80;
+  background:var(--paper);color:#3a2d1a;padding:11px 18px;
+  font-size:16px;text-decoration:none;border:4px solid #8a7a58;
+  box-shadow:0 5px 0 rgba(0,0,0,.5)}
+.home:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.5)}
 
 .screen{display:none;flex-direction:column;align-items:center;justify-content:center;
-  width:100%;height:100%}
-.screen.on{display:flex;animation:f .3s ease-out}
-@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  width:100%;min-height:100vh;padding:74px 10px 28px}
+.screen.on{display:flex}
 
-h1{font-family:'Black Han Sans',sans-serif;font-weight:400;
-  font-size:clamp(30px,6.4vh,58px);margin:0;letter-spacing:.02em;
-  color:#ffd88a;text-shadow:0 4px 0 #7c4a11, 0 8px 22px rgba(0,0,0,.5)}
-.sub{font-size:clamp(12px,2vh,18px);color:#d9c3a5;margin:8px 0 22px;text-align:center}
+/* ── 시작 화면 ── */
+h1{font-size:clamp(26px,5.2vh,50px);margin:0 0 6px;text-align:center;color:var(--gold);
+  text-shadow:4px 4px 0 #7a3d05, 8px 8px 0 rgba(0,0,0,.45);line-height:1.35}
+.sub{font-size:clamp(15px,2.4vh,21px);color:#c3b6e6;margin:10px 0 30px;
+  text-align:center;line-height:1.75}
+.modes{display:flex;gap:22px;flex-wrap:wrap;justify-content:center}
+.mode{background:var(--panel2);color:var(--cream);border:4px solid var(--line);
+  padding:24px 26px;width:min(310px,88vw);box-shadow:0 8px 0 rgba(0,0,0,.55);
+  text-align:center;transition:.08s;min-height:190px}
+.mode:hover{background:#38296b}
+.mode:active{transform:translateY(7px);box-shadow:0 1px 0 rgba(0,0,0,.55)}
+.mode .em{font-size:clamp(40px,6.4vh,58px);line-height:1.15}
+.mode .t{font-size:clamp(21px,3.2vh,28px);margin:12px 0 8px;color:var(--gold)}
+.mode .d{font-size:clamp(14px,2vh,18px);color:#bdb0dd;line-height:1.7}
+.helpbtn{margin-top:26px;background:var(--panel2);border:4px solid var(--line);
+  color:var(--cream);padding:15px 30px;font-size:18px;min-height:56px;
+  box-shadow:0 5px 0 rgba(0,0,0,.5)}
+.helpbtn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.5)}
 
-.modes{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
-.mode{background:linear-gradient(#fff7ea,#f3e0c4);color:var(--ink);
-  border:4px solid #a9743a;border-radius:20px;padding:18px 26px;width:min(260px,42vw);
-  box-shadow:0 8px 0 #7c4a11, 0 14px 28px rgba(0,0,0,.35);transition:.1s;text-align:center}
-.mode:active{transform:translateY(8px);box-shadow:0 0 0 #7c4a11}
-.mode .em{font-size:clamp(32px,5.4vh,48px);line-height:1.1}
-.mode .t{font-family:'Black Han Sans',sans-serif;font-size:clamp(17px,2.8vh,24px);margin:6px 0 3px}
-.mode .d{font-size:clamp(11px,1.7vh,14px);color:#6b5a48;line-height:1.45}
+/* ── 소 고르기 ── */
+#s-pick{justify-content:flex-start}
+.htitle{font-size:clamp(22px,3.6vh,32px);color:var(--gold);margin:0 0 8px;text-align:center;
+  text-shadow:3px 3px 0 #7a3d05}
+.hhint{font-size:clamp(14px,2.1vh,19px);color:#c3b6e6;margin:0 0 20px;text-align:center;line-height:1.7}
+.bulls{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px;
+  width:min(1180px,97vw)}
+.bull{background:var(--panel2);border:4px solid var(--line);padding:10px 8px 12px;
+  text-align:center;transition:.08s;box-shadow:0 6px 0 rgba(0,0,0,.5);color:var(--cream)}
+.bull:hover{background:#38296b}
+.bull.sel{border-color:var(--gold);background:#4a2f1a;box-shadow:0 6px 0 var(--gold-d)}
+.bull.taken{opacity:.3;pointer-events:none}
+.bull canvas{width:100%;height:auto}
+.bull .nm{font-size:clamp(17px,2.4vh,22px);margin-top:6px;color:var(--gold)}
+.bull .st{display:flex;gap:5px;justify-content:center;margin-top:7px;flex-wrap:wrap}
+.pip{font-size:13px;padding:3px 7px;border:2px solid rgba(0,0,0,.35)}
+.p-p{background:#5c2020;color:#ffb0b0}
+.p-t{background:#1f3a63;color:#a8ccff}
+.p-s{background:#1f4a2c;color:#a5efbb}
+.bull .tag{font-size:12.5px;color:#a99cc9;margin-top:7px;line-height:1.5;min-height:36px}
 
-.helpbtn{margin-top:20px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.28);
-  color:#f0dfc6;padding:8px 20px;border-radius:999px;font-size:14px}
+.bar-row{display:flex;gap:14px;align-items:center;margin-top:22px;flex-wrap:wrap;justify-content:center}
+.go{background:var(--gold);color:#3a2405;font-size:clamp(19px,2.9vh,26px);
+  padding:17px 46px;min-height:64px;border:4px solid var(--gold-d);
+  box-shadow:0 7px 0 rgba(0,0,0,.55);transition:.08s}
+.go:active{transform:translateY(6px);box-shadow:0 1px 0 rgba(0,0,0,.55)}
+.go:disabled{opacity:.35;transform:none;cursor:default}
+.back{background:var(--panel2);border:4px solid var(--line);color:var(--cream);
+  padding:15px 26px;font-size:17px;min-height:56px;box-shadow:0 5px 0 rgba(0,0,0,.5)}
+.back:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.5)}
 
-/* ---------- 소 고르기 ---------- */
-#s-pick{justify-content:flex-start;padding-top:10px}
-.pickhead{font-family:'Black Han Sans',sans-serif;font-size:clamp(18px,3.2vh,28px);
-  color:#ffd88a;margin:4px 0 2px;text-align:center}
-.pickhint{font-size:clamp(11px,1.8vh,15px);color:#d9c3a5;margin:0 0 10px}
-.bulls{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;
-  width:min(1040px,98vw);overflow-y:auto;padding:2px}
-.bull{background:linear-gradient(#fffaf2,#f0e2cd);color:var(--ink);border:3px solid #b98a52;
-  border-radius:13px;padding:5px 4px 6px;transition:.12s;text-align:center}
-.bull:hover{transform:translateY(-3px)}
-.bull.sel{border-color:#facc15;box-shadow:0 0 0 3px #facc15,0 8px 18px rgba(0,0,0,.4)}
-.bull.taken{opacity:.32;pointer-events:none}
-.bull canvas{width:100%;height:auto;display:block}
-.bull .nm{font-family:'Black Han Sans',sans-serif;font-size:clamp(12px,1.9vh,16px);margin-top:1px}
-.bull .st{display:flex;gap:3px;justify-content:center;margin-top:3px}
-.pip{font-size:9.5px;padding:1px 4px;border-radius:5px;font-family:'Jua',sans-serif}
-.p-p{background:#fee2e2;color:#991b1b}
-.p-t{background:#dbeafe;color:#1e40af}
-.p-s{background:#dcfce7;color:#166534}
-.bull .tag{font-size:10px;color:#7a6853;margin-top:2px;line-height:1.25;min-height:24px}
+/* ── 대진표 ── */
+.bracket{display:flex;gap:clamp(12px,3.2vw,46px);align-items:center;justify-content:center;
+  margin:20px 0 26px;flex-wrap:nowrap;overflow-x:auto;max-width:98vw;padding:6px}
+.rnd{display:flex;flex-direction:column;gap:10px}
+.rnd .lab{font-size:14px;color:#a99cc9;text-align:center;margin-bottom:4px}
+.slot{background:var(--panel2);border:4px solid var(--line);padding:11px 12px;
+  min-width:clamp(100px,11vw,142px);font-size:clamp(14px,2.1vh,18px);
+  text-align:center;white-space:nowrap;color:var(--cream)}
+.slot.me{background:#4a2f1a;border-color:var(--gold);color:var(--gold)}
+.slot.win{background:#1f4a2c;border-color:var(--green)}
+.slot.now{border-color:var(--red);box-shadow:0 0 0 4px rgba(232,67,63,.35)}
 
-.pickbar{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;justify-content:center}
-.go{background:var(--gold);color:#3b2607;font-family:'Black Han Sans',sans-serif;
-  font-size:clamp(16px,2.6vh,24px);padding:11px 40px;border-radius:999px;
-  box-shadow:0 6px 0 var(--gold-d);transition:.1s}
-.go:active{transform:translateY(6px);box-shadow:0 0 0 var(--gold-d)}
-.go:disabled{opacity:.4;box-shadow:0 6px 0 var(--gold-d);transform:none;cursor:default}
-.back{background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);
-  color:#f0dfc6;padding:9px 18px;border-radius:999px;font-size:14px}
+/* ══════════════ 경기 화면 ══════════════ */
+#s-fight{justify-content:flex-start;padding:70px 8px 24px}
+.fight{width:min(1240px,99vw);display:flex;flex-direction:column;gap:9px}
 
-/* ---------- 대진표 ---------- */
-#s-bracket{justify-content:center}
-.bracket{display:flex;gap:clamp(10px,3vw,42px);align-items:center;justify-content:center;
-  margin:14px 0 18px}
-.rnd{display:flex;flex-direction:column;gap:clamp(5px,1.1vh,12px)}
-.rnd .lab{font-size:11px;color:#c9b394;text-align:center;margin-bottom:2px}
-.slot{background:rgba(255,255,255,.09);border:2px solid rgba(255,255,255,.18);
-  border-radius:9px;padding:5px 10px;min-width:clamp(76px,10vw,118px);
-  font-size:clamp(11px,1.8vh,15px);text-align:center;white-space:nowrap;transition:.2s}
-.slot.me{background:#fde68a;color:#3b2607;border-color:#f59e0b;font-family:'Black Han Sans',sans-serif}
-.slot.win{background:rgba(34,197,94,.22);border-color:#22c55e}
-.slot.out{opacity:.35;text-decoration:line-through}
-.slot.now{box-shadow:0 0 0 3px #f87171;border-color:#f87171}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar .rd{font-size:clamp(16px,2.4vh,22px);color:var(--gold)}
+.tb-right{display:flex;gap:9px;align-items:center}
+.icobtn{background:var(--panel2);border:4px solid var(--line);color:var(--cream);
+  min-width:54px;min-height:54px;font-size:19px;padding:0 14px;box-shadow:0 4px 0 rgba(0,0,0,.5)}
+.icobtn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.5)}
 
-/* ---------- 경기 ---------- */
-#s-fight{justify-content:flex-start;padding-top:4px}
-.topbar{display:flex;justify-content:space-between;align-items:center;
-  width:min(1000px,99vw);margin-bottom:4px;gap:10px}
-.topbar{padding-left:104px}   /* 왼쪽 위 「놀이터로」 버튼과 겹치지 않게 */
-.topbar .rd{font-family:'Black Han Sans',sans-serif;font-size:clamp(13px,2.1vh,19px);color:#ffd88a}
-.topbar .turn{font-size:12.5px;color:#d9c3a5}
-.quit{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
-  color:#f0dfc6;padding:5px 12px;border-radius:9px;font-size:12.5px}
+.hpwrap{display:flex;gap:12px;align-items:center}
+.hpside{flex:1;min-width:0}
+.hpside .nm{font-size:clamp(16px,2.3vh,21px);margin-bottom:5px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;color:var(--cream)}
+.hpside.r{text-align:right}
+.hpbar{height:26px;background:#0a0712;border:4px solid var(--line);overflow:hidden;display:flex}
+.hpfill{height:100%;transition:width .4s steps(12)}
+.hpfill.me{background:linear-gradient(#5fe07f,#2f9e4d)}
+.hpfill.op{background:linear-gradient(#ff6b67,#c02824);margin-left:auto}
+.vs{font-size:clamp(18px,2.6vh,24px);color:var(--gold)}
 
-.hpwrap{display:flex;gap:10px;width:min(1000px,99vw);align-items:center;margin-bottom:4px}
-.side{flex:1;min-width:0}
-.side .nm{font-family:'Black Han Sans',sans-serif;font-size:clamp(13px,2.2vh,20px);
-  margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.side.r{text-align:right}
-.bar{height:clamp(13px,2.1vh,19px);background:rgba(0,0,0,.45);border-radius:999px;
-  overflow:hidden;border:2px solid rgba(255,255,255,.22)}
-.fill{height:100%;transition:width .35s ease-out;border-radius:999px}
-.fill.me{background:linear-gradient(90deg,#22c55e,#86efac)}
-.fill.op{background:linear-gradient(90deg,#f87171,#dc2626);margin-left:auto}
-.vs{font-family:'Black Han Sans',sans-serif;font-size:clamp(15px,2.4vh,22px);color:#ffd88a;padding:0 2px}
+/* 3분할: 왼쪽 경기장 / 오른쪽 해설위원 / 아래 문제창 */
+.stage{display:grid;grid-template-columns:1fr 254px;gap:10px;align-items:stretch}
+@media (max-width:880px){ .stage{grid-template-columns:1fr} }
 
-#arena{width:min(1000px,99vw);height:auto;display:block;border-radius:14px;
-  box-shadow:0 10px 26px rgba(0,0,0,.45);background:#c9a271}
+.arenabox{background:#000;border:4px solid var(--line);overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center}
+#arena{width:100%;height:auto}
 
-.log{width:min(1000px,99vw);margin-top:5px;min-height:clamp(30px,4.6vh,42px);
-  display:grid;place-items:center;text-align:center;
-  font-size:clamp(13px,2.1vh,19px);color:#ffe9c4;padding:0 8px;line-height:1.3}
-.log b{color:#fca5a5}
-.log .ok{color:#86efac}
-
-.controls{width:min(1000px,99vw);margin-top:2px}
-.grp{display:flex;gap:clamp(5px,1vw,10px);justify-content:center;flex-wrap:wrap}
-.grp+.grp{margin-top:6px}
-.mv{border-radius:14px;padding:clamp(6px,1.2vh,11px) clamp(8px,1.2vw,16px);
-  min-width:clamp(88px,13vw,148px);transition:.09s;text-align:center;
-  border:3px solid transparent;position:relative}
-.mv .em{font-size:clamp(18px,2.9vh,26px);line-height:1.1}
-.mv .t{font-family:'Black Han Sans',sans-serif;font-size:clamp(13px,2vh,18px);white-space:nowrap}
-.mv .d{font-size:clamp(9.5px,1.4vh,12px);opacity:.8;white-space:nowrap}
-.mv:active{transform:translateY(5px)}
-.atk{background:linear-gradient(#ef4444,#c81e1e);box-shadow:0 5px 0 #7f1d1d}
-.atk:active{box-shadow:0 0 0 #7f1d1d}
-.def{background:linear-gradient(#3b82f6,#1d4ed8);box-shadow:0 5px 0 #172554}
-.def:active{box-shadow:0 0 0 #172554}
-.mv:disabled{opacity:.45;transform:none;cursor:default}
-.mv.hintme{border-color:#fde047;animation:glow .9s infinite alternate}
-@keyframes glow{from{box-shadow:0 5px 0 rgba(0,0,0,.4)}to{box-shadow:0 5px 0 rgba(0,0,0,.4),0 0 16px #fde047}}
-.grplab{font-size:11.5px;color:#c9b394;text-align:center;margin-bottom:3px}
-
-/* ---------- 팝업 ---------- */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);
-  align-items:center;justify-content:center;z-index:90;padding:12px}
-.modal.on{display:flex}
-.modal .m{background:linear-gradient(#fffaf2,#f0e2cd);color:var(--ink);
-  border:5px solid #a9743a;border-radius:24px;padding:22px 22px 20px;text-align:center;
-  max-width:520px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.6);
-  max-height:94vh;overflow-y:auto}
-.modal .em{font-size:clamp(38px,7vh,60px);line-height:1}
-.modal h2{font-family:'Black Han Sans',sans-serif;font-weight:400;
-  font-size:clamp(21px,3.6vh,32px);margin:6px 0 8px}
-.modal p{margin:0 0 14px;color:#6b5a48;font-size:clamp(13px,2vh,16px);line-height:1.55}
-.modal button{width:100%;padding:12px;border-radius:14px;font-size:clamp(15px,2.3vh,19px);
-  margin-top:8px;font-family:'Black Han Sans',sans-serif;font-weight:400}
-.m-go{background:var(--gold);color:#3b2607;box-shadow:0 5px 0 var(--gold-d)}
-.m-alt{background:#e7dccb;color:#5b4b39;box-shadow:0 5px 0 #bfae97}
-
-/* 상성표 */
-.rules{text-align:left}
-.rules h3{font-family:'Black Han Sans',sans-serif;font-weight:400;font-size:16px;
-  margin:14px 0 7px;color:#8a4b12}
-.pair{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid #e4d5bd;
-  border-radius:11px;padding:7px 10px;margin-bottom:6px;font-size:14px}
-.pair .a{color:#b91c1c;font-family:'Black Han Sans',sans-serif;min-width:74px}
-.pair .arrow{color:#9a8873}
-.pair .b{color:#1d4ed8;font-family:'Black Han Sans',sans-serif;min-width:74px}
-.pair .why{color:#7a6853;font-size:12px;flex:1;text-align:right}
-.tri{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;
-  background:#fff;border:2px solid #e4d5bd;border-radius:11px;padding:9px;font-size:14px}
-.tri b{font-family:'Black Han Sans',sans-serif}
-.tri .w{color:#b91c1c}
-
-.dust{position:fixed;pointer-events:none;border-radius:50%;z-index:60}
-.shout{position:fixed;left:50%;top:34%;transform:translate(-50%,-50%) scale(.6);
-  font-family:'Black Han Sans',sans-serif;font-size:clamp(26px,5.6vh,52px);
-  color:#fff;text-shadow:0 4px 0 #b91c1c,0 0 26px rgba(0,0,0,.6);
-  opacity:0;z-index:65;pointer-events:none;white-space:nowrap}
-.shout.go{animation:shout .85s ease-out forwards}
-@keyframes shout{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}
-  25%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}
-  70%{opacity:1;transform:translate(-50%,-50%) scale(1)}
-  100%{opacity:0;transform:translate(-50%,-58%) scale(1)}
+.caster{background:var(--panel);border:4px solid var(--line);padding:12px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:8px}
+.caster .who{font-size:16px;color:var(--gold);text-align:center;line-height:1.4}
+#caster-cv{width:132px;height:auto;background:#231a3e;border:4px solid #3d2f66}
+.score{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;width:100%}
+.sc{flex:1;min-width:56px;background:var(--panel2);border:3px solid var(--line);
+  padding:7px 4px;text-align:center;font-size:15px;line-height:1.5}
+.sc b{display:block;font-size:22px;margin-top:3px}
+.sc.o b{color:var(--green)} .sc.x b{color:var(--red)} .sc.q b{color:var(--gold)}
+@media (max-width:880px){
+  .caster{flex-direction:row;flex-wrap:wrap;justify-content:center}
+  #caster-cv{width:100px}
+  .score{width:auto;flex:1}
 }
+
+/* ── RPG 대화창 + 문제 ── */
+.dlg{background:var(--panel);border:4px solid var(--line);padding:14px 16px 16px;
+  box-shadow:0 6px 0 rgba(0,0,0,.55)}
+.dlg .say{font-size:clamp(17px,2.5vh,23px);color:var(--cream);line-height:1.65;
+  min-height:2.6em;display:flex;align-items:center}
+.dlg .say .cur{display:inline-block;width:.6em;background:var(--gold);
+  animation:blink .5s steps(1) infinite;margin-left:3px}
+@keyframes blink{50%{opacity:0}}
+.divider{height:4px;background:var(--line);margin:12px 0}
+
+.qhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:9px}
+.subj{background:var(--gold);color:#3a2405;padding:6px 13px;font-size:15px;border:3px solid var(--gold-d)}
+.qno{font-size:15px;color:#a99cc9}
+.qtext{font-size:clamp(27px,4.2vh,38px);color:#fff;line-height:1.5;margin-bottom:16px;
+  text-shadow:3px 3px 0 rgba(0,0,0,.55);word-break:keep-all;text-align:center;
+  background:var(--panel2);border:4px solid var(--line);padding:16px 14px}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (min-width:900px){ .opts{grid-template-columns:repeat(4,1fr)} }
+.opt{background:var(--blue);color:#fff;border:4px solid var(--blue-d);
+  min-height:74px;padding:14px 12px;font-size:clamp(19px,2.7vh,25px);
+  box-shadow:0 6px 0 rgba(0,0,0,.5);transition:.08s;word-break:keep-all;line-height:1.4}
+.opt:hover:not(:disabled){background:#4d8fea}
+.opt:active:not(:disabled){transform:translateY(5px);box-shadow:0 1px 0 rgba(0,0,0,.5)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--green);border-color:var(--green-d)}
+.opt.wrong{background:var(--red);border-color:var(--red-d)}
+.opt.dim{opacity:.32}
+.nextbtn{width:100%;margin-top:12px;background:var(--gold);color:#3a2405;
+  border:4px solid var(--gold-d);min-height:66px;font-size:clamp(19px,2.8vh,25px);
+  box-shadow:0 6px 0 rgba(0,0,0,.55);display:none}
+.nextbtn.on{display:block}
+.nextbtn:active{transform:translateY(5px);box-shadow:0 1px 0 rgba(0,0,0,.55)}
+
+/* ── 팝업 ── */
+.modal{display:none;position:fixed;inset:0;background:rgba(5,3,10,.86);
+  align-items:safe center;justify-content:center;z-index:95;padding:26px 12px;overflow-y:auto}
+.modal.on{display:flex}
+.modal .m{background:var(--panel);border:5px solid var(--line);padding:26px 22px;
+  text-align:center;max-width:600px;width:100%;margin:auto;box-shadow:0 10px 0 rgba(0,0,0,.6)}
+.modal .em{font-size:clamp(46px,8vh,72px);line-height:1.1}
+.modal h2{font-size:clamp(23px,3.8vh,34px);margin:12px 0 12px;color:var(--gold);
+  text-shadow:3px 3px 0 #7a3d05;line-height:1.4}
+.modal p{margin:0 0 18px;color:#cfc3ee;font-size:clamp(16px,2.3vh,20px);line-height:1.8}
+.modal button{width:100%;padding:16px;min-height:64px;font-size:clamp(17px,2.5vh,22px);
+  margin-top:11px;border:4px solid}
+.m-go{background:var(--gold);color:#3a2405;border-color:var(--gold-d);box-shadow:0 6px 0 rgba(0,0,0,.55)}
+.m-alt{background:var(--panel2);color:var(--cream);border-color:var(--line);box-shadow:0 6px 0 rgba(0,0,0,.55)}
+.modal button:active{transform:translateY(5px);box-shadow:0 1px 0 rgba(0,0,0,.55)}
+
+.rules{text-align:left;font-size:16px;line-height:1.85;color:#cfc3ee}
+.rules h3{font-size:19px;color:var(--gold);margin:18px 0 9px}
+.rules .box{background:var(--panel2);border:3px solid var(--line);padding:12px 14px;margin-bottom:10px}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media (max-width:820px){ .bulls{grid-template-columns:repeat(5,1fr)} }
 </style>
 </head>
 <body>
 
 <a class="home" href="../index.html">🏠 놀이터로</a>
-<div class="shout" id="shout"></div>
 
-<!-- ============ 시작 ============ -->
+<!-- ══════ 시작 ══════ -->
 <div id="s-home" class="screen on">
   <h1>🐂 아인이의 소싸움 대회 🐂</h1>
-  <p class="sub">진주 소싸움에 나오는 소 14마리가 모였어요!<br>공격과 수비의 상성을 읽고 이겨 보세요.</p>
+  <p class="sub">진주 소싸움에 나오는 소 열네 마리가 모였어요!<br>
+     문제를 맞히면 내 소가 힘차게 밀어붙입니다.</p>
   <div class="modes">
     <button class="mode" onclick="startMode('cup')">
       <div class="em">🏆</div>
       <div class="t">천하장사 대회</div>
-      <div class="d">내 소 한 마리를 골라<br>8강 · 4강 · 결승을 이겨요</div>
+      <div class="d">내 소를 골라서<br>8강 · 4강 · 결승을 이겨요</div>
     </button>
     <button class="mode" onclick="startMode('duel')">
       <div class="em">⚔️</div>
@@ -216,76 +243,92 @@ h1{font-family:'Black Han Sans',sans-serif;font-weight:400;
       <div class="d">소 두 마리를 직접 골라<br>바로 붙여 봐요</div>
     </button>
   </div>
-  <button class="helpbtn" onclick="showRules()">📖 규칙 보기 (상성표)</button>
+  <button class="helpbtn" onclick="showRules()">📖 어떻게 하는 거예요?</button>
 </div>
 
-<!-- ============ 소 고르기 ============ -->
+<!-- ══════ 소 고르기 ══════ -->
 <div id="s-pick" class="screen">
-  <div class="pickhead" id="pick-title">내 소를 골라 주세요</div>
-  <p class="pickhint" id="pick-hint">💪 힘 · 🌀 기술 · 🔥 끈기 를 보고 고르세요</p>
+  <div class="htitle" id="pick-title">내 소를 골라 주세요</div>
+  <p class="hhint" id="pick-hint">💪 힘 · 🌀 기술 · 🔥 끈기 를 보고 골라 보세요</p>
   <div class="bulls" id="bulls"></div>
-  <div class="pickbar">
-    <button class="back" onclick="go('s-home')">← 뒤로</button>
+  <div class="bar-row">
+    <button class="back" onclick="go('s-home')">◀ 뒤로</button>
     <button class="go" id="pick-go" onclick="confirmPick()" disabled>정했어요!</button>
   </div>
 </div>
 
-<!-- ============ 대진표 ============ -->
+<!-- ══════ 대진표 ══════ -->
 <div id="s-bracket" class="screen">
-  <div class="pickhead" id="br-title">🏆 천하장사 대회 대진표</div>
+  <div class="htitle" id="br-title">천하장사 대회 대진표</div>
   <div class="bracket" id="bracket"></div>
   <button class="go" id="br-go" onclick="beginMatch()">경기 시작!</button>
 </div>
 
-<!-- ============ 경기 ============ -->
+<!-- ══════ 경기 ══════ -->
 <div id="s-fight" class="screen">
+ <div class="fight">
+
   <div class="topbar">
     <span class="rd" id="round-lab">8강</span>
-    <span class="turn" id="turn-lab">1 / 14 합</span>
-    <button class="quit" onclick="quitFight()">그만하기</button>
+    <div class="tb-right">
+      <button class="icobtn" id="bgm-btn" onclick="toggleBGM()">🔊</button>
+      <button class="icobtn" onclick="quitFight()">그만두기</button>
+    </div>
   </div>
 
   <div class="hpwrap">
-    <div class="side">
+    <div class="hpside">
       <div class="nm" id="me-name">불검</div>
-      <div class="bar"><div class="fill me" id="me-hp" style="width:100%"></div></div>
+      <div class="hpbar"><div class="hpfill me" id="me-hp" style="width:100%"></div></div>
     </div>
     <span class="vs">VS</span>
-    <div class="side r">
-      <div class="nm" id="op-name">흑기사</div>
-      <div class="bar"><div class="fill op" id="op-hp" style="width:100%"></div></div>
+    <div class="hpside r">
+      <div class="nm" id="op-name">흑곰</div>
+      <div class="hpbar"><div class="hpfill op" id="op-hp" style="width:100%"></div></div>
     </div>
   </div>
 
-  <canvas id="arena" width="1000" height="380"></canvas>
-
-  <div class="log" id="log">기술을 골라 보세요!</div>
-
-  <div class="controls">
-    <div class="grp" id="grp-atk">
-      <button class="mv atk" data-mv="push"><div class="em">💪</div><div class="t">밀치기</div><div class="d">힘으로 밀어붙여</div></button>
-      <button class="mv atk" data-mv="horn"><div class="em">⚡</div><div class="t">뿔치기</div><div class="d">뿔을 빠르게 흔들어</div></button>
-      <button class="mv atk" data-mv="hook"><div class="em">🪝</div><div class="t">뿔걸이</div><div class="d">뿔을 걸어 넘겨</div></button>
-    </div>
-    <div class="grp" id="grp-def">
-      <button class="mv def" data-mv="hold"><div class="em">🦵</div><div class="t">버티기</div><div class="d">밀치기를 막아</div></button>
-      <button class="mv def" data-mv="block"><div class="em">🛡️</div><div class="t">받아치기</div><div class="d">뿔치기를 막아</div></button>
-      <button class="mv def" data-mv="dodge"><div class="em">💨</div><div class="t">빠지기</div><div class="d">뿔걸이를 막아</div></button>
+  <div class="stage">
+    <div class="arenabox"><canvas id="arena" width="480" height="270"></canvas></div>
+    <div class="caster">
+      <div class="who" id="caster-name">🎙 해설위원</div>
+      <canvas id="caster-cv" width="64" height="80"></canvas>
+      <div class="score">
+        <div class="sc q">문제<b id="sc-q">1/10</b></div>
+        <div class="sc o">맞음<b id="sc-o">0</b></div>
+        <div class="sc x">틀림<b id="sc-x">0</b></div>
+      </div>
     </div>
   </div>
+
+  <div class="dlg">
+    <div class="say" id="say">자, 이제 시작해 보입시더!</div>
+    <div class="divider"></div>
+    <div id="qzone">
+      <div class="qhead">
+        <span class="subj" id="subj">🔢 산수</span>
+        <span class="qno" id="qno">1번 문제</span>
+      </div>
+      <div class="qtext" id="qtext">7 + 5 = ?</div>
+      <div class="opts" id="opts"></div>
+      <button class="nextbtn" id="nextbtn" onclick="nextQuestion()">▶ 다음 문제</button>
+    </div>
+  </div>
+
+ </div>
 </div>
 
-<!-- ============ 팝업 ============ -->
-<div class="modal" id="modal">
-  <div class="m" id="modal-box"></div>
-</div>
+<div class="modal" id="modal"><div class="m" id="modal-box"></div></div>
 
 <script>
 "use strict";
 
-/* =======================================================
-   소 데이터 — 진주 소싸움에 나오는 소 이름
-   ======================================================= */
+/* ╔══════════════════════════════════════════════════════════╗
+   ║  해설위원 캐릭터 이름 — 여기 한 줄만 바꾸면 이름이 바뀝니다 ║
+   ╚══════════════════════════════════════════════════════════╝ */
+const CASTER_NAME = '황소 아저씨';
+
+/* ══════════════ 소 데이터 (진주 소싸움 출전 소 이름) ══════════════ */
 const BULLS=[
  {n:'불검',    c:'red',   p:5,t:3,s:3, tag:'불처럼 달려드는 힘'},
  {n:'화랑',    c:'brown', p:4,t:4,s:4, tag:'빈틈 없는 균형'},
@@ -299,796 +342,925 @@ const BULLS=[
  {n:'흑곰',    c:'black', p:5,t:2,s:5, tag:'곰처럼 육중한 몸'},
  {n:'대타',    c:'brown', p:4,t:3,s:4, tag:'한 방을 노린다'},
  {n:'대한',    c:'gold',  p:3,t:3,s:5, tag:'끝까지 버틴다'},
- {n:'라송',    c:'gray',  p:3,t:5,s:3, tag:'영리한 뿔걸이'},
+ {n:'라송',    c:'gray',  p:3,t:5,s:3, tag:'영리한 발놀림'},
  {n:'메가샤크',c:'dark',  p:5,t:4,s:2, tag:'상어처럼 몰아친다'}
 ];
-
 const HIDE={
-  red:  {body:'#8d3a22',dark:'#6b2a17',light:'#b1543a'},
-  brown:{body:'#9a6636',dark:'#734a26',light:'#bb8a55'},
-  dark: {body:'#4a3a2c',dark:'#33271d',light:'#67523f'},
-  white:{body:'#e8e2d6',dark:'#c4bcae',light:'#f6f2ea'},
-  gold: {body:'#c9922f',dark:'#9c6f20',light:'#e3b354'},
-  black:{body:'#2f2b28',dark:'#1c1a18',light:'#4a443f'},
-  gray: {body:'#7d7a74',dark:'#5c5a55',light:'#9c9891'}
+  red  :{d:'#7a2f18',m:'#a8452a',l:'#c96a45'},
+  brown:{d:'#6b4520',m:'#96662f',l:'#bb8a55'},
+  dark :{d:'#33271d',m:'#4f3d2c',l:'#6d5540'},
+  white:{d:'#b8b0a2',m:'#ddd6c8',l:'#f6f2ea'},
+  gold :{d:'#8a611b',m:'#c08f2c',l:'#e5b856'},
+  black:{d:'#17151a',m:'#2e2a30',l:'#4a4450'},
+  gray :{d:'#4f4d52',m:'#77737c',l:'#9c98a1'}
 };
 
-/* 기술 정의 */
-const MOVES={
-  push :{k:'atk',n:'밀치기',em:'💪',beat:'horn', by:'hold' },
-  horn :{k:'atk',n:'뿔치기',em:'⚡',beat:'hook', by:'block'},
-  hook :{k:'atk',n:'뿔걸이',em:'🪝',beat:'push', by:'dodge'},
-  hold :{k:'def',n:'버티기',em:'🦵',stops:'push'},
-  block:{k:'def',n:'받아치기',em:'🛡️',stops:'horn'},
-  dodge:{k:'def',n:'빠지기',em:'💨',stops:'hook'}
-};
-const ATKS=['push','horn','hook'];
-const DEFS=['hold','block','dodge'];
+/* ══════════════ 해설위원 대사 ══════════════ */
+const SAY_START=[
+ '자~ 오늘도 뜨겁습니더! 시작해 보입시더!',
+ '모래판이 딱 좋습니더. 자, 갑니다!',
+ '아인이 소, 오늘 눈빛이 살아 있습니더!'
+];
+const SAY_ASK=[
+ '자, {n}번 문제 나갑니더!',
+ '{n}번 문제! 잘 보이소~',
+ '이번 문제 중요합니더. 집중하이소!',
+ '자~ 다음 문제 갑니더!'
+];
+const SAY_RIGHT=[
+ '맞췄어요~!! 밀어봐라~!!! 밀어 봐라!!!!',
+ '가자 가자!!!! 아이고 잘한다!!',
+ '맞췄습니더!! 박수 한번 주이소!!!!',
+ '옳지! 지금입니더, 확 밀어붙이이소!!',
+ '캬~ 정답입니더! 힘이 붙었어요!!'
+];
+const SAY_CRIT=[
+ '우와~!! 완전히 들어뿠어요!!! 박수 한번 주이소!!!!',
+ '아이고~ 이건 뭐 그냥 밀어뿌네예!! 대단합니더!!',
+ '어어~ 넘어갑니더! 넘어가요!! 회심의 한 방입니더!!'
+];
+const SAY_WRONG=[
+ '아... 중앙 자리를 내어주고 있어요.',
+ '아이고~ 밀립니더, 밀려요...',
+ '지금 힘이 딸리는데예... 정신 차리이소!',
+ '아쉽습니더. 한 발 물러섰어요.',
+ '어어~ 뒤로 밀립니더. 다시 버티 보이소!'
+];
+const SAY_TANK=[
+ '아이고~ 잘 버팁니더! 안 밀립니더!',
+ '오~ 다리에 힘 딱 주고 버팁니더!'
+];
+const SAY_WIN=[
+ '이겼습니더!!! 천하장사 나왔습니더!! 박수 한번 주이소!!!!',
+ '해냈습니더!! 아이고 장하다 장해!!'
+];
+const SAY_LOSE=[
+ '아이고... 오늘은 여까지입니더. 다음에 또 붙어보입시더.',
+ '아쉽게 졌습니더. 그래도 잘 싸웠어요!'
+];
+const pick=a=>a[Math.floor(Math.random()*a.length)];
 
-/* =======================================================
-   상태
-   ======================================================= */
-let mode='cup';            // 'cup' | 'duel'
-let pickStage=0;           // duel 모드에서 0=내 소, 1=상대 소
-let myBull=null, opBull=null;
-let bracket=null, roundIdx=0;
-let me=null, op=null;      // 경기 중 선수 상태
-let turn=1, maxTurn=14, busy=false, telegraph=null;
-let myHistory=[];
-let audioCtx=null;
+/* ══════════════ 문제 은행 ══════════════ */
+/* 형식: [과목, 문제, [보기4개], 정답인덱스] */
+const SUBJ={math:'🔢 산수',kor:'📖 국어',hanja:'🀄 한자',eng:'🔤 영어',
+            manner:'🙏 예의',idea:'💡 창의',cow:'🐮 상식'};
 
-/* =======================================================
-   소리
-   ======================================================= */
-function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
-function beep(type){
-  if(!audioCtx)return;
-  const t=audioCtx.currentTime;
-  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-  o.connect(g); g.connect(audioCtx.destination);
-  if(type==='tap'){o.type='sine';o.frequency.setValueAtTime(680,t);g.gain.setValueAtTime(.07,t);o.start();o.stop(t+.07);}
-  else if(type==='clash'){
-    o.type='sawtooth';o.frequency.setValueAtTime(150,t);
-    o.frequency.exponentialRampToValueAtTime(60,t+.25);
-    g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);
-    o.start();o.stop(t+.32);
-    // 흙먼지 노이즈
-    try{
-      const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.2,audioCtx.sampleRate);
-      const d=buf.getChannelData(0);
-      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
-      const src=audioCtx.createBufferSource(); src.buffer=buf;
-      const ng=audioCtx.createGain(); ng.gain.setValueAtTime(.1,t);
-      src.connect(ng); ng.connect(audioCtx.destination); src.start();
-    }catch(e){}
+const BANK=[
+/* ── 국어 ── */
+['kor','"크다"의 반대말은?',['작다','넓다','많다','길다'],0],
+['kor','"높다"의 반대말은?',['낮다','짧다','좁다','얇다'],0],
+['kor','"길다"의 반대말은?',['짧다','작다','가늘다','낮다'],0],
+['kor','"무겁다"의 반대말은?',['가볍다','약하다','얇다','작다'],0],
+['kor','"밝다"의 반대말은?',['어둡다','흐리다','검다','춥다'],0],
+['kor','"빠르다"의 반대말은?',['느리다','작다','약하다','늦다'],0],
+['kor','"뜨겁다"의 반대말은?',['차갑다','시원하다','미지근하다','따뜻하다'],0],
+['kor','"많다"의 반대말은?',['적다','작다','좁다','낮다'],0],
+['kor','연필을 셀 때 쓰는 말은?',['한 자루','한 마리','한 켤레','한 채'],0],
+['kor','소를 셀 때 쓰는 말은?',['한 마리','한 자루','한 장','한 권'],0],
+['kor','신발을 셀 때 쓰는 말은?',['한 켤레','한 장','한 마리','한 대'],0],
+['kor','책을 셀 때 쓰는 말은?',['한 권','한 장','한 채','한 자루'],0],
+['kor','종이를 셀 때 쓰는 말은?',['한 장','한 권','한 켤레','한 마리'],0],
+['kor','개구리 우는 소리를 흉내낸 말은?',['개굴개굴','짹짹','음메','멍멍'],0],
+['kor','소가 우는 소리는?',['음메','야옹','꿀꿀','꼬끼오'],0],
+['kor','시계가 가는 소리는?',['똑딱똑딱','주룩주룩','쨍쨍','살랑살랑'],0],
+['kor','비가 오는 소리는?',['주룩주룩','반짝반짝','폴짝폴짝','드르렁'],0],
+['kor','다음 중 맞춤법이 바른 것은?',['며칠','몇일','몇칠','며칟'],0],
+['kor','다음 중 바르게 쓴 낱말은?',['오뚝이','오뚜기','오뚝기','오뚜끼'],0],
+['kor','"예쁘다"와 비슷한 말은?',['아름답다','귀엽다','착하다','좋다'],0],
+['kor','"기쁘다"와 비슷한 말은?',['즐겁다','슬프다','무섭다','피곤하다'],0],
+['kor','"사과"의 첫 글자의 첫소리(자음)는?',['ㅅ','ㅇ','ㅈ','ㅎ'],0],
+['kor','받침이 있는 낱말은?',['산','소','비','나'],0],
+['kor','"학교"에서 "학"의 받침은?',['ㄱ','ㄴ','ㅇ','ㅎ'],0],
+['kor','다음 중 낱말이 아닌 것은?',['ㅁㄴㅇ','하늘','바다','구름'],0],
+
+/* ── 한자 ── */
+['hanja','"一"은 무슨 뜻일까요?',['하나','둘','셋','열'],0],
+['hanja','"三"은 무슨 뜻일까요?',['셋','둘','넷','다섯'],0],
+['hanja','"十"은 무슨 뜻일까요?',['열','아홉','스물','백'],0],
+['hanja','"大"는 무슨 뜻일까요?',['크다','작다','길다','높다'],0],
+['hanja','"小"는 무슨 뜻일까요?',['작다','크다','적다','짧다'],0],
+['hanja','"山"은 무슨 뜻일까요?',['산','물','불','돌'],0],
+['hanja','"水"는 무슨 뜻일까요?',['물','불','흙','바람'],0],
+['hanja','"火"는 무슨 뜻일까요?',['불','물','흙','나무'],0],
+['hanja','"木"은 무슨 뜻일까요?',['나무','풀','꽃','흙'],0],
+['hanja','"日"은 무슨 뜻일까요?',['해','달','별','밤'],0],
+['hanja','"月"은 무슨 뜻일까요?',['달','해','별','구름'],0],
+['hanja','"人"은 무슨 뜻일까요?',['사람','손','발','입'],0],
+['hanja','"手"는 무슨 뜻일까요?',['손','발','입','눈'],0],
+['hanja','"足"은 무슨 뜻일까요?',['발','손','귀','머리'],0],
+['hanja','"口"는 무슨 뜻일까요?',['입','눈','코','귀'],0],
+['hanja','"牛"는 무슨 뜻일까요?',['소','말','개','돼지'],0],
+['hanja','"上"은 무슨 뜻일까요?',['위','아래','옆','앞'],0],
+['hanja','"下"는 무슨 뜻일까요?',['아래','위','뒤','안'],0],
+['hanja','"中"은 무슨 뜻일까요?',['가운데','바깥','위','옆'],0],
+['hanja','"父"는 무슨 뜻일까요?',['아버지','어머니','형','누나'],0],
+['hanja','"母"는 무슨 뜻일까요?',['어머니','아버지','언니','동생'],0],
+['hanja','"물"을 뜻하는 한자는?',['水','火','山','木'],0],
+['hanja','"불"을 뜻하는 한자는?',['火','水','土','金'],0],
+['hanja','"사람"을 뜻하는 한자는?',['人','入','八','大'],0],
+['hanja','"소"를 뜻하는 한자는?',['牛','午','馬','羊'],0],
+['hanja','"다섯"을 뜻하는 한자는?',['五','四','六','三'],0],
+
+/* ── 영어 ── */
+['eng','"cow"는 무슨 뜻일까요?',['소','개','고양이','말'],0],
+['eng','"dog"는 무슨 뜻일까요?',['개','소','새','물고기'],0],
+['eng','"cat"은 무슨 뜻일까요?',['고양이','개','쥐','토끼'],0],
+['eng','"lion"은 무슨 뜻일까요?',['사자','호랑이','곰','늑대'],0],
+['eng','"bird"는 무슨 뜻일까요?',['새','물고기','벌레','뱀'],0],
+['eng','"fish"는 무슨 뜻일까요?',['물고기','새','개구리','거북이'],0],
+['eng','"red"는 무슨 색일까요?',['빨강','파랑','노랑','초록'],0],
+['eng','"blue"는 무슨 색일까요?',['파랑','빨강','검정','하양'],0],
+['eng','"yellow"는 무슨 색일까요?',['노랑','초록','보라','주황'],0],
+['eng','"green"은 무슨 색일까요?',['초록','파랑','노랑','갈색'],0],
+['eng','"black"은 무슨 색일까요?',['검정','하양','회색','갈색'],0],
+['eng','"apple"은 무슨 뜻일까요?',['사과','바나나','포도','딸기'],0],
+['eng','"banana"는 무슨 뜻일까요?',['바나나','사과','수박','참외'],0],
+['eng','"one"은 숫자로 몇일까요?',['1','2','3','4'],0],
+['eng','"three"는 숫자로 몇일까요?',['3','2','4','5'],0],
+['eng','"five"는 숫자로 몇일까요?',['5','4','6','7'],0],
+['eng','"ten"은 숫자로 몇일까요?',['10','9','11','12'],0],
+['eng','"Hello"는 무슨 뜻일까요?',['안녕','고마워','미안해','잘 가'],0],
+['eng','"Thank you"는 무슨 뜻일까요?',['고마워요','미안해요','안녕','잘 자요'],0],
+['eng','"Sorry"는 무슨 뜻일까요?',['미안해요','고마워요','반가워요','축하해요'],0],
+['eng','알파벳 A 다음 글자는?',['B','C','D','Z'],0],
+['eng','알파벳은 모두 몇 글자일까요?',['26개','24개','28개','30개'],0],
+['eng','"big"의 반대말은?',['small','tall','long','fast'],0],
+['eng','"mother"는 무슨 뜻일까요?',['어머니','아버지','언니','할머니'],0],
+
+/* ── 예의 ── */
+['manner','어른께 물건을 드릴 때는 어떻게 할까요?',['두 손으로 드린다','한 손으로 준다','던져서 준다','발로 민다'],0],
+['manner','밥을 먹기 전에 하는 인사는?',['잘 먹겠습니다','잘 먹었습니다','안녕히 계세요','고맙습니다'],0],
+['manner','친구 발을 밟았을 때 할 말은?',['미안해','괜찮아','고마워','안녕'],0],
+['manner','선물을 받았을 때 할 말은?',['고맙습니다','미안합니다','괜찮습니다','안녕하세요'],0],
+['manner','어른이 말씀하실 때는?',['눈을 보고 잘 듣는다','딴 데를 본다','말을 끊는다','자리를 뜬다'],0],
+['manner','도서관에서는 어떻게 해야 할까요?',['조용히 한다','뛰어다닌다','크게 웃는다','노래한다'],0],
+['manner','횡단보도를 건널 때는?',['손 들고 좌우를 본다','뛰어서 건넌다','휴대폰을 본다','눈을 감는다'],0],
+['manner','기침이 나올 때는?',['팔로 입을 가린다','친구를 향해 한다','손으로 가리고 악수한다','참는다'],0],
+['manner','친구가 넘어졌을 때는?',['일으켜 주고 괜찮은지 묻는다','웃는다','모른 척한다','도망간다'],0],
+['manner','아침에 선생님을 만나면?',['안녕하세요 하고 인사한다','그냥 지나간다','숨는다','손을 흔들며 뛴다'],0],
+['manner','남의 물건을 쓰고 싶을 때는?',['먼저 물어본다','그냥 가져간다','숨겨 놓는다','바꿔치기한다'],0],
+['manner','줄을 설 때는 어떻게 할까요?',['차례를 지킨다','새치기한다','밀친다','뛰어넘는다'],0],
+['manner','밥을 다 먹은 뒤에 하는 인사는?',['잘 먹었습니다','잘 먹겠습니다','안녕히 주무세요','반갑습니다'],0],
+['manner','버스에서 할머니가 타시면?',['자리를 양보한다','자는 척한다','더 앉는다','창밖만 본다'],0],
+['manner','친구가 도와줬을 때 할 말은?',['고마워','미안해','안녕','괜찮아'],0],
+['manner','쓰레기는 어디에 버려야 할까요?',['쓰레기통','길바닥','친구 가방','풀숲'],0],
+
+/* ── 창의 ── */
+['idea','🔴🔵🔴🔵🔴 다음에 올 것은?',['🔵','🔴','🟡','🟢'],0],
+['idea','⭐⭐🌙⭐⭐🌙⭐⭐ 다음에 올 것은?',['🌙','⭐','☀️','⚡'],0],
+['idea','1, 3, 5, 7, 다음 수는?',['9','8','10','11'],0],
+['idea','2, 4, 6, 8, 다음 수는?',['10','9','11','12'],0],
+['idea','사과, 딸기, 토마토의 공통점은?',['빨간색이다','노란색이다','네모다','차갑다'],0],
+['idea','소, 말, 개의 공통점은?',['다리가 넷이다','날개가 있다','물에 산다','알을 낳는다'],0],
+['idea','다리가 넷인데 걷지 못하는 것은?',['책상','고양이','소','거미'],0],
+['idea','겨울에 생겼다가 봄에 녹는 사람 모양은?',['눈사람','허수아비','로봇','인형'],0],
+['idea','비 올 때 쓰는 것은?',['우산','부채','장갑','안경'],0],
+['idea','다음 중 과일이 아닌 것은?',['자동차','사과','포도','바나나'],0],
+['idea','다음 중 새가 아닌 것은?',['고래','참새','비둘기','독수리'],0],
+['idea','케이크를 똑같이 둘로 나누면 한 조각은?',['반','전부','두 배','셋'],0],
+['idea','가장 무거운 것은?',['코끼리','고양이','개미','참새'],0],
+['idea','가장 빠른 것은?',['치타','거북이','달팽이','개미'],0],
+['idea','밤에 하늘에서 볼 수 있는 것은?',['별','무지개','구름 그림자','해'],0],
+['idea','얼음을 따뜻한 곳에 두면?',['물이 된다','더 커진다','돌이 된다','사라진다'],0],
+['idea','씨앗을 심고 물을 주면 무엇이 될까요?',['싹이 튼다','돌이 된다','없어진다','작아진다'],0],
+['idea','거울 앞에서 오른손을 들면 거울 속 나는?',['왼손을 든 것처럼 보인다','아무것도 안 든다','두 손을 든다','뒤돌아선다'],0],
+
+/* ── 소·동물 상식 ── */
+['cow','소의 새끼를 뭐라고 부를까요?',['송아지','망아지','강아지','병아리'],0],
+['cow','소는 무엇을 먹고 살까요?',['풀','고기','생선','벌레'],0],
+['cow','소싸움은 어떻게 이길까요?',['상대 소가 먼저 물러나면','뿔이 부러지면','더 크게 울면','빨리 달리면'],0],
+['cow','소의 위(밥통)는 몇 개일까요?',['4개','1개','2개','6개'],0],
+['cow','소의 발굽은 몇 개로 갈라져 있을까요?',['2개','1개','3개','5개'],0],
+['cow','말의 새끼는 무엇일까요?',['망아지','송아지','강아지','새끼말'],0],
+['cow','개구리는 어릴 때 무엇이었을까요?',['올챙이','애벌레','번데기','알집'],0],
+['cow','나비는 애벌레 다음에 무엇이 될까요?',['번데기','올챙이','알','새'],0],
+['cow','다음 중 알을 낳는 동물은?',['닭','소','개','고양이'],0],
+['cow','다음 중 물에서 사는 동물은?',['물고기','소','닭','토끼'],0],
+['cow','소싸움 대회가 유명한 도시는?',['진주','부산','인천','대전'],0],
+['cow','소가 되새김질을 하는 이유는?',['풀을 잘 소화하려고','심심해서','목이 말라서','졸려서'],0]
+];
+
+/* 산수 문제는 그때그때 새로 만들어 냅니다 (매번 다른 문제) */
+function makeMath(step){
+  const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+  const kinds = step<=3 ? ['add','sub','cnt'] : (step<=6 ? ['add','sub','mul','cmp'] : ['add','sub','mul','cmp','odd','ten']);
+  const k = pick(kinds);
+  let q,ans;
+  if(k==='add'){ const a=R(2,step<=3?9:18), b=R(2,step<=3?9:18); q=`${a} + ${b} = ?`; ans=a+b; }
+  else if(k==='sub'){ const a=R(5,step<=3?12:25), b=R(1,a-1); q=`${a} - ${b} = ?`; ans=a-b; }
+  else if(k==='mul'){ const a=R(2,9), b=R(2,9); q=`${a} × ${b} = ?`; ans=a*b; }
+  else if(k==='cnt'){ const a=R(3,9); q=`🐮 가 ${a}마리 있고 ${R(1,3)}마리가 더 왔어요. 모두 몇 마리?`;
+                      const add=parseInt(q.match(/(\d+)마리가 더/)[1],10); ans=a+add; }
+  else if(k==='cmp'){ const a=R(11,60), b=R(11,60); if(a===b) return makeMath(step);
+                      q=`${a} 와 ${b} 중에서 더 큰 수는?`; ans=Math.max(a,b); }
+  else if(k==='odd'){ const a=R(2,30); q=`${a} 은(는) 짝수일까요 홀수일까요?`;
+                      return ['math',q,shuffleAns(a%2===0?'짝수':'홀수',[a%2===0?'홀수':'짝수','둘 다','알 수 없다'])]; }
+  else { const a=R(1,9); q=`${a} + ? = 10`; ans=10-a; }
+
+  // 그럴듯한 오답 3개
+  const wrong=new Set();
+  let guard=0;
+  while(wrong.size<3 && guard++<60){
+    const d=pick([-3,-2,-1,1,2,3,10,-10,5,-5]);
+    const w=ans+d;
+    if(w!==ans && w>=0) wrong.add(w);
   }
-  else if(type==='block'){o.type='square';o.frequency.setValueAtTime(320,t);
-    o.frequency.setValueAtTime(240,t+.08);g.gain.setValueAtTime(.1,t);o.start();o.stop(t+.16);}
-  else if(type==='rest'){o.type='sine';o.frequency.setValueAtTime(420,t);
-    o.frequency.setValueAtTime(520,t+.1);g.gain.setValueAtTime(.06,t);o.start();o.stop(t+.2);}
-  else if(type==='win'){o.type='square';[392,523,659,784].forEach((f,i)=>o.frequency.setValueAtTime(f,t+i*.15));
-    g.gain.setValueAtTime(.1,t);o.start();o.stop(t+.66);}
-  else if(type==='lose'){o.type='triangle';o.frequency.setValueAtTime(400,t);
-    o.frequency.exponentialRampToValueAtTime(140,t+.6);g.gain.setValueAtTime(.1,t);o.start();o.stop(t+.62);}
+  while(wrong.size<3) wrong.add(ans+wrong.size+1);
+  return ['math',q,shuffleAns(String(ans),[...wrong].map(String))];
+}
+/* 정답과 오답을 섞어 [보기배열, 정답인덱스] 형태로 */
+function shuffleAns(right,wrongs){
+  const arr=[right,...wrongs.slice(0,3)];
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return [arr, arr.indexOf(right)];
 }
 
-/* =======================================================
-   소 그리기 (옆모습, 몸통에 이름)
-   ======================================================= */
-function drawBull(g,o){
-  const {x,y,s,dir,hide,name}=o;
-  const pose=o.pose||'idle', ph=o.ph||0, lean=o.lean||0, shake=o.shake||0;
-  const H=HIDE[hide]||HIDE.brown;
-
-  g.save();
-  g.translate(x + (shake?Math.sin(ph*40)*shake:0), y);
-  g.scale(dir*s, s);
-  g.rotate(lean*dir);
-
-  const br=Math.sin(ph*2)*1.6;               // 숨쉬기
-  const legSwing=pose==='charge'?Math.sin(ph*14)*7:0;
-
-  /* 그림자 */
-  g.fillStyle='rgba(0,0,0,.22)';
-  g.beginPath(); g.ellipse(0,86,108,15,0,0,Math.PI*2); g.fill();
-
-  /* 꼬리 */
-  g.strokeStyle=H.dark; g.lineWidth=7; g.lineCap='round';
-  g.beginPath(); g.moveTo(-96,-26);
-  g.quadraticCurveTo(-128,-4+Math.sin(ph*3)*6, -120,42);
-  g.stroke();
-  g.fillStyle=H.dark; g.beginPath(); g.ellipse(-120,48,7,12,0,0,Math.PI*2); g.fill();
-
-  /* 뒷다리 */
-  g.fillStyle=H.dark;
-  rr(g,-78,26-legSwing*0.4,21,58,7); g.fill();
-  rr(g,-46,26+legSwing*0.4,21,58,7); g.fill();
-  g.fillStyle='#2a2018';
-  rr(g,-79,78-legSwing*0.4,23,10,4); g.fill();
-  rr(g,-47,78+legSwing*0.4,23,10,4); g.fill();
-
-  /* 몸통 */
-  g.fillStyle=H.body;
-  g.beginPath();
-  g.moveTo(-100,-14);
-  g.quadraticCurveTo(-104,-58+br, -58,-62+br);
-  g.lineTo(46,-58+br);
-  g.quadraticCurveTo(96,-56+br, 100,-16);
-  g.quadraticCurveTo(104,36, 44,42);
-  g.lineTo(-52,42);
-  g.quadraticCurveTo(-104,40, -100,-14);
-  g.closePath(); g.fill();
-
-  /* 등마루(어깨 융기) */
-  g.fillStyle=H.light;
-  g.beginPath();
-  g.moveTo(28,-58+br);
-  g.quadraticCurveTo(62,-84+br, 92,-46+br);
-  g.quadraticCurveTo(64,-54+br, 30,-52+br);
-  g.closePath(); g.fill();
-
-  /* 배 그늘 */
-  g.fillStyle='rgba(0,0,0,.13)';
-  g.beginPath(); g.ellipse(-6,34,74,12,0,0,Math.PI*2); g.fill();
-
-  /* 앞다리 */
-  g.fillStyle=H.dark;
-  rr(g,42,26+legSwing*0.5,22,58,7); g.fill();
-  rr(g,74,26-legSwing*0.5,22,58,7); g.fill();
-  g.fillStyle='#2a2018';
-  rr(g,41,78+legSwing*0.5,24,10,4); g.fill();
-  rr(g,73,78-legSwing*0.5,24,10,4); g.fill();
-
-  /* 목 */
-  const hd = pose==='charge'? 10 : (pose==='guard'? -6 : 0);
-  const hdY = pose==='charge'? 8 : (pose==='guard'? 6 : 0);
-  g.fillStyle=H.body;
-  g.beginPath();
-  g.moveTo(72,-56+br); g.lineTo(112+hd,-52+hdY);
-  g.lineTo(116+hd,-6+hdY); g.lineTo(78,4);
-  g.closePath(); g.fill();
-
-  /* 머리 */
-  g.save();
-  g.translate(126+hd,-30+hdY);
-  g.rotate(pose==='charge'?0.22:(pose==='guard'?0.3:0.06));
-  g.fillStyle=H.body;
-  rr(g,-24,-26,58,52,17); g.fill();
-  /* 주둥이 */
-  g.fillStyle=H.light;
-  rr(g,20,-6,30,30,12); g.fill();
-  g.fillStyle='#3a2d24';
-  g.beginPath(); g.ellipse(42,4,3.5,5,0,0,Math.PI*2); g.fill();
-  g.beginPath(); g.ellipse(42,16,3.5,5,0,0,Math.PI*2); g.fill();
-  /* 눈 */
-  g.fillStyle='#fff'; g.beginPath(); g.ellipse(12,-10,7,8,0,0,Math.PI*2); g.fill();
-  g.fillStyle='#151210'; g.beginPath(); g.ellipse(14,-10,4,5.5,0,0,Math.PI*2); g.fill();
-  /* 귀 */
-  g.fillStyle=H.dark;
-  g.beginPath(); g.ellipse(-16,-14,15,8,-0.5,0,Math.PI*2); g.fill();
-  /* 뿔 */
-  g.strokeStyle='#efe4cf'; g.lineWidth=11; g.lineCap='round';
-  g.beginPath(); g.moveTo(-6,-24); g.quadraticCurveTo(16,-58, 48,-52); g.stroke();
-  g.beginPath(); g.moveTo(-14,-22); g.quadraticCurveTo(-34,-52, -54,-34); g.stroke();
-  g.strokeStyle='#cbbda2'; g.lineWidth=4;
-  g.beginPath(); g.moveTo(34,-56); g.quadraticCurveTo(44,-56, 48,-52); g.stroke();
-  g.restore();
-
-  /* 이름판 — 몸통 옆면 */
-  g.save();
-  g.scale(dir,1);                       // 글자는 항상 똑바로
-  const nx = dir>0 ? -14 : 14;
-  g.fillStyle='rgba(255,255,255,.93)';
-  const nw = Math.max(96, name.length*30+26);
-  rr(g, nx-nw/2, -30, nw, 50, 12); g.fill();
-  g.strokeStyle='rgba(0,0,0,.28)'; g.lineWidth=3; g.stroke();
-  g.fillStyle='#241a10';
-  g.font='700 '+(name.length>3?30:36)+"px 'Black Han Sans','Jua',sans-serif";
-  g.textAlign='center'; g.textBaseline='middle';
-  g.fillText(name, nx, -3);
-  g.restore();
-
-  g.restore();
-}
-function rr(g,x,y,w,h,r){
-  g.beginPath();
-  g.moveTo(x+r,y);
-  g.arcTo(x+w,y,x+w,y+h,r);
-  g.arcTo(x+w,y+h,x,y+h,r);
-  g.arcTo(x,y+h,x,y,r);
-  g.arcTo(x,y,x+w,y,r);
-  g.closePath();
-}
-
-/* 관중석 — 한 번만 만들어 두고 계속 씀 */
-const CROWD=(()=>{
-  let sd=20250822;
-  const rnd=()=>{ sd=(sd*1103515245+12345)&0x7fffffff; return sd/0x7fffffff; };
-  const cols=['#d9b380','#c98f5c','#f0d9b5','#a97545','#efe0c8','#b98a52','#8a6440'];
-  const a=[];
-  for(let row=0;row<5;row++){
-    const y=18+row*22;
-    for(let i=0;i<46;i++){
-      a.push({ x:(i*22 + (row%2)*11 + rnd()*7)%1010 - 5,
-               y:y+rnd()*5, r:5+rnd()*2,
-               c:cols[Math.floor(rnd()*cols.length)] });
+/* 한 경기에 낼 10문제 뽑기 — 과목을 골고루 */
+function buildQuiz(){
+  const plan=['math','kor','eng','hanja','math','manner','idea','eng','cow','math'];
+  for(let i=plan.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[plan[i],plan[j]]=[plan[j],plan[i]];}
+  const used=new Set(), out=[];
+  plan.forEach((subj,i)=>{
+    if(subj==='math'){
+      let m, guard=0;
+      do{ m=makeMath(i+1); }while(used.has(m[1]) && guard++<40);   // 같은 식 두 번 방지
+      used.add(m[1]);
+      out.push({s:'math',q:m[1],o:m[2][0],c:m[2][1]}); return;
     }
+    const pool=BANK.filter(b=>b[0]===subj && !used.has(b[1]));
+    const b = pool.length ? pick(pool) : pick(BANK.filter(x=>!used.has(x[1])));
+    used.add(b[1]);
+    const [opts,ci]=shuffleAns(b[2][b[3]], b[2].filter((_,k)=>k!==b[3]));
+    out.push({s:b[0],q:b[1],o:opts,c:ci});
+  });
+  return out;
+}
+
+/* ══════════════ 상태 ══════════════ */
+let mode='cup', pickStage=0, myBull=null, opBull=null;
+let bracket=null, roundIdx=0;
+let me=null, op=null;
+let quiz=[], qi=0, right=0, wrong=0, locked=false;
+const MAXQ=10, LOSE_WRONG=7;
+
+/* ══════════════ 소리 (8비트) ══════════════ */
+let AC=null, bgmOn=true, bgmTimer=null, bgmStep=0;
+function initAudio(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+  if(AC && AC.state==='suspended') AC.resume(); }
+
+function tone(freq,dur,type,vol,when){
+  if(!AC||!freq)return;
+  const t=(when||AC.currentTime);
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type=type||'square'; o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vol||.08,t+.01);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g); g.connect(AC.destination);
+  o.start(t); o.stop(t+dur+.02);
+}
+function noise(dur,vol){
+  if(!AC)return;
+  const t=AC.currentTime, n=Math.floor(AC.sampleRate*dur);
+  const buf=AC.createBuffer(1,n,AC.sampleRate), d=buf.getChannelData(0);
+  for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
+  const src=AC.createBufferSource(); src.buffer=buf;
+  const g=AC.createGain(); g.gain.setValueAtTime(vol||.12,t);
+  src.connect(g); g.connect(AC.destination); src.start(t);
+}
+const SFX={
+  tap  :()=>tone(760,.06,'square',.06),
+  right:()=>{ [523,659,784,1047].forEach((f,i)=>tone(f,.12,'square',.08,AC&&AC.currentTime+i*.07)); },
+  wrong:()=>{ tone(300,.16,'sawtooth',.09); setTimeout(()=>tone(200,.22,'sawtooth',.09),140); },
+  hit  :()=>{ noise(.22,.16); tone(120,.2,'square',.09); },
+  crit :()=>{ noise(.32,.2); [180,140,110].forEach((f,i)=>tone(f,.18,'square',.1,AC&&AC.currentTime+i*.06)); },
+  win  :()=>{ [523,659,784,1047,784,1047].forEach((f,i)=>tone(f,.18,'square',.09,AC&&AC.currentTime+i*.14)); },
+  lose :()=>{ [392,330,262,196].forEach((f,i)=>tone(f,.26,'triangle',.09,AC&&AC.currentTime+i*.2)); }
+};
+
+/* --- 배경음악 (8비트 루프) --- */
+const NF={C3:130.81,D3:146.83,E3:164.81,F3:174.61,G3:196,A3:220,B3:246.94,
+          C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,
+          C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880};
+const MEL=['G4','G4','A4','B4', 'C5',0,'B4',0, 'A4','A4','G4','A4', 'B4',0,0,0,
+           'C5','C5','D5','E5', 'D5',0,'C5',0, 'B4','B4','A4','G4', 'G4',0,0,0,
+           'E5',0,'E5',0,      'D5',0,'C5',0, 'B4','B4','C5','D5', 'C5',0,0,0,
+           'A4','A4','B4','C5', 'B4',0,'A4',0, 'G4',0,'E4',0,      'G4',0,0,0];
+const BAS=['C3',0,0,0,'G3',0,0,0, 'A3',0,0,0,'F3',0,0,0,
+           'C3',0,0,0,'G3',0,0,0, 'A3',0,0,0,'F3',0,0,0,
+           'F3',0,0,0,'G3',0,0,0, 'C3',0,0,0,'G3',0,0,0,
+           'F3',0,0,0,'G3',0,0,0, 'C3',0,0,0,'C3',0,0,0];
+const STEP_MS=140;
+function bgmStart(){
+  if(!AC||bgmTimer||!bgmOn) return;
+  bgmTimer=setInterval(()=>{
+    const m=MEL[bgmStep%MEL.length], b=BAS[bgmStep%BAS.length];
+    if(m) tone(NF[m],.13,'square',.035);
+    if(b) tone(NF[b],.20,'triangle',.05);
+    if(bgmStep%8===0) noise(.03,.02);       // 가벼운 리듬
+    bgmStep++;
+  },STEP_MS);
+}
+function bgmStop(){ if(bgmTimer){clearInterval(bgmTimer);bgmTimer=null;} }
+function toggleBGM(){
+  initAudio(); bgmOn=!bgmOn;
+  document.getElementById('bgm-btn').textContent = bgmOn?'🔊':'🔇';
+  if(bgmOn) bgmStart(); else bgmStop();
+}
+
+/* ══════════════ 도트 그리기 도우미 ══════════════ */
+function px(g,x,y,w,h,c){ g.fillStyle=c; g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h)); }
+
+/* ── 소 도트 스프라이트 (옆모습, 몸통에 이름) ──
+   dir: 1 = 오른쪽을 봄, -1 = 왼쪽을 봄                                */
+function drawBullPx(g,o){
+  const {x,y,sc,dir,hide,name}=o;
+  const H=HIDE[hide]||HIDE.brown;
+  const bob=o.bob||0, lean=o.lean||0;
+  g.save();
+  g.translate(Math.round(x+lean), Math.round(y+bob));
+  g.scale(dir,1);
+  const P=(a,b,w,h,c)=>px(g,a*sc,b*sc,w*sc,h*sc,c);
+
+  P(-30,20,60,4,'rgba(0,0,0,.30)');                 // 그림자
+  P(-32,-4,10,3,H.d); P(-36,-8,5,6,H.d);            // 꼬리
+  P(-24,6,8,14,H.d); P(-12,6,8,14,H.d);             // 뒷다리
+  P( 10,6,8,14,H.d); P( 22,6,8,14,H.d);             // 앞다리
+  P(-25,20,8,3,'#141014'); P(-13,20,8,3,'#141014');
+  P( 9,20,8,3,'#141014');  P(21,20,8,3,'#141014');  // 발굽
+  P(-28,-14,58,22,H.m);                             // 몸통
+  P(-28,-14,58,4,H.l);                              // 등 하이라이트
+  P(-28,4,58,4,H.d);                                // 배 그늘
+  P( 12,-20,16,8,H.l);                              // 어깨 융기
+  P( 26,-16,10,16,H.m);                             // 목
+  P( 32,-22,16,18,H.m);                             // 머리
+  P( 46,-14,8,10,H.l);                              // 주둥이
+  P( 50,-12,2,2,'#241a20'); P(50,-8,2,2,'#241a20'); // 콧구멍
+  P( 40,-16,4,4,'#ffffff'); P(41,-15,2,2,'#141014');// 눈
+  P( 30,-20,5,4,H.d);                               // 귀
+  P( 36,-29,4,8,'#efe4cf'); P(40,-34,5,6,'#efe4cf');// 앞 뿔
+  P( 45,-38,5,5,'#efe4cf');
+  P( 30,-28,4,7,'#d6c9ae'); P(25,-33,6,6,'#d6c9ae');// 뒤 뿔
+
+  // 이름판 (글자는 항상 똑바로)
+  g.scale(dir,1);
+  const nx = dir>0 ? -6*sc : 6*sc;
+  const fs = Math.max(9, Math.round(8.2*sc));
+  g.font = fs+"px 'Galmuri11','DungGeunMo','Jua',monospace";
+  const tw = g.measureText(name).width;
+  const bw = tw+10*sc*0.7, bh = fs+7;
+  px(g, nx-bw/2, -8*sc-bh/2, bw, bh, '#f4ecd8');
+  px(g, nx-bw/2, -8*sc-bh/2, bw, 2, '#ffffff');
+  g.fillStyle='#241a10'; g.textAlign='center'; g.textBaseline='middle';
+  g.fillText(name, nx, -8*sc+1);
+  g.restore();
+}
+
+/* ── 소 머리 확대 (클로즈업용). 주둥이 끝이 x+42 지점에 오도록 맞춤 ── */
+function drawHeadPx(g,o){
+  const {x,y,sc,dir,hide}=o;
+  const H=HIDE[hide]||HIDE.brown;
+  g.save(); g.translate(Math.round(x),Math.round(y)); g.scale(dir,1);
+  const P=(a,b,w,h,c)=>px(g,a*sc,b*sc,w*sc,h*sc,c);
+  P(-52,-12,42,40,H.d);                          // 목 (뒤쪽)
+  P(-52,-12,42,5,H.m);
+  P(-14,-24,38,46,H.m);                          // 머리
+  P(-14,-24,38,6,H.l);                           // 이마 하이라이트
+  P(-14, 16,38,6,H.d);                           // 턱 그늘
+  P( 22, -6,22,24,H.l);                          // 주둥이
+  P( 22, -6,22,4,'#ffffff22');
+  P( 33,  0,5,5,'#2a1f26'); P(33,9,5,5,'#2a1f26');   // 콧구멍
+  P( -2,-14,12,12,'#ffffff'); P(2,-11,6,7,'#141014');// 눈
+  P(-20,-20,10,9,H.d);                           // 귀
+  P(  4,-34,9,12,'#efe4cf');                     // 앞 뿔
+  P( 11,-43,9,11,'#efe4cf');
+  P( 19,-50,9,9,'#f6efe0');
+  P( -8,-32,9,11,'#cfc2a7');                     // 뒤 뿔
+  P(-16,-40,9,9,'#cfc2a7');
+  g.restore();
+}
+
+/* ── 해설위원 도트 캐릭터 (오리지널) ── */
+function drawCaster(mood){
+  const c=document.getElementById('caster-cv'); if(!c)return;
+  const g=c.getContext('2d');
+  g.clearRect(0,0,64,80);
+  px(g,0,0,64,80,'#231a3e');
+  for(let i=0;i<64;i+=8) px(g,i,0,4,80,'#281e46');      // 배경 줄무늬
+
+  const bob = mood==='excited' ? (Math.floor(Date.now()/140)%2?-2:0) : 0;
+  const T=(x,y,w,h,col)=>px(g,x,y+bob,w,h,col);
+
+  T(18,60,28,20,'#2f4a86');                 // 양복 어깨
+  T(18,60,28,3,'#4463a8');
+  T(29,60,6,20,'#f4ecd8');                  // 셔츠
+  T(30,62,4,10,'#c0392b');                  // 넥타이
+  T(22,24,20,26,'#e8bf95');                 // 얼굴
+  T(20,20,24,10,'#3a2a1a');                 // 머리
+  T(20,26,4,8,'#3a2a1a'); T(40,26,4,8,'#3a2a1a');
+  T(18,30,4,10,'#e8bf95'); T(42,30,4,10,'#e8bf95');  // 귀
+  T(24,16,16,5,'#5a3b1e');                  // 모자 챙 위
+  T(18,21,28,4,'#7a5228');                  // 모자 챙
+
+  if(mood==='excited'){
+    T(24,32,6,3,'#3a2a1a'); T(34,32,6,3,'#3a2a1a');   // 눈썹 올라감
+    T(25,36,5,5,'#ffffff'); T(34,36,5,5,'#ffffff');
+    T(26,37,3,3,'#141014'); T(35,37,3,3,'#141014');
+    T(27,45,10,8,'#7a1e1e'); T(29,47,6,3,'#ffffff');  // 크게 벌린 입
+  }else if(mood==='sad'){
+    T(24,34,6,3,'#3a2a1a'); T(34,34,6,3,'#3a2a1a');
+    T(26,38,4,3,'#141014'); T(34,38,4,3,'#141014');   // 눈 처짐
+    T(28,47,8,3,'#7a1e1e');
+  }else{
+    T(24,33,6,2,'#3a2a1a'); T(34,33,6,2,'#3a2a1a');
+    T(26,37,4,4,'#ffffff'); T(34,37,4,4,'#ffffff');
+    T(27,38,2,2,'#141014'); T(35,38,2,2,'#141014');
+    T(28,47,8,3,'#7a1e1e');
   }
+  // 마이크
+  T(46,44,6,6,'#3d3d48'); T(48,50,2,12,'#6b6b78'); T(45,42,8,3,'#8a8a99');
+}
+
+/* ══════════════ 경기장 렌더링 ══════════════ */
+const arena=document.getElementById('arena');
+const A=arena.getContext('2d');
+const AW=480, AH=270;
+let scene='wide';                 // 'wide' | 'closeup'
+let fx={t:0, shake:0, flash:0, cu:null, dust:[], stars:[]};
+let rafId=null;
+
+const CROWD=(()=>{
+  let sd=20260822; const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+  const cols=['#c9a06a','#a87c50','#e0c49a','#8a6440','#f0dcbb','#7a5638'];
+  const a=[];
+  for(let r=0;r<4;r++) for(let i=0;i<34;i++)
+    a.push({x:i*14+(r%2)*7+Math.floor(rnd()*4), y:8+r*13, c:cols[Math.floor(rnd()*cols.length)]});
   return a;
 })();
 
-/* =======================================================
-   아레나 렌더링
-   ======================================================= */
-const arena=document.getElementById('arena');
-const A=arena.getContext('2d');
-const AW=1000, AH=380;
-let anim={t:0, meOff:0, opOff:0, mePose:'idle', opPose:'idle', meShake:0, opShake:0, flash:0};
-let particles=[];
-let rafId=null;
+function drawWide(){
+  px(A,0,0,AW,AH,'#2a1c10');
+  CROWD.forEach(c=>{ px(A,c.x,c.y,7,7,c.c); px(A,c.x-1,c.y+7,9,6,'#3d2c1c'); });   // 관중
+  px(A,0,0,AW,4,'#1a1109');
+  px(A,0,62,AW,16,'#8c2f2f'); px(A,0,62,AW,3,'#b04242');                          // 현수막
+  A.fillStyle='#ffe9b8'; A.textAlign='center'; A.textBaseline='middle';
+  A.font="11px 'Galmuri11','DungGeunMo','Jua',monospace";
+  A.fillText('제1회 아인이배 천하장사 소싸움 대회', AW/2, 71);
+  px(A,0,78,AW,AH-78,'#cba173');                                                  // 모래판
+  px(A,0,78,AW,4,'#a8804f');
+  for(let i=0;i<26;i++) px(A,(i*37)%470, 92+((i*53)%160), 12, 3, '#bb9366');       // 모래 결
+  A.strokeStyle='#e2c49b'; A.lineWidth=3;
+  A.beginPath(); A.ellipse(AW/2,190,190,58,0,0,Math.PI*2); A.stroke();
 
-function fitArena(){
-  // 위(제목·기력바)와 아래(로그·버튼)에 필요한 공간을 뺀 나머지를 모두 경기장에 준다
-  const maxH=Math.max(140, window.innerHeight-296);
-  const w=Math.min(window.innerWidth*0.99, 1000, maxH*AW/AH);
-  arena.style.width=w+'px';
-  arena.style.height=(w*AH/AW)+'px';
-  const r=arena.getBoundingClientRect();
-  const el=document.getElementById('shout');
-  el.style.left=(r.left+r.width/2)+'px';
-  el.style.top=(r.top+r.height*0.50)+'px';
+  const bob = Math.floor(fx.t*3)%2 ? -1 : 0;
+  if(op) drawBullPx(A,{x:322,y:184,sc:1.55,dir:-1,hide:op.b.c,name:op.b.n,bob:bob,lean:fx.opLean||0});
+  if(me) drawBullPx(A,{x:158,y:184,sc:1.55,dir: 1,hide:me.b.c,name:me.b.n,bob:-bob,lean:fx.meLean||0});
 }
-window.addEventListener('resize',()=>{fitArena();fitPick();});
 
-function drawArena(){
-  A.clearRect(0,0,AW,AH);
+/* 클로즈업 — 공격 기술별 연출 */
+const TECHS={
+  head:{n:'박치기', cry:'쿵!!'},
+  push:{n:'밀치기', cry:'우으윽!!'},
+  horn:{n:'뿔치기', cry:'빠악!!'}
+};
+function drawCloseup(){
+  const cu=fx.cu; if(!cu) return;
+  const p=Math.min(1,(fx.t-cu.t0)/cu.dur);
 
-  /* 하늘 & 관중석 */
-  const sky=A.createLinearGradient(0,0,0,AH);
-  sky.addColorStop(0,'#3d2b1a'); sky.addColorStop(1,'#7a5a37');
-  A.fillStyle=sky; A.fillRect(0,0,AW,AH);
+  /* 배경 */
+  px(A,0,0,AW,AH,'#3a2412');
+  for(let i=0;i<AH;i+=6) px(A,0,i,AW,3,'#412a15');
+  for(let i=0;i<16;i++){                                  // 속도선
+    const yy=(i*19+Math.floor(fx.t*70)%19)%200;
+    px(A,0,yy,AW,2,'rgba(255,255,255,.055)');
+  }
+  px(A,0,196,AW,AH-196,'#cba173'); px(A,0,196,AW,4,'#a8804f');
 
-  /* 관중 (점) */
-  A.fillStyle='#4b3826'; A.fillRect(0,0,AW,120);
-  CROWD.forEach(c=>{
-    A.fillStyle=c.c;
-    A.beginPath(); A.arc(c.x,c.y,c.r,0,Math.PI*2); A.fill();   // 머리
-    A.fillRect(c.x-c.r*0.9, c.y+c.r*0.7, c.r*1.8, c.r*1.5);    // 어깨
-  });
-  A.fillStyle='rgba(0,0,0,.28)'; A.fillRect(0,0,AW,120);
+  const sc=1.7, CY=138, MID=240;
+  const contact = 84*sc;                                   // 주둥이가 맞닿는 거리
+  const rest    = contact + 52;
 
-  /* 현수막 */
-  A.fillStyle='#8c2f2f'; A.fillRect(0,104,AW,30);
-  A.fillStyle='#ffe9c4';
-  A.font="700 21px 'Black Han Sans','Jua',sans-serif";
-  A.textAlign='center'; A.textBaseline='middle';
-  A.fillText('제 1 회  아인이배  천하장사  소싸움  대회', AW/2, 120);
+  /* 달려들기 → 충돌 → 밀어내기 */
+  let gap;
+  if(p<0.24)      gap = rest - (rest-contact)*(p/0.24);
+  else if(p<0.36) gap = contact + (p-0.24)/0.12*12;        // 부딪히고 살짝 튕김
+  else            gap = contact + 8;
+  let slide=0;
+  if(cu.tech==='push' && p>0.32) slide=(p-0.32)/0.68*62;   // 밀치기는 계속 밀고 나감
+  if(cu.tech==='head'&& p>0.32) slide=(p-0.32)/0.68*18;
 
-  /* 모래판 */
-  const sand=A.createLinearGradient(0,134,0,AH);
-  sand.addColorStop(0,'#c8a173'); sand.addColorStop(1,'#e0bd8e');
-  A.fillStyle=sand; A.fillRect(0,134,AW,AH-134);
-  A.strokeStyle='rgba(255,255,255,.35)'; A.lineWidth=5;
-  A.beginPath(); A.ellipse(AW/2,300,430,116,0,0,Math.PI*2); A.stroke();
-  /* 모래 결 */
-  A.fillStyle='rgba(140,100,60,.16)';
-  for(let i=0;i<70;i++){
-    const sx=((i*7919)%1000), sy=160+((i*5417)%200);
-    A.fillRect(sx, sy, 16, 3);
+  const d = cu.mine? 1 : -1;                               // 공격 방향
+  const ax = MID - d*gap/2 + d*slide;
+  const dx = MID + d*gap/2 + d*slide;
+  const cx = (ax+dx)/2;
+
+  /* 뿔치기는 머리를 살짝 기울여 뿔이 엇갈리게 */
+  const tilt = (cu.tech==='horn' && p>0.24) ? Math.sin((p-0.24)*40)*4 : 0;
+
+  drawHeadPx(A,{x:dx,y:CY+(p>0.24?tilt:0),sc:sc,dir:-d,hide:cu.def.b.c});
+  drawHeadPx(A,{x:ax,y:CY-(p>0.24?tilt:0),sc:sc,dir: d,hide:cu.atk.b.c});
+
+  /* 충돌 이펙트 */
+  if(p>=0.24){
+    const q=(p-0.24)/0.76;
+    if(cu.tech==='horn'){
+      for(let i=0;i<12;i++){
+        const a=i*30+q*140, r=16+q*74;
+        px(A,cx+Math.cos(a*Math.PI/180)*r-4, CY-26+Math.sin(a*Math.PI/180)*r*.7-4,
+           8,8, i%2?'#fff8c8':'#ffc32b');
+      }
+    }else if(cu.tech==='head'){
+      A.strokeStyle='rgba(255,255,255,'+Math.max(0,1-q*1.3)+')'; A.lineWidth=5;
+      [26,52,84].forEach(r0=>{ A.beginPath(); A.arc(cx,CY,r0*(0.5+q*1.1),0,Math.PI*2); A.stroke(); });
+      for(let i=0;i<8;i++){
+        const a=i*45+q*30, r=22+q*86;
+        px(A,cx+Math.cos(a*Math.PI/180)*r-5, CY+Math.sin(a*Math.PI/180)*r*.75-5,10,10,'#ffe066');
+      }
+    }else{                                                  // 밀치기 — 흙먼지
+      for(let i=0;i<18;i++){
+        const a=(i*41)%180, r=q*(24+(i%6)*20);
+        px(A, dx + d*(20+Math.cos(a*Math.PI/180)*r),
+              200 - Math.abs(Math.sin(a*Math.PI/180))*r*.55,
+              12-((i%3)*3), 9, i%2?'#e0c49a':'#c9a675');
+      }
+      px(A, dx - d*8, 190, 40, 8, 'rgba(0,0,0,.18)');
+    }
+
+    /* 큰 도트 외침 */
+    if(p<0.86){
+      const t=TECHS[cu.tech].cry;
+      A.font="bold 40px 'Galmuri11','DungGeunMo','Jua',monospace";
+      A.textAlign='center'; A.textBaseline='middle';
+      const yy=48-q*8, wob=Math.sin(q*30)*2;
+      A.fillStyle='#000'; A.fillText(t,cx+4,yy+4);
+      A.fillStyle=cu.crit?'#ff6b67':'#ffc32b'; A.fillText(t,cx+wob,yy);
+    }
   }
 
-  /* 두 소 */
-  const baseY=286;
-  const meX=332+anim.meOff, opX=668+anim.opOff;
-  if(op) drawBull(A,{x:opX,y:baseY,s:0.96,dir:-1,hide:op.b.c,name:op.b.n,
-                     pose:anim.opPose,ph:anim.t,shake:anim.opShake});
-  if(me) drawBull(A,{x:meX,y:baseY,s:0.96,dir:1, hide:me.b.c,name:me.b.n,
-                     pose:anim.mePose,ph:anim.t,shake:anim.meShake});
-
-  /* 흙먼지 */
-  particles.forEach(p=>{
-    A.fillStyle=`rgba(200,160,110,${p.a})`;
-    A.beginPath(); A.arc(p.x,p.y,p.r,0,Math.PI*2); A.fill();
-  });
-
-  /* 충돌 섬광 */
-  if(anim.flash>0){
-    A.fillStyle=`rgba(255,255,255,${anim.flash*0.5})`;
-    A.fillRect(0,134,AW,AH-134);
-  }
-
-  /* 다음 수 예고 (말풍선) */
-  if(telegraph && !busy){
-    const m=MOVES[telegraph];
-    const bx=opX-10, by=140;
-    A.fillStyle='rgba(255,255,255,.94)';
-    rr(A,bx-92,by-4,184,46,14); A.fill();
-    A.strokeStyle='#b45309'; A.lineWidth=3; A.stroke();
-    A.beginPath(); A.moveTo(bx-8,by+42); A.lineTo(bx+8,by+42); A.lineTo(bx,by+56); A.closePath(); A.fill();
-    A.fillStyle='#7c2d12';
-    A.font="700 20px 'Black Han Sans','Jua',sans-serif";
-    A.textAlign='center'; A.textBaseline='middle';
-    A.fillText(m.em+' '+m.n+' 준비!', bx, by+19);
-  }
+  /* 기술 이름표 */
+  px(A,0,AH-28,AW,28,'rgba(10,7,18,.88)');
+  px(A,0,AH-28,AW,3,'#5b4a8c');
+  A.fillStyle='#ffe9b8'; A.textAlign='center'; A.textBaseline='middle';
+  A.font="15px 'Galmuri11','DungGeunMo','Jua',monospace";
+  A.fillText(`${cu.atk.b.n} 의 ${TECHS[cu.tech].n}!${cu.crit?'   회심의 일격!!':''}`, AW/2, AH-13);
 }
+
 function loop(){
-  anim.t+=0.05;
-  if(anim.flash>0) anim.flash=Math.max(0,anim.flash-0.06);
-  anim.meOff*=0.86; anim.opOff*=0.86;
-  anim.meShake*=0.88; anim.opShake*=0.88;
-  particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.25;p.a-=0.022;p.r*=0.985;});
-  particles=particles.filter(p=>p.a>0);
-  drawArena();
+  fx.t+=1/60;
+  A.save();
+  if(fx.shake>0.4){
+    A.translate((Math.random()-.5)*fx.shake, (Math.random()-.5)*fx.shake);
+    fx.shake*=0.90;
+  }
+  if(scene==='wide') drawWide(); else drawCloseup();
+  A.restore();
+  if(fx.flash>0){ px(A,0,0,AW,AH,`rgba(255,255,255,${fx.flash})`); fx.flash-=0.05; }
+  drawCaster(casterMood);
   rafId=requestAnimationFrame(loop);
 }
-function dust(x,y,n){
-  for(let i=0;i<n;i++){
-    particles.push({x:x+(Math.random()-.5)*40, y:y+(Math.random()-.5)*18,
-      vx:(Math.random()-.5)*7, vy:-Math.random()*5-1,
-      r:5+Math.random()*11, a:.75});
-  }
+let casterMood='normal';
+
+/* ══════════════ 화면 전환 ══════════════ */
+function fitArena(){
+  const box=document.querySelector('.arenabox'); if(!box) return;
+  const w=Math.max(240, box.clientWidth-8);          // 칸 너비를 꽉 채움 (검은 여백 없음)
+  arena.style.width=Math.floor(w)+'px';
+  arena.style.height=Math.floor(w*AH/AW)+'px';
 }
-function shout(text,color){
-  const el=document.getElementById('shout');
-  el.textContent=text;
-  el.style.textShadow=`0 4px 0 ${color||'#b91c1c'},0 0 26px rgba(0,0,0,.6)`;
-  el.classList.remove('go'); void el.offsetWidth; el.classList.add('go');
+window.addEventListener('resize',fitArena);
+
+/* 화면이 작아 한눈에 안 들어올 때, 지금 봐야 할 곳으로 저절로 따라간다 */
+const smooth = window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth';
+function lookAt(sel,where){
+  const el=document.querySelector(sel); if(!el) return;
+  const r=el.getBoundingClientRect();
+  if(r.top>=0 && r.bottom<=window.innerHeight) return;   // 이미 다 보이면 그대로
+  el.scrollIntoView({block:where||'center',behavior:smooth});
 }
 
-/* =======================================================
-   화면 이동
-   ======================================================= */
 function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
   if(id==='s-fight'){ fitArena(); if(!rafId) loop(); }
   else if(rafId){ cancelAnimationFrame(rafId); rafId=null; }
-  if(id==='s-pick') fitPick();
 }
 function closeModal(){ document.getElementById('modal').classList.remove('on'); }
-
-/* =======================================================
-   소 고르기
-   ======================================================= */
-function startMode(m){
-  initAudio(); beep('tap');
-  mode=m; pickStage=0; myBull=null; opBull=null;
-  buildPickList();
-  go('s-pick');
-}
-function buildPickList(){
-  const box=document.getElementById('bulls');
-  box.innerHTML='';
-  document.getElementById('pick-title').textContent =
-    (mode==='duel' && pickStage===1) ? '상대 소를 골라 주세요' : '내 소를 골라 주세요';
-  document.getElementById('pick-hint').innerHTML =
-    (mode==='duel' && pickStage===1)
-      ? `내 소는 <b style="color:#fde047">${myBull.n}</b> 이에요. 붙여 볼 상대를 고르세요!`
-      : '💪 힘 · 🌀 기술 · 🔥 끈기 를 보고 골라 보세요';
-  document.getElementById('pick-go').disabled=true;
-
-  BULLS.forEach((b,i)=>{
-    const btn=document.createElement('button');
-    btn.className='bull';
-    if(mode==='duel' && pickStage===1 && myBull && b.n===myBull.n) btn.classList.add('taken');
-    btn.dataset.i=i;
-    btn.innerHTML=`<canvas width="150" height="96"></canvas>
-      <div class="nm">${b.n}</div>
-      <div class="st">
-        <span class="pip p-p">💪${b.p}</span>
-        <span class="pip p-t">🌀${b.t}</span>
-        <span class="pip p-s">🔥${b.s}</span>
-      </div>
-      <div class="tag">${b.tag}</div>`;
-    btn.onclick=()=>{
-      initAudio(); beep('tap');
-      document.querySelectorAll('.bull').forEach(x=>x.classList.remove('sel'));
-      btn.classList.add('sel');
-      document.getElementById('pick-go').disabled=false;
-      document.getElementById('pick-go').dataset.i=i;
-    };
-    box.appendChild(btn);
-    const g=btn.querySelector('canvas').getContext('2d');
-    g.save(); g.translate(0,6);
-    drawBull(g,{x:78,y:74,s:0.30,dir:1,hide:b.c,name:b.n,ph:i});
-    g.restore();
-  });
-}
-function fitPick(){
-  const box=document.getElementById('bulls');
-  if(box) box.style.maxHeight=(window.innerHeight-170)+'px';
-}
-function confirmPick(){
-  const i=parseInt(document.getElementById('pick-go').dataset.i,10);
-  initAudio(); beep('tap');
-  if(mode==='duel' && pickStage===0){
-    myBull=BULLS[i]; pickStage=1; buildPickList(); return;
-  }
-  if(mode==='duel'){
-    opBull=BULLS[i];
-    startDuel(); return;
-  }
-  myBull=BULLS[i];
-  makeBracket();
-  go('s-bracket');
-}
-
-/* =======================================================
-   대진표 (8강)
-   ======================================================= */
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function makeBracket(){
-  const rest=shuffle(BULLS.filter(b=>b.n!==myBull.n)).slice(0,7);
-  const eight=shuffle([myBull].concat(rest));
-  bracket={r8:eight, r4:[null,null,null,null], r2:[null,null], champ:null};
-  roundIdx=0;
-  renderBracket();
-}
-const ROUND_NAME=['8강','4강','결승'];
-function myIndexIn(list){ return list.findIndex(b=>b&&b.n===myBull.n); }
-
-function renderBracket(){
-  const el=document.getElementById('bracket');
-  el.innerHTML='';
-  const cols=[
-    {lab:'8강', list:bracket.r8},
-    {lab:'4강', list:bracket.r4},
-    {lab:'결승',list:bracket.r2},
-    {lab:'천하장사',list:[bracket.champ]}
-  ];
-  cols.forEach((c,ci)=>{
-    const d=document.createElement('div');
-    d.className='rnd';
-    d.innerHTML=`<div class="lab">${c.lab}</div>`;
-    c.list.forEach((b,bi)=>{
-      const s=document.createElement('div');
-      s.className='slot';
-      s.textContent=b?b.n:'?';
-      if(b && b.n===myBull.n) s.classList.add('me');
-      // 현재 라운드의 내 경기 표시
-      if(ci===roundIdx){
-        const mine=myIndexIn(c.list);
-        if(mine>=0 && (bi===mine || bi===(mine^1))) s.classList.add('now');
-      }
-      if(ci<roundIdx && b) s.classList.add('win');
-      d.appendChild(s);
-    });
-    el.appendChild(d);
-  });
-  const cur=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
-  const mine=myIndexIn(cur);
-  const foe=cur[mine^1];
-  document.getElementById('br-title').innerHTML=
-    bracket.champ ? `🏆 ${bracket.champ.n} 천하장사 등극!`
-    : `🏆 ${ROUND_NAME[roundIdx]} — <b style="color:#fde047">${myBull.n}</b> vs <b style="color:#fca5a5">${foe?foe.n:'?'}</b>`;
-  document.getElementById('br-go').style.display = bracket.champ ? 'none':'inline-block';
-}
-
-/* =======================================================
-   경기 준비
-   ======================================================= */
-function mkFighter(b){
-  const hp=90+b.s*12;
-  return {b, hp, max:hp};
-}
-function startDuel(){
-  me=mkFighter(myBull); op=mkFighter(opBull);
-  setupFight('1대1 대결');
-}
-function beginMatch(){
-  const cur=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
-  const mine=myIndexIn(cur);
-  me=mkFighter(cur[mine]); op=mkFighter(cur[mine^1]);
-  setupFight(ROUND_NAME[roundIdx]);
-}
-function setupFight(label){
-  initAudio();
-  turn=1; busy=false; myHistory=[]; particles=[];
-  anim={t:0,meOff:0,opOff:0,mePose:'idle',opPose:'idle',meShake:0,opShake:0,flash:0};
-  document.getElementById('round-lab').textContent=label;
-  document.getElementById('me-name').textContent=me.b.n;
-  document.getElementById('op-name').textContent=op.b.n;
-  updateHP(); updateTurn();
-  setLog('두 소가 마주 섰어요! 기술을 골라 보세요 🐂');
-  pickTelegraph();      // 먼저 상대 수를 정하고
-  enableMoves(true);    // 그 다음 막는 수비를 강조해야 첫 합부터 힌트가 보인다
-  go('s-fight');
-}
-function updateHP(){
-  document.getElementById('me-hp').style.width=Math.max(0,me.hp/me.max*100)+'%';
-  document.getElementById('op-hp').style.width=Math.max(0,op.hp/op.max*100)+'%';
-}
-function updateTurn(){
-  document.getElementById('turn-lab').textContent=`${turn} / ${maxTurn} 합`;
-}
-function setLog(html){ document.getElementById('log').innerHTML='<span>'+html+'</span>'; }
-function enableMoves(on){
-  document.querySelectorAll('.mv').forEach(b=>{
-    b.disabled=!on;
-    b.classList.remove('hintme');
-  });
-  if(on && telegraph){
-    const counter=MOVES[telegraph].by;   // 예고된 공격을 막는 수비
-    if(counter){
-      const el=document.querySelector(`.mv[data-mv="${counter}"]`);
-      if(el) el.classList.add('hintme');
-    }
-  }
-}
-
-/* 상대의 다음 수 결정 + 예고 */
-function pickTelegraph(){
-  const smart = 0.15 + roundIdx*0.15;             // 라운드가 올라갈수록 눈치 빠름
-  let choice;
-  if(myHistory.length>=2 && Math.random()<smart){
-    // 플레이어가 자주 쓴 공격을 카운터
-    const counts={};
-    myHistory.slice(-5).forEach(m=>counts[m]=(counts[m]||0)+1);
-    const fav=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
-    if(MOVES[fav].k==='atk') choice=MOVES[fav].by;      // 막는 수비
-    else choice=ATKS[Math.floor(Math.random()*3)];
-  }else{
-    const pool = Math.random()<0.68 ? ATKS : DEFS;      // 공격 성향
-    choice = pool[Math.floor(Math.random()*3)];
-  }
-  telegraph = choice;
-}
-
-/* =======================================================
-   한 합 진행
-   ======================================================= */
-document.querySelectorAll('.mv').forEach(btn=>{
-  btn.addEventListener('pointerdown',e=>{
-    e.preventDefault();
-    if(busy||btn.disabled) return;
-    playTurn(btn.dataset.mv);
-  });
-});
-
-function playTurn(myMove){
-  busy=true;
-  initAudio(); beep('tap');
-  enableMoves(false);
-  myHistory.push(myMove);
-  const opMove=telegraph;
-  telegraph=null;
-
-  const M=MOVES[myMove], O=MOVES[opMove];
-  let dmgOp=0, dmgMe=0, msg='', kind='clash';
-
-  const pw=n=>n.b.p, tc=n=>n.b.t;
-  const R=(a,b)=>a+Math.random()*(b-a);
-
-  if(M.k==='atk' && O.k==='atk'){
-    if(M.beat===opMove){
-      dmgOp = 11 + pw(me)*2.2 + R(0,6);
-      dmgMe = 3 + R(0,3);
-      msg=`정면 충돌! <span class="ok">${M.n}가 ${O.n}를 이겼어요!</span>`;
-      kind='clash';
-    }else if(O.beat===myMove){
-      dmgMe = 11 + pw(op)*2.2 + R(0,6);
-      dmgOp = 3 + R(0,3);
-      msg=`정면 충돌! <b>${O.n}에 밀렸어요…</b>`;
-      kind='clash';
-    }else{
-      const d=(pw(me)-pw(op))*2.5;
-      dmgOp = Math.max(2, 6+d+R(0,4));
-      dmgMe = Math.max(2, 6-d+R(0,4));
-      msg=`같은 기술끼리 쿵! 힘으로 겨뤄요!`;
-      kind='clash';
-    }
-  }
-  else if(M.k==='atk' && O.k==='def'){
-    if(O.stops===myMove){
-      dmgMe = 5 + tc(op)*1.6 + R(0,3);
-      msg=`<b>${op.b.n}가 ${O.n}로 막았어요!</b> 되치기를 맞았어요.`;
-      kind='block';
-    }else{
-      dmgOp = 15 + pw(me)*2.6 + tc(me)*1.2 + R(0,6);
-      msg=`<span class="ok">${M.n} 명중! 수비가 어긋났어요!</span>`;
-      kind='hit';
-    }
-  }
-  else if(M.k==='def' && O.k==='atk'){
-    if(M.stops===opMove){
-      dmgOp = 5 + tc(me)*1.6 + R(0,3);
-      msg=`<span class="ok">${M.n}로 잘 막았어요!</span> 되치기 성공!`;
-      kind='block';
-    }else{
-      dmgMe = 15 + pw(op)*2.6 + R(0,6);
-      msg=`<b>${O.n}에 정통으로 맞았어요…</b>`;
-      kind='hit';
-    }
-  }
-  else{
-    me.hp=Math.min(me.max, me.hp+7);
-    op.hp=Math.min(op.max, op.hp+7);
-    msg=`둘 다 숨을 고릅니다… 기력을 조금 회복했어요.`;
-    kind='rest';
-  }
-
-  dmgOp=Math.round(dmgOp); dmgMe=Math.round(dmgMe);
-  op.hp=Math.max(0, op.hp-dmgOp);
-  me.hp=Math.max(0, me.hp-dmgMe);
-
-  animateTurn(myMove,opMove,kind,dmgMe,dmgOp);
-
-  const head=`나 ${M.em}${M.n} <span style="color:#c9b394">vs</span> ${op.b.n} ${O.em}${O.n} — `;
-  setLog(head+msg);
-
-  setTimeout(()=>{
-    updateHP();
-    setTimeout(()=>finishTurn(), 480);
-  }, 460);
-}
-
-function animateTurn(myMove,opMove,kind,dmgMe,dmgOp){
-  const myAtk=MOVES[myMove].k==='atk', opAtk=MOVES[opMove].k==='atk';
-  anim.mePose = myAtk?'charge':'guard';
-  anim.opPose = opAtk?'charge':'guard';
-  anim.meOff = myAtk? 70 : -18;
-  anim.opOff = opAtk? -70 : 18;
-
-  setTimeout(()=>{
-    anim.flash=1;
-    dust(500,300, kind==='rest'?4:16);
-    if(kind==='clash'){ beep('clash'); shout('쿵!','#b91c1c'); }
-    else if(kind==='block'){ beep('block'); shout('막았다!','#1d4ed8'); }
-    else if(kind==='hit'){ beep('clash'); shout('명중!','#b45309'); }
-    else { beep('rest'); }
-    if(dmgMe>dmgOp) anim.meShake=9;
-    else if(dmgOp>dmgMe) anim.opShake=9;
-    anim.meOff = dmgMe>4? -34 : 0;
-    anim.opOff = dmgOp>4?  34 : 0;
-    setTimeout(()=>{ anim.mePose='idle'; anim.opPose='idle'; }, 420);
-  }, 240);
-}
-
-function finishTurn(){
-  if(me.hp<=0 || op.hp<=0){ endFight(); return; }
-  turn++;
-  if(turn>maxTurn){ endFight(true); return; }
-  updateTurn();
-  pickTelegraph();
-  enableMoves(true);
-  busy=false;
-}
-
-/* =======================================================
-   경기 종료
-   ======================================================= */
-function endFight(byJudge){
-  busy=true;
-  enableMoves(false);
-  const iWon = op.hp<=0 ? true : (me.hp<=0 ? false : me.hp>=op.hp);
-  const draw = byJudge && Math.abs(me.hp-op.hp)<1;
-
-  if(iWon){ beep('win'); shout('이겼다!','#15803d'); }
-  else{ beep('lose'); }
-
-  setTimeout(()=>{
-    if(mode==='duel'){ duelResult(iWon,byJudge); return; }
-    if(iWon) cupWin(byJudge);
-    else cupLose(byJudge);
-  }, 900);
-}
-
-function judgeLine(byJudge){
-  return byJudge
-    ? `<br><span style="font-size:.9em">14합을 다 겨뤘어요. 심판 다섯 명이 손을 들어 판정했습니다.</span>`
-    : '';
-}
-
-function duelResult(iWon,byJudge){
-  const w=iWon?me.b:op.b, l=iWon?op.b:me.b;
-  showModal(`
-    <div class="em">${iWon?'🏆':'😤'}</div>
-    <h2>${w.n} 승리!</h2>
-    <p>${w.n} 가 ${l.n} 를 이겼어요.${judgeLine(byJudge)}</p>
-    <button class="m-go" onclick="startDuel()">같은 소로 한 판 더!</button>
-    <button class="m-alt" onclick="startMode('duel')">다른 소 골라서 하기</button>
-    <button class="m-alt" onclick="closeModal();go('s-home')">처음으로</button>
-  `);
-}
-
-function cupWin(byJudge){
-  // 다음 라운드 진출 처리
-  const cur=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
-  const next=[bracket.r4,bracket.r2,null][roundIdx];
-  const mine=myIndexIn(cur);
-
-  if(roundIdx<2){
-    // 내 경기 결과 반영
-    next[Math.floor(mine/2)] = me.b;
-    // 나머지 경기들은 스탯 기반으로 자동 진행
-    for(let i=0;i<cur.length;i+=2){
-      if(i===mine || i===(mine^1)) continue;
-      const a=cur[i], b=cur[i+1];
-      if(!a||!b) continue;
-      const sa=a.p+a.t+a.s+Math.random()*5, sb=b.p+b.t+b.s+Math.random()*5;
-      next[i/2] = sa>=sb ? a : b;
-    }
-    roundIdx++;
-    renderBracket();
-    const nc=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
-    const foe=nc[myIndexIn(nc)^1];
-    showModal(`
-      <div class="em">🎉</div>
-      <h2>${ROUND_NAME[roundIdx-1]} 통과!</h2>
-      <p><b>${me.b.n}</b> 가 <b>${op.b.n}</b> 를 이겼어요.${judgeLine(byJudge)}
-      <br><br>다음은 <b style="color:#b45309">${ROUND_NAME[roundIdx]}</b>,
-      상대는 <b style="color:#b91c1c">${foe?foe.n:'?'}</b> 예요!</p>
-      <button class="m-go" onclick="closeModal();go('s-bracket')">대진표 보기</button>
-      <button class="m-alt" onclick="closeModal();beginMatch()">바로 다음 경기!</button>
-    `);
-  }else{
-    bracket.champ=me.b;
-    renderBracket();
-    showModal(`
-      <div class="em">🏆👑</div>
-      <h2>${me.b.n} 천하장사!</h2>
-      <p>8강, 4강, 결승을 모두 이겼어요.<br>
-      아인이와 <b>${me.b.n}</b> 가 대회 우승입니다! 정말 대단해요!${judgeLine(byJudge)}</p>
-      <button class="m-go" onclick="closeModal();startMode('cup')">다른 소로 또 도전!</button>
-      <button class="m-alt" onclick="closeModal();go('s-home')">처음으로</button>
-    `);
-  }
-}
-
-function cupLose(byJudge){
-  showModal(`
-    <div class="em">😢</div>
-    <h2>${ROUND_NAME[roundIdx]}에서 아쉽게…</h2>
-    <p><b>${op.b.n}</b> 가 한 수 위였어요.${judgeLine(byJudge)}
-    <br><br>기술 상성을 다시 보고 한 번 더 붙어 볼까요?</p>
-    <button class="m-go" onclick="closeModal();beginMatch()">이 경기 다시 하기</button>
-    <button class="m-alt" onclick="closeModal();showRules()">📖 상성표 다시 보기</button>
-    <button class="m-alt" onclick="closeModal();startMode('cup')">소 다시 고르기</button>
-  `);
-}
-
-function quitFight(){
-  showModal(`
-    <div class="em">🐂</div>
-    <h2>경기를 그만할까요?</h2>
-    <p>지금까지의 경기 기록은 사라져요.</p>
-    <button class="m-go" onclick="closeModal()">계속 할래요</button>
-    <button class="m-alt" onclick="closeModal();go('s-home')">그만하기</button>
-  `);
-}
-
-/* =======================================================
-   규칙 팝업
-   ======================================================= */
-function showRules(){
-  showModal(`
-    <div class="em">📖</div>
-    <h2>소싸움 기술 상성</h2>
-    <div class="rules">
-      <h3>① 상대가 수비하면 — 짝이 맞는 수비에만 막혀요</h3>
-      <div class="pair"><span class="a">💪 밀치기</span><span>는</span><span class="b">🦵 버티기</span><span class="why">발로 버티면 못 밀어요</span></div>
-      <div class="pair"><span class="a">⚡ 뿔치기</span><span>는</span><span class="b">🛡️ 받아치기</span><span class="why">뿔로 맞받으면 튕겨요</span></div>
-      <div class="pair"><span class="a">🪝 뿔걸이</span><span>는</span><span class="b">💨 빠지기</span><span class="why">옆으로 빠지면 헛걸려요</span></div>
-      <h3>② 둘 다 공격하면 — 가위바위보처럼!</h3>
-      <div class="tri">
-        <b class="w">💪 힘</b> ▸ <b>⚡ 빠르기</b> ▸ <b>🪝 기술</b> ▸ <b class="w">💪 힘</b>
-      </div>
-      <p style="margin-top:8px;font-size:13px">밀치기는 뿔치기를, 뿔치기는 뿔걸이를, 뿔걸이는 밀치기를 이겨요.</p>
-      <h3>③ 둘 다 수비하면</h3>
-      <p style="margin:0;font-size:13px">둘 다 숨을 고르며 기력을 조금 회복해요.</p>
-      <h3>④ 승부</h3>
-      <p style="margin:0;font-size:13px">기력이 먼저 바닥나면 져요. 14합까지 가면 기력이 많은 소가 심판 판정으로 이겨요.</p>
-    </div>
-    <button class="m-go" onclick="closeModal()">알겠어요!</button>
-  `);
-}
 function showModal(html){
   document.getElementById('modal-box').innerHTML=html;
   document.getElementById('modal').classList.add('on');
 }
 
-/* 초기 */
-fitArena();
+/* ══════════════ 소 고르기 ══════════════ */
+function startMode(m){
+  initAudio(); SFX.tap(); bgmStart();
+  mode=m; pickStage=0; myBull=null; opBull=null;
+  buildPickList(); go('s-pick');
+}
+function buildPickList(){
+  const box=document.getElementById('bulls'); box.innerHTML='';
+  const second = (mode==='duel' && pickStage===1);
+  document.getElementById('pick-title').textContent = second?'상대 소를 골라 주세요':'내 소를 골라 주세요';
+  document.getElementById('pick-hint').innerHTML = second
+    ? `내 소는 <span style="color:var(--gold)">${myBull.n}</span> 입니다. 붙여 볼 상대를 고르세요!`
+    : '💪 힘 · 🌀 기술 · 🔥 끈기 를 보고 골라 보세요';
+  const goBtn=document.getElementById('pick-go'); goBtn.disabled=true;
+
+  BULLS.forEach((b,i)=>{
+    const btn=document.createElement('button');
+    btn.className='bull';
+    if(second && myBull && b.n===myBull.n) btn.classList.add('taken');
+    btn.innerHTML=`<canvas width="150" height="86"></canvas>
+      <div class="nm">${b.n}</div>
+      <div class="st"><span class="pip p-p">💪${b.p}</span>
+        <span class="pip p-t">🌀${b.t}</span><span class="pip p-s">🔥${b.s}</span></div>
+      <div class="tag">${b.tag}</div>`;
+    btn.onclick=()=>{
+      initAudio(); SFX.tap();
+      document.querySelectorAll('.bull').forEach(x=>x.classList.remove('sel'));
+      btn.classList.add('sel'); goBtn.disabled=false; goBtn.dataset.i=i;
+    };
+    box.appendChild(btn);
+    const g=btn.querySelector('canvas').getContext('2d');
+    drawBullPx(g,{x:75,y:58,sc:1.15,dir:1,hide:b.c,name:b.n});
+  });
+}
+function confirmPick(){
+  const i=parseInt(document.getElementById('pick-go').dataset.i,10);
+  initAudio(); SFX.tap();
+  if(mode==='duel' && pickStage===0){ myBull=BULLS[i]; pickStage=1; buildPickList(); window.scrollTo(0,0); return; }
+  if(mode==='duel'){ opBull=BULLS[i]; startDuel(); return; }
+  myBull=BULLS[i]; makeBracket(); go('s-bracket');
+}
+
+/* ══════════════ 대진표 ══════════════ */
+const ROUND_NAME=['8강','4강','결승'];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function makeBracket(){
+  const rest=shuffle(BULLS.filter(b=>b.n!==myBull.n)).slice(0,7);
+  bracket={r8:shuffle([myBull].concat(rest)), r4:[null,null,null,null], r2:[null,null], champ:null};
+  roundIdx=0; renderBracket();
+}
+const myIdx=list=>list.findIndex(b=>b&&b.n===myBull.n);
+function renderBracket(){
+  const el=document.getElementById('bracket'); el.innerHTML='';
+  [['8강',bracket.r8],['4강',bracket.r4],['결승',bracket.r2],['천하장사',[bracket.champ]]]
+  .forEach(([lab,list],ci)=>{
+    const d=document.createElement('div'); d.className='rnd';
+    d.innerHTML=`<div class="lab">${lab}</div>`;
+    list.forEach((b,bi)=>{
+      const s=document.createElement('div'); s.className='slot';
+      s.textContent=b?b.n:'?';
+      if(b&&b.n===myBull.n) s.classList.add('me');
+      if(ci===roundIdx){ const m=myIdx(list); if(m>=0&&(bi===m||bi===(m^1))) s.classList.add('now'); }
+      if(ci<roundIdx&&b) s.classList.add('win');
+      d.appendChild(s);
+    });
+    el.appendChild(d);
+  });
+  const cur=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
+  const foe=cur[myIdx(cur)^1];
+  document.getElementById('br-title').innerHTML = bracket.champ
+    ? `🏆 ${bracket.champ.n} 천하장사 등극!`
+    : `${ROUND_NAME[roundIdx]} · <span style="color:var(--gold)">${myBull.n}</span> vs <span style="color:#ff8f8b">${foe?foe.n:'?'}</span>`;
+  document.getElementById('br-go').style.display = bracket.champ?'none':'inline-block';
+}
+
+/* ══════════════ 경기 ══════════════ */
+const HPMAX=105, DMG=15;
+const mkFighter=b=>({b,hp:HPMAX});
+
+function startDuel(){ me=mkFighter(myBull); op=mkFighter(opBull); setupFight('1대1 대결'); }
+function beginMatch(){
+  const cur=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
+  const m=myIdx(cur);
+  me=mkFighter(cur[m]); op=mkFighter(cur[m^1]);
+  setupFight(ROUND_NAME[roundIdx]);
+}
+function setupFight(label){
+  initAudio(); bgmStart();
+  quiz=buildQuiz(); qi=0; right=0; wrong=0; locked=false;
+  scene='wide'; fx.cu=null; fx.meLean=0; fx.opLean=0; casterMood='normal';
+  document.getElementById('caster-name').textContent='🎙 '+CASTER_NAME;
+  document.getElementById('round-lab').textContent=label;
+  document.getElementById('me-name').textContent=me.b.n;
+  document.getElementById('op-name').textContent=op.b.n;
+  document.getElementById('bgm-btn').textContent = bgmOn?'🔊':'🔇';
+  updateHP(); updateScore();
+  go('s-fight');
+  say(pick(SAY_START), ()=>askQuestion());
+}
+function updateHP(){
+  document.getElementById('me-hp').style.width=Math.max(0,me.hp/HPMAX*100)+'%';
+  document.getElementById('op-hp').style.width=Math.max(0,op.hp/HPMAX*100)+'%';
+}
+function updateScore(){
+  document.getElementById('sc-q').textContent=Math.min(qi+1,MAXQ)+'/'+MAXQ;
+  document.getElementById('sc-o').textContent=right;
+  document.getElementById('sc-x').textContent=wrong;
+}
+
+/* ── 타자기 대사 ── */
+let typeTimer=null;
+function say(text,done){
+  const el=document.getElementById('say');
+  if(typeTimer) clearInterval(typeTimer);
+  let i=0; el.textContent='';
+  typeTimer=setInterval(()=>{
+    el.textContent=text.slice(0,++i);
+    if(i>=text.length){ clearInterval(typeTimer); typeTimer=null; if(done) done(); }
+  },26);
+}
+
+/* ── 문제 내기 ── */
+function askQuestion(){
+  const q=quiz[qi];
+  casterMood='normal';
+  document.getElementById('subj').textContent=SUBJ[q.s];
+  document.getElementById('qno').textContent=(qi+1)+'번 문제';
+  document.getElementById('qtext').textContent=q.q;
+  document.getElementById('nextbtn').classList.remove('on');
+  updateScore();
+
+  const box=document.getElementById('opts'); box.innerHTML='';
+  q.o.forEach((txt,k)=>{
+    const b=document.createElement('button');
+    b.className='opt'; b.textContent=txt; b.dataset.k=k;
+    b.onclick=()=>answer(k);
+    box.appendChild(b);
+  });
+  locked=false;
+  lookAt('.dlg','end');
+  say(pick(SAY_ASK).replace('{n}',qi+1));
+}
+
+/* ── 답 고르기 ── */
+function answer(k){
+  if(locked) return;
+  locked=true;
+  initAudio();
+  const q=quiz[qi];
+  const ok = (k===q.c);
+  const btns=[...document.querySelectorAll('.opt')];
+  btns.forEach(b=>{
+    b.disabled=true;
+    const bk=parseInt(b.dataset.k,10);
+    if(bk===q.c) b.classList.add('right');
+    else if(bk===k) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+
+  if(ok){ right++; SFX.right(); } else { wrong++; SFX.wrong(); }
+  updateScore();
+  setTimeout(()=>doAttack(ok), 620);
+}
+
+/* ── 공격 연출 ── */
+function doAttack(iAttack){
+  const atk = iAttack? me : op;
+  const def = iAttack? op : me;
+  const crit = Math.random() < atk.b.p*0.06;               // 힘이 셀수록 회심의 일격
+  const tank = !crit && Math.random() < def.b.s*0.05;      // 끈기가 좋으면 잘 버팀
+  const tech = pick(['head','push','horn']);
+  let dmg = DMG;
+  if(crit) dmg = Math.round(DMG*2);
+  else if(tank) dmg = Math.round(DMG*0.5);
+
+  lookAt('.arenabox','center');
+  scene='closeup';
+  fx.cu={t0:fx.t, dur:1.45, atk, def, tech, crit, mine:iAttack};
+  fx.shake = crit? 16 : 9;
+  fx.flash = crit? .55 : .3;
+  setTimeout(()=>{ crit?SFX.crit():SFX.hit(); }, 380);
+
+  casterMood = iAttack ? 'excited' : 'sad';
+  const line = crit ? pick(SAY_CRIT) : (iAttack ? pick(SAY_RIGHT) : (tank? pick(SAY_TANK) : pick(SAY_WRONG)));
+  setTimeout(()=>say(line), 420);
+
+  setTimeout(()=>{
+    def.hp=Math.max(0,def.hp-dmg);
+    updateHP();
+  }, 700);
+
+  setTimeout(()=>{
+    scene='wide'; fx.cu=null;
+    if(iAttack){ fx.meLean=14; fx.opLean=10; } else { fx.meLean=-10; fx.opLean=-14; }
+    setTimeout(()=>{ fx.meLean=0; fx.opLean=0; }, 420);
+    afterAttack();
+  }, 1560);
+}
+
+function afterAttack(){
+  if(op.hp<=0 || me.hp<=0 || wrong>=LOSE_WRONG || qi>=MAXQ-1){
+    setTimeout(endFight, 500);
+    return;
+  }
+  document.getElementById('nextbtn').classList.add('on');
+}
+function nextQuestion(){
+  initAudio(); SFX.tap();
+  qi++;
+  if(qi>=MAXQ){ endFight(); return; }
+  askQuestion();
+}
+
+/* ══════════════ 경기 종료 ══════════════ */
+function endFight(){
+  const iWon = op.hp<=0 ? true
+             : (me.hp<=0 || wrong>=LOSE_WRONG) ? false
+             : (right>wrong ? true : (me.hp>=op.hp && right>=wrong));
+  casterMood = iWon? 'excited':'sad';
+  say(pick(iWon?SAY_WIN:SAY_LOSE));
+  iWon? SFX.win() : SFX.lose();
+  document.getElementById('nextbtn').classList.remove('on');
+
+  const stat=`10문제 중 <span style="color:var(--green)">${right}문제</span>를 맞혔어요.`;
+  setTimeout(()=>{
+    if(mode==='duel'){ duelEnd(iWon,stat); return; }
+    iWon? cupWin(stat) : cupLose(stat);
+  }, 1100);
+}
+function duelEnd(iWon,stat){
+  const w=iWon?me.b:op.b, l=iWon?op.b:me.b;
+  showModal(`<div class="em">${iWon?'🏆':'😤'}</div>
+    <h2>${w.n} 승리!</h2>
+    <p>${w.n} 가 ${l.n} 를 이겼습니다.<br>${stat}</p>
+    <button class="m-go" onclick="closeModal();startDuel()">같은 소로 한 판 더!</button>
+    <button class="m-alt" onclick="closeModal();startMode('duel')">다른 소 골라서 하기</button>
+    <button class="m-alt" onclick="closeModal();go('s-home')">처음으로</button>`);
+}
+function cupWin(stat){
+  const cur=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
+  const next=[bracket.r4,bracket.r2,null][roundIdx];
+  const m=myIdx(cur);
+  if(roundIdx<2){
+    next[Math.floor(m/2)]=me.b;
+    for(let i=0;i<cur.length;i+=2){
+      if(i===m||i===(m^1)) continue;
+      const a=cur[i], b=cur[i+1]; if(!a||!b) continue;
+      next[i/2] = (a.p+a.t+a.s+Math.random()*5) >= (b.p+b.t+b.s+Math.random()*5) ? a : b;
+    }
+    const doneRound=ROUND_NAME[roundIdx];
+    roundIdx++; renderBracket();
+    const nc=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
+    const foe=nc[myIdx(nc)^1];
+    showModal(`<div class="em">🎉</div>
+      <h2>${doneRound} 통과!</h2>
+      <p><span style="color:var(--gold)">${me.b.n}</span> 가 ${op.b.n} 를 이겼습니다.<br>${stat}
+      <br><br>다음은 <span style="color:var(--gold)">${ROUND_NAME[roundIdx]}</span>,
+      상대는 <span style="color:#ff8f8b">${foe?foe.n:'?'}</span> 입니다!</p>
+      <button class="m-go" onclick="closeModal();beginMatch()">바로 다음 경기!</button>
+      <button class="m-alt" onclick="closeModal();go('s-bracket')">대진표 보기</button>`);
+  }else{
+    bracket.champ=me.b; renderBracket();
+    showModal(`<div class="em">🏆👑</div>
+      <h2>${me.b.n} 천하장사!</h2>
+      <p>8강, 4강, 결승을 모두 이겼습니다.<br>${stat}<br>
+      아인이와 ${me.b.n} 가 대회 우승입니다. 박수 한번 주이소!!</p>
+      <button class="m-go" onclick="closeModal();startMode('cup')">다른 소로 또 도전!</button>
+      <button class="m-alt" onclick="closeModal();go('s-home')">처음으로</button>`);
+  }
+}
+function cupLose(stat){
+  showModal(`<div class="em">😢</div>
+    <h2>${ROUND_NAME[roundIdx]}에서 아쉽게…</h2>
+    <p>${stat}<br>다음엔 더 잘할 수 있어요!<br>한 번 더 붙어 볼까요?</p>
+    <button class="m-go" onclick="closeModal();beginMatch()">이 경기 다시 하기</button>
+    <button class="m-alt" onclick="closeModal();startMode('cup')">소 다시 고르기</button>
+    <button class="m-alt" onclick="closeModal();go('s-home')">처음으로</button>`);
+}
+function quitFight(){
+  showModal(`<div class="em">🐂</div><h2>경기를 그만할까요?</h2>
+    <p>지금까지의 경기 기록은 사라집니다.</p>
+    <button class="m-go" onclick="closeModal()">계속 할래요</button>
+    <button class="m-alt" onclick="closeModal();bgmStop();go('s-home')">그만하기</button>`);
+}
+
+/* ══════════════ 규칙 ══════════════ */
+function showRules(){
+  initAudio(); SFX.tap();
+  showModal(`<div class="em">📖</div><h2>어떻게 하는 거예요?</h2>
+    <div class="rules">
+      <div class="box">① 내 소를 고르고 경기장에 들어갑니다.</div>
+      <div class="box">② ${CASTER_NAME}가 문제를 냅니다.<br>
+        산수 · 국어 · 한자 · 영어 · 예의 · 창의 · 상식, 모두 일곱 가지가 나옵니다.</div>
+      <div class="box">③ <span style="color:var(--green)">맞히면</span> 내 소가 밀어붙입니다!<br>
+        박치기 · 밀치기 · 뿔치기 중 하나가 나와요.</div>
+      <div class="box">④ <span style="color:#ff8f8b">틀리면</span> 상대 소가 밀고 들어옵니다.</div>
+      <div class="box">⑤ 한 경기는 <b>10문제</b>. 7문제를 맞히면 이기고,<br>
+        7문제를 틀리면 기력이 다해 집니다.</div>
+      <div class="box">💪 힘이 센 소는 가끔 <b>회심의 일격</b>을 날리고,<br>
+        🔥 끈기가 좋은 소는 잘 <b>버팁니다</b>.</div>
+    </div>
+    <button class="m-go" onclick="closeModal()">알겠어요!</button>`);
+}
+
+/* 첫 클릭에 소리 켜기 (브라우저 정책) */
+window.addEventListener('pointerdown', function once(){
+  initAudio(); if(bgmOn) bgmStart();
+  window.removeEventListener('pointerdown', once);
+});
+drawCaster('normal');
 </script>
 </body>
 </html>
