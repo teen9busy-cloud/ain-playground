@@ -73,6 +73,15 @@
       "skill": "규칙 · 추론",
       "file": "games/pattern.html",
       "color": "violet"
+    },
+    {
+      "id": "bull",
+      "title": "소싸움 대회",
+      "emoji": "🐂",
+      "desc": "공격과 수비의 상성을 읽고 소 14마리 토너먼트에서 우승해요.",
+      "skill": "상성 · 전략",
+      "file": "games/bull.html",
+      "color": "orange"
     }
   ]
 }
