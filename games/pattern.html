@@ -156,18 +156,48 @@ const COUNTS=[5,10,15];
 
 let kind='pic', level=1, total=10;
 let qi=0,right=0,wrong=0,answered=false;
-let cur=null, audioCtx=null;
+let cur=null;
 
-function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+/* ============ 소리 (WebAudio · 파일 없이 오실레이터로 생성) ============ */
+let AC=null;
+function initAudio(){
+  try{
+    if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)();
+    if(AC && AC.state==='suspended') AC.resume();
+  }catch(e){ AC=null; }
+}
+/* 첫 사용자 동작에서 오디오를 깨움 (모바일/사파리 자동재생 차단 대응) */
+['pointerdown','touchstart','keydown'].forEach(ev=>
+  window.addEventListener(ev,initAudio,{passive:true}));
+
+/* 모든 소리는 AC.currentTime 기준으로 미리 예약 → 게임 진행을 절대 막지 않음 */
+function tone(freq,dur,type,vol,delay,glide){
+  if(!AC) return;
+  try{
+    const t0=AC.currentTime+(delay||0);
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type||'sine';
+    o.frequency.setValueAtTime(freq,t0);
+    if(glide) o.frequency.exponentialRampToValueAtTime(glide,t0+dur);
+    g.gain.setValueAtTime(.0001,t0);
+    g.gain.exponentialRampToValueAtTime(vol||.06,t0+.012);
+    g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+    o.connect(g); g.connect(AC.destination);
+    o.start(t0); o.stop(t0+dur+.02);
+  }catch(e){}
+}
+const SFX={
+  tap(){ tone(660,.06,'sine',.05,0); },                                   /* 버튼 누름 */
+  good(){ tone(880,.10,'sine',.07,0); tone(1318.5,.14,'sine',.06,.09); }, /* 정답! */
+  bad(){ tone(196,.30,'sine',.05,0,156); },                               /* 부드럽고 낮은 실패음 */
+  clear(){ [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,.14,'square',.08,i*.085)); }
+};
+/* 기존 호출부 호환 (소리 시스템은 위 하나뿐) */
 function beep(t){
-  if(!audioCtx)return;
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.connect(g);g.connect(audioCtx.destination);
-  const c=audioCtx.currentTime;g.gain.setValueAtTime(.08,c);
-  if(t==='tap'){o.type='sine';o.frequency.setValueAtTime(660,c);o.start();o.stop(c+.06);}
-  if(t==='good'){o.type='sine';o.frequency.setValueAtTime(700,c);o.frequency.setValueAtTime(1040,c+.1);o.start();o.stop(c+.24);}
-  if(t==='bad'){o.type='sawtooth';o.frequency.setValueAtTime(230,c);o.frequency.exponentialRampToValueAtTime(120,c+.26);o.start();o.stop(c+.28);}
-  if(t==='win'){o.type='square';[440,590,780,980].forEach((f,i)=>o.frequency.setValueAtTime(f,c+i*.16));o.start();o.stop(c+.7);}
+  if(t==='tap') SFX.tap();
+  else if(t==='good') SFX.good();
+  else if(t==='bad') SFX.bad();
+  else if(t==='win') SFX.clear();
 }
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function pickN(arr,n){return shuffle(arr.slice()).slice(0,n);}

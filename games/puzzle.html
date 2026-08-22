@@ -176,20 +176,51 @@ const THEMES=[
 const LEVELS=[{n:2,l:'1단계 (4조각)'},{n:3,l:'2단계 (9조각)'},{n:4,l:'3단계 (16조각)'},
               {n:5,l:'4단계 (25조각)'},{n:6,l:'5단계 (36조각)'}];
 
-let theme='dino', gridSize=2, levelIdx=0, img='', selected=null, placed=0, audioCtx=null;
+let theme='dino', gridSize=2, levelIdx=0, img='', selected=null, placed=0;
 let showTags=true, lockRight=true;
+let correctIds=new Set();   /* 지금 제자리에 있는 조각들 (효과음 판단용) */
 
-/* ============ 소리 ============ */
-function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+/* ============ 소리 (WebAudio · 파일 없이 오실레이터로 생성) ============ */
+let AC=null;
+function initAudio(){
+  try{
+    if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)();
+    if(AC && AC.state==='suspended') AC.resume();
+  }catch(e){ AC=null; }
+}
+/* 첫 사용자 동작에서 오디오를 깨움 (모바일/사파리 자동재생 차단 대응) */
+['pointerdown','touchstart','keydown'].forEach(ev=>
+  window.addEventListener(ev,initAudio,{passive:true}));
+
+/* 모든 소리는 AC.currentTime 기준으로 미리 예약 → 게임 진행을 절대 막지 않음 */
+function tone(freq,dur,type,vol,delay,glide){
+  if(!AC) return;
+  try{
+    const t0=AC.currentTime+(delay||0);
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type||'sine';
+    o.frequency.setValueAtTime(freq,t0);
+    if(glide) o.frequency.exponentialRampToValueAtTime(glide,t0+dur);
+    g.gain.setValueAtTime(.0001,t0);
+    g.gain.exponentialRampToValueAtTime(vol||.06,t0+.012);
+    g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+    o.connect(g); g.connect(AC.destination);
+    o.start(t0); o.stop(t0+dur+.02);
+  }catch(e){}
+}
+const SFX={
+  tap(){ tone(660,.06,'sine',.05,0); },                                   /* 조각 고르기 */
+  move(){ tone(400,.10,'triangle',.05,0,820); },                          /* 그냥 옮김 */
+  good(){ tone(880,.10,'sine',.07,0); tone(1318.5,.14,'sine',.06,.09); }, /* 제자리를 찾았다! */
+  bad(){ tone(196,.30,'sine',.05,0,156); },                               /* 부드럽고 낮은 실패음 */
+  clear(){ [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,.14,'square',.08,i*.085)); }
+};
+/* 기존 호출부 호환 (소리 시스템은 위 하나뿐) */
 function beep(t){
-  if(!audioCtx)return;
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.connect(g);g.connect(audioCtx.destination);
-  const c=audioCtx.currentTime; g.gain.setValueAtTime(.08,c);
-  if(t==='sel'){o.type='sine';o.frequency.setValueAtTime(640,c);o.start();o.stop(c+.08);}
-  if(t==='drop'){o.type='triangle';o.frequency.setValueAtTime(400,c);o.frequency.exponentialRampToValueAtTime(820,c+.1);o.start();o.stop(c+.11);}
-  if(t==='good'){o.type='sine';o.frequency.setValueAtTime(700,c);o.frequency.setValueAtTime(980,c+.09);o.start();o.stop(c+.2);}
-  if(t==='win'){o.type='square';[440,590,780,980].forEach((f,i)=>o.frequency.setValueAtTime(f,c+i*.16));o.start();o.stop(c+.7);}
+  if(t==='sel') SFX.tap();
+  else if(t==='drop') SFX.move();
+  else if(t==='good') SFX.good();
+  else if(t==='win') SFX.clear();
 }
 
 /* ============ 그림 생성 ============
@@ -502,7 +533,7 @@ window.addEventListener('resize',fit);
 
 function build(){
   const board=document.getElementById('board'), tray=document.getElementById('tray');
-  board.innerHTML=''; tray.innerHTML=''; selected=null; placed=0;
+  board.innerHTML=''; tray.innerHTML=''; selected=null; placed=0; correctIds=new Set();
   board.style.backgroundImage=`url(${img})`;
   board.style.gridTemplateColumns=`repeat(${gridSize},1fr)`;
   board.style.gridTemplateRows=`repeat(${gridSize},1fr)`;
@@ -535,15 +566,16 @@ function pieceClick(p){
   if(p.classList.contains('fixed')) return;
   initAudio();
   if(selected===p){ clearSel(); return; }
-  if(selected){ swap(selected,p); clearSel(); beep('drop'); check(); return; }
-  clearSel(); selected=p; p.classList.add('sel'); beep('sel');
+  if(selected){ const moved=selected; swap(selected,p); clearSel(); SFX.move(); afterMove(moved,check()); return; }
+  clearSel(); selected=p; p.classList.add('sel'); SFX.tap();
 }
 function slotClick(slot){
   if(!selected) return;
   initAudio();
+  const moved=selected;
   if(slot.children.length===0){ slot.appendChild(selected); }
   else { swap(selected, slot.children[0]); }
-  clearSel(); beep('drop'); check();
+  clearSel(); SFX.move(); afterMove(moved,check());
 }
 /* 두 조각의 자리를 안전하게 맞바꿈 */
 function swap(a,b){
@@ -558,20 +590,32 @@ function clearSel(){ if(selected){selected.classList.remove('sel');selected=null
 
 function check(){
   const slots=document.querySelectorAll('.slot');
-  let count=0, all=true;
+  let count=0, all=true; const nowRight=new Set();
   slots.forEach(s=>{
     const p=s.children[0];
     if(p && p.dataset.id===s.dataset.target){
-      count++;
+      count++; nowRight.add(p.dataset.id);
       if(lockRight && !p.classList.contains('fixed')){
         p.classList.add('fixed');
         const t=p.querySelector('.tag'); if(t)t.remove();
-        beep('good');
       }
     } else all=false;
   });
+  /* 새로 제자리를 찾은 조각이 있으면 성공 효과음 (고정 옵션과 무관하게) */
+  let gained=false;
+  nowRight.forEach(id=>{ if(!correctIds.has(id)) gained=true; });
+  correctIds=nowRight;
+  if(gained) SFX.good();
   placed=count; updateStat();
   if(all && slots.length) setTimeout(win,320);
+  return gained;
+}
+/* 방금 옮긴 조각이 엉뚱한 칸에 놓였으면 부드러운 소리로 살짝 알려줌 */
+function afterMove(moved,gained){
+  if(gained || !moved) return;
+  const par=moved.parentNode;
+  if(par && par.classList && par.classList.contains('slot')
+     && moved.dataset.id!==par.dataset.target) SFX.bad();
 }
 function updateStat(){
   document.getElementById('stat').textContent=`${placed} / ${gridSize*gridSize} 맞췄어요`;
@@ -586,7 +630,7 @@ document.getElementById('mini').onclick=()=>{
 };
 
 function win(){
-  beep('win'); confetti();
+  SFX.clear(); confetti();
   document.getElementById('win-msg').textContent=
     `${LEVELS[levelIdx].l} 완성! 정말 잘했어요!`;
   document.getElementById('win').classList.add('on');

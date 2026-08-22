@@ -38,6 +38,17 @@ h1{font-size:clamp(29px,5.2vh,50px);color:var(--o-d);margin:0 0 4px;text-align:c
 .big{background:var(--green);color:#fff;font-size:clamp(23px,3.6vh,34px);padding:18px 56px;
   border-radius:999px;box-shadow:0 5px 0 var(--green-d);transition:.08s;min-height:70px;margin-top:6px}
 .big:active{transform:translateY(5px);box-shadow:0 0 0 var(--green-d)}
+/* 넷북처럼 화면이 낮을 때는 설정 화면을 촘촘하게 */
+@media (max-height:720px){
+  .screen{padding:56px 8px 14px}
+  h1{margin-bottom:2px}
+  .sub{margin-bottom:10px}
+  .box{padding:12px 14px;margin-bottom:10px}
+  .box h2{margin-bottom:10px}
+  .opts{gap:9px}
+  .opt{min-height:54px;padding:10px 16px}
+  .big{min-height:62px;padding:14px 46px;margin-top:2px}
+}
 
 /* 게임 */
 .bar{display:flex;justify-content:space-between;align-items:center;gap:12px;
@@ -48,7 +59,10 @@ h1{font-size:clamp(29px,5.2vh,50px);color:var(--o-d);margin:0 0 4px;text-align:c
 
 .play{display:flex;gap:clamp(16px,3vw,34px);align-items:center;justify-content:center;flex-wrap:wrap}
 canvas#clock{width:var(--cs,300px);height:var(--cs,300px);
-  filter:drop-shadow(0 8px 18px rgba(0,0,0,.12))}
+  filter:drop-shadow(0 8px 18px rgba(0,0,0,.12));
+  touch-action:none;-ms-touch-action:none;cursor:default}
+canvas#clock.grabbable{cursor:grab}
+canvas#clock.dragging{cursor:grabbing}
 .side{display:flex;flex-direction:column;align-items:center;gap:14px}
 .ask{font-size:clamp(20px,3.1vh,28px);color:var(--o-d);text-align:center}
 .choices{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
@@ -60,6 +74,9 @@ canvas#clock{width:var(--cs,300px);height:var(--cs,300px);
 .ch:disabled{cursor:default}
 
 .setclock{display:flex;flex-direction:column;gap:12px;align-items:center}
+.draghint{background:#e0f2fe;border:2px solid #7dd3fc;color:#075985;border-radius:14px;
+  padding:11px 18px;font-size:clamp(15px,2.2vh,20px);white-space:nowrap;text-align:center}
+.orhint{color:var(--muted);font-size:clamp(13px,1.9vh,16px);white-space:nowrap}
 .setrow{display:flex;align-items:center;gap:12px}
 .setrow .lab{width:106px;font-size:19px;text-align:right}
 .setrow button{width:64px;height:64px;border-radius:16px;font-size:28px;color:#fff}
@@ -129,6 +146,8 @@ canvas#clock{width:var(--cs,300px);height:var(--cs,300px);
       <div class="ask" id="ask">지금 몇 시일까요?</div>
       <div class="choices" id="choices"></div>
       <div class="setclock" id="setclock" style="display:none">
+        <div class="draghint" id="draghint">👆 바늘을 손가락으로 잡고 돌려 보세요!</div>
+        <div class="orhint">또는 아래 ➖ ➕ 단추로 움직여도 좋아요</div>
         <div class="setrow">
           <span class="lab" style="color:var(--hour)">짧은 바늘</span>
           <button class="h-btn" onclick="bump('h',-1)">−</button>
@@ -173,16 +192,41 @@ let qi=0, right=0, wrong=0, answered=false;
 let target={h:3,m:0}, guess={h:12,m:0}, curMode='read';
 let audioCtx=null;
 
-function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
-function beep(t){
+/* ===== 소리 (WebAudio, 오디오 파일 없음) ===== */
+window.__sfx=[];                       // 테스트/검증용 재생 기록
+function initAudio(){
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+  }catch(e){ audioCtx=null; }
+}
+// 첫 사용자 제스처에서 AudioContext 생성/재개
+['pointerdown','touchstart','mousedown','keydown'].forEach(ev=>
+  window.addEventListener(ev,initAudio,{passive:true}));
+
+function tone(f,at,dur,type,vol){
   if(!audioCtx)return;
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.connect(g);g.connect(audioCtx.destination);
-  const c=audioCtx.currentTime;g.gain.setValueAtTime(.08,c);
-  if(t==='tick'){o.type='sine';o.frequency.setValueAtTime(700,c);o.start();o.stop(c+.06);}
-  if(t==='good'){o.type='sine';o.frequency.setValueAtTime(660,c);o.frequency.setValueAtTime(990,c+.1);o.start();o.stop(c+.24);}
-  if(t==='bad'){o.type='sawtooth';o.frequency.setValueAtTime(220,c);o.frequency.exponentialRampToValueAtTime(120,c+.28);o.start();o.stop(c+.3);}
-  if(t==='win'){o.type='square';[440,590,780,980].forEach((f,i)=>o.frequency.setValueAtTime(f,c+i*.16));o.start();o.stop(c+.7);}
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type||'sine'; o.frequency.setValueAtTime(f,at);
+  g.gain.setValueAtTime(0.0001,at);
+  g.gain.linearRampToValueAtTime(vol,at+0.012);
+  g.gain.setValueAtTime(vol,at+dur*0.62);
+  g.gain.exponentialRampToValueAtTime(0.0001,at+dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(at); o.stop(at+dur+0.03);
+}
+const FANFARE=[523.25,659.25,783.99,1046.5];
+function beep(t){
+  window.__sfx.push(t);
+  if(!audioCtx)return;
+  const c=audioCtx.currentTime+0.01;
+  if(t==='tick'){ tone(700,c,.06,'sine',.05); }
+  // 한 문제 정답 → 짧고 밝은 삑!
+  if(t==='good'){ tone(1046.5,c,.075,'triangle',.09); tone(1396.91,c+.065,.11,'triangle',.075); }
+  // 틀림 → 부드럽고 낮은 소리 (혼내지 않는 느낌)
+  if(t==='bad'){ tone(196,c,.16,'sine',.05); tone(155.56,c+.14,.22,'sine',.045); }
+  // 한 판 클리어 → 올라가는 4음 팡파르
+  if(t==='win'){ FANFARE.forEach((f,i)=>tone(f,c+i*.085,.14,'square',.08)); }
 }
 
 /* 설정 UI */
@@ -210,6 +254,7 @@ function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remo
 /* ===== 시계 그리기 ===== */
 const cv=document.getElementById('clock'), cx=cv.getContext('2d');
 const S=600, C=300, R=252;
+const HLEN=R-130, MLEN=R-58;          // 시침 / 분침 길이
 function fit(){
   const s=Math.max(300,Math.floor(Math.min(window.innerHeight-150, window.innerWidth*0.44, 420)));
   document.documentElement.style.setProperty('--cs',s+'px');
@@ -248,13 +293,29 @@ function drawClock(h,m,opts){
 
   const ma=(m/60)*Math.PI*2-Math.PI/2;
   const ha=((h%12)/12 + m/720)*Math.PI*2-Math.PI/2;
+  const grab=opts.grab||null, draggable=!!opts.draggable;
 
   // 짧은 바늘 (시)
-  cx.strokeStyle='#ef4444';cx.lineWidth=20;cx.lineCap='round';
-  cx.beginPath();cx.moveTo(C,C);cx.lineTo(C+Math.cos(ha)*(R-130),C+Math.sin(ha)*(R-130));cx.stroke();
+  cx.lineCap='round';
+  const hx=C+Math.cos(ha)*HLEN, hy=C+Math.sin(ha)*HLEN;
+  const mx=C+Math.cos(ma)*MLEN, my=C+Math.sin(ma)*MLEN;
+  if(grab==='h'){cx.shadowColor='rgba(239,68,68,.55)';cx.shadowBlur=26;}
+  cx.strokeStyle=grab==='h'?'#dc2626':'#ef4444';cx.lineWidth=grab==='h'?30:20;
+  cx.beginPath();cx.moveTo(C,C);cx.lineTo(hx,hy);cx.stroke();
+  cx.shadowBlur=0;
   // 긴 바늘 (분)
-  cx.strokeStyle='#2563eb';cx.lineWidth=13;
-  cx.beginPath();cx.moveTo(C,C);cx.lineTo(C+Math.cos(ma)*(R-58),C+Math.sin(ma)*(R-58));cx.stroke();
+  if(grab==='m'){cx.shadowColor='rgba(37,99,235,.55)';cx.shadowBlur=26;}
+  cx.strokeStyle=grab==='m'?'#1d4ed8':'#2563eb';cx.lineWidth=grab==='m'?22:13;
+  cx.beginPath();cx.moveTo(C,C);cx.lineTo(mx,my);cx.stroke();
+  cx.shadowBlur=0;
+  // 손잡이 구슬 (잡을 수 있다는 표시)
+  if(draggable){
+    [[hx,hy,'#ef4444',grab==='h'],[mx,my,'#2563eb',grab==='m']].forEach(([x,y,col,on])=>{
+      cx.fillStyle=col;cx.beginPath();cx.arc(x,y,on?30:21,0,Math.PI*2);cx.fill();
+      cx.fillStyle='#fff';cx.beginPath();cx.arc(x,y,on?13:9,0,Math.PI*2);cx.fill();
+      if(on){cx.strokeStyle='#fff';cx.lineWidth=5;cx.beginPath();cx.arc(x,y,30,0,Math.PI*2);cx.stroke();}
+    });
+  }
   // 가운데
   cx.fillStyle='#1f2937';cx.beginPath();cx.arc(C,C,17,0,Math.PI*2);cx.fill();
   cx.fillStyle='#fff';cx.beginPath();cx.arc(C,C,7,0,Math.PI*2);cx.fill();
@@ -294,13 +355,18 @@ function nextQ(){
     document.getElementById('setclock').style.display='none';
     document.getElementById('choices').style.display='grid';
     document.getElementById('ask').textContent='지금 몇 시 몇 분일까요?';
-    drawClock(target.h,target.m);
+    dragging=null; cv.classList.remove('grabbable','dragging');
+    drawClock(target.h,target.m);          // 읽기 모드에서는 바늘을 잡을 수 없어요
     buildChoices();
   }else{
     document.getElementById('choices').style.display='none';
     document.getElementById('setclock').style.display='flex';
     document.getElementById('ask').innerHTML=
       `<b style="font-size:1.25em;color:#c2410c">${fmt(target.h,target.m)}</b><br>가 되도록 바늘을 돌려요!`;
+    const step=DIFFS[diff].step;
+    document.getElementById('draghint').textContent = step>=60
+      ? '👆 짧은 바늘을 잡고 돌려 보세요! (긴 바늘은 12에 그대로예요)'
+      : `👆 바늘을 손가락으로 잡고 돌려 보세요! (긴 바늘은 ${step}분씩)`;
     guess={h:12,m:0};
     updateSet();
   }
@@ -360,13 +426,84 @@ function bump(which,dir){
 function updateSet(){
   document.getElementById('hv').textContent=guess.h+'시';
   document.getElementById('mv').textContent=String(guess.m).padStart(2,'0')+'분';
-  drawClock(guess.h,guess.m);
+  drawClock(guess.h,guess.m,{grab:dragging,draggable:canDrag()});
+  cv.classList.toggle('grabbable',canDrag());
 }
+
+/* ===== 바늘 직접 잡고 돌리기 (마우스 + 터치) ===== */
+let dragging=null;                       // 'h' | 'm' | null
+const TAU=Math.PI*2;
+function canDrag(){ return curMode==='set' && !answered; }
+function canvasPos(ev){
+  const r=cv.getBoundingClientRect();
+  if(!r.width||!r.height) return {x:C,y:C};
+  return {x:(ev.clientX-r.left)*(S/r.width), y:(ev.clientY-r.top)*(S/r.height)};
+}
+function tipOf(which,h,m){
+  const a = which==='m' ? (m/60)*TAU-Math.PI/2
+                        : ((h%12)/12+m/720)*TAU-Math.PI/2;
+  const len = which==='m'?MLEN:HLEN;
+  return {x:C+Math.cos(a)*len, y:C+Math.sin(a)*len};
+}
+function applyDrag(p){
+  // 12시를 0으로 하는 회전량(0~1)
+  const ang=Math.atan2(p.y-C,p.x-C)+Math.PI/2;
+  const turns=((ang/TAU)%1+1)%1;
+  const step=DIFFS[diff].step;
+  const before=guess.h+':'+guess.m;
+  if(dragging==='m'){
+    // 분침: 이 단계에 맞는 칸(5·15·30분)으로 딱 붙게
+    let mm = step>=60 ? 0 : Math.round(turns*60/step)*step;
+    guess.m = ((mm%60)+60)%60;
+  }else{
+    // 시침: 분만큼 앞서가 있으니 그만큼 빼고 정시로 붙임 (3시 30분 → 3과 4 사이)
+    let hh = Math.round(turns*12 - guess.m/60);
+    hh = ((hh%12)+12)%12;
+    guess.h = hh===0?12:hh;
+  }
+  if(before!==guess.h+':'+guess.m) beep('tick');
+  updateSet();
+}
+cv.addEventListener('pointerdown',e=>{
+  initAudio();
+  if(!canDrag()) return;
+  const p=canvasPos(e), dx=p.x-C, dy=p.y-C, rr=Math.hypot(dx,dy);
+  if(rr<24 || rr>R+50) return;                     // 가운데 못이나 시계 밖은 무시
+  const th=tipOf('h',guess.h,guess.m), tm=tipOf('m',guess.h,guess.m);
+  const dh=Math.hypot(p.x-th.x,p.y-th.y), dm=Math.hypot(p.x-tm.x,p.y-tm.y);
+  dragging = dh<=dm ? 'h' : 'm';                   // 손끝에 더 가까운 바늘을 잡음
+  try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+  cv.classList.add('dragging');
+  e.preventDefault();
+  applyDrag(p);
+},{passive:false});
+cv.addEventListener('pointermove',e=>{
+  if(!dragging) return;
+  e.preventDefault();
+  applyDrag(canvasPos(e));
+},{passive:false});
+function endDrag(e){
+  if(!dragging) return;
+  dragging=null;
+  cv.classList.remove('dragging');
+  try{ cv.releasePointerCapture(e.pointerId); }catch(_){}
+  updateSet();
+}
+cv.addEventListener('pointerup',endDrag);
+cv.addEventListener('pointercancel',endDrag);
+cv.addEventListener('lostpointercapture',endDrag);
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+// 검증용 훅
+window.getGuess=()=>({h:guess.h,m:guess.m});
+window.getAudioState=()=>audioCtx?audioCtx.state:'none';
+window.getCurMode=()=>curMode;
+window.isDragging=()=>dragging;
 function checkSet(){
   if(answered) return;
   answered=true;
+  dragging=null; cv.classList.remove('grabbable','dragging');
   const ok = guess.h===target.h && guess.m===target.m;
-  if(ok){ right++; beep('good'); feedback(true,'딱 맞췄어요! 시계 박사님! 🎉'); }
+  if(ok){ right++; beep('good'); feedback(true,'딱 맞췄어요! 시계 박사님! 🎉'); drawClock(guess.h,guess.m); }
   else{
     wrong++; beep('bad');
     feedback(false,`아쉬워요! ${fmt(target.h,target.m)}는 이렇게 생겼어요 👀`);

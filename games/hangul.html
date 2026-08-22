@@ -38,6 +38,28 @@ h1{font-size:clamp(29px,5.2vh,50px);color:var(--pink-d);margin:0 0 4px;text-alig
 .big{background:var(--green);color:#fff;font-size:clamp(23px,3.6vh,34px);padding:18px 56px;
   border-radius:999px;box-shadow:0 5px 0 var(--green-d);transition:.08s;min-height:70px;margin-top:6px}
 .big:active{transform:translateY(5px);box-shadow:0 0 0 var(--green-d)}
+.lvdesc{margin:13px 0 0;text-align:center;color:var(--muted);
+  font-size:clamp(14px,2.1vh,18px);line-height:1.45;min-height:26px}
+.box.off{opacity:.45}
+.box.off .opts{pointer-events:none}
+.offnote{display:none;margin:10px 0 0;text-align:center;color:var(--pink-d);font-size:15px}
+.box.off .offnote{display:block}
+.row2{display:flex;gap:14px;width:min(880px,96vw);align-items:stretch}
+.row2 .box{width:auto;flex:1;min-width:0}
+@media (max-width:820px){ .row2{flex-direction:column;gap:0} }
+/* 넷북처럼 화면이 낮을 때는 설정 화면을 촘촘하게 */
+@media (max-height:720px){
+  .screen{padding:56px 8px 14px}
+  h1{margin-bottom:2px}
+  .sub{margin-bottom:10px}
+  .box{padding:12px 14px;margin-bottom:10px}
+  .box h2{margin-bottom:10px}
+  .opts{gap:9px}
+  .opt{min-height:54px;padding:10px 16px}
+  .lvdesc{margin-top:9px;min-height:20px}
+  .row2{gap:10px}
+  .big{min-height:62px;padding:14px 46px;margin-top:2px}
+}
 
 .bar{display:flex;justify-content:space-between;align-items:center;gap:12px;
   width:min(960px,97vw);margin-bottom:10px}
@@ -45,19 +67,34 @@ h1{font-size:clamp(29px,5.2vh,50px);color:var(--pink-d);margin:0 0 4px;text-alig
 .bar .s{font-size:18px;color:var(--muted)}
 .bar .quit{background:#fecaca;color:#991b1b;font-size:17px;padding:13px 20px;border-radius:12px;min-height:52px}
 
-.stage{display:flex;flex-direction:column;align-items:center;gap:clamp(9px,1.7vh,17px)}
-.pic{font-size:clamp(70px,15vh,150px);line-height:1;filter:drop-shadow(0 6px 12px rgba(0,0,0,.12))}
+.stage{display:flex;flex-direction:column;align-items:center;gap:clamp(7px,1.4vh,15px)}
+.pic{font-size:clamp(62px,12.5vh,140px);line-height:1;filter:drop-shadow(0 6px 12px rgba(0,0,0,.12))}
+.pic.q{font-size:clamp(30px,5vh,52px);opacity:.55;filter:none}
 .hintline{font-size:clamp(16px,2.5vh,22px);color:var(--muted);min-height:28px;text-align:center}
+.sentence{font-size:clamp(17px,2.7vh,25px);color:#9f1239;text-align:center;
+  max-width:min(760px,94vw);line-height:1.45}
+.sentence b{color:var(--pink);letter-spacing:.06em}
 
-.answer{display:flex;gap:clamp(8px,1.6vh,14px)}
+.answer{display:flex;gap:clamp(8px,1.6vh,14px);flex-wrap:wrap;justify-content:center;align-items:flex-end}
 .cell{width:var(--cs,72px);height:var(--cs,72px);min-width:64px;min-height:64px;border-radius:16px;background:#fff;
   border:3px dashed #fda4af;display:flex;align-items:center;justify-content:center;
   font-size:calc(var(--cs,72px)*.55);color:var(--pink-d);transition:.15s}
 .cell.filled{border-style:solid;border-color:var(--pink);background:#fff1f2}
-.cell.ok{border-color:var(--green);background:#dcfce7;color:var(--green-d);animation:pop .35s}
-.cell.no{border-color:#ef4444;background:#fee2e2;animation:shake .32s}
+.cell.ok{border-style:solid;border-color:var(--green);background:#dcfce7;color:var(--green-d);animation:pop .35s}
+.cell.no{border-style:solid;border-color:#ef4444;background:#fee2e2;animation:shake .32s}
 @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.14)}100%{transform:scale(1)}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* 도전 단계: 자모를 모아 한 글자를 만드는 칸 */
+.syl{display:flex;flex-direction:column;align-items:center;gap:5px;
+  background:#fff7f8;border:2px solid #fecdd3;border-radius:16px;padding:7px 8px}
+.sylout{width:calc(var(--cs,72px)*.92);height:calc(var(--cs,72px)*.92);min-width:52px;min-height:52px;
+  border-radius:13px;background:#fff;border:2px solid #fbcfe8;display:flex;
+  align-items:center;justify-content:center;font-size:calc(var(--cs,72px)*.55);color:var(--pink-d)}
+.sylout.done{background:#dcfce7;border-color:var(--green);color:var(--green-d)}
+.jrow{display:flex;gap:5px}
+.cell.j{width:calc(var(--cs,72px)*.56);height:calc(var(--cs,72px)*.56);
+  min-width:38px;min-height:38px;border-radius:11px;font-size:calc(var(--cs,72px)*.31)}
 
 .tiles{display:flex;flex-wrap:wrap;gap:clamp(10px,1.6vh,14px);justify-content:center;max-width:min(900px,96vw)}
 .tile{width:var(--cs,72px);height:var(--cs,72px);min-width:64px;min-height:64px;
@@ -66,6 +103,8 @@ h1{font-size:clamp(29px,5.2vh,50px);color:var(--pink-d);margin:0 0 4px;text-alig
   box-shadow:0 4px 0 #d1d5db;transition:.1s}
 .tile:active{transform:translateY(4px);box-shadow:0 0 0 #d1d5db}
 .tile.used{opacity:.28;pointer-events:none;box-shadow:none}
+.tiles.jamo .tile{width:calc(var(--cs,72px)*.78);height:calc(var(--cs,72px)*.78);
+  min-width:60px;min-height:60px;font-size:calc(var(--cs,72px)*.42)}
 
 .tools{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 .tool{background:#fff;border:2px solid #e5e7eb;color:#4b5563;padding:14px 22px;border-radius:14px;
@@ -103,20 +142,28 @@ h1{font-size:clamp(29px,5.2vh,50px);color:var(--pink-d);margin:0 0 4px;text-alig
   <p class="sub">그림을 보고 글자를 순서대로 눌러 낱말을 만들어요!</p>
 
   <div class="box">
-    <h2>1. 글자 수는 몇 개로 할까요?</h2>
-    <div class="opts" id="lens">
-      <button class="opt sel" data-len="2">두 글자 (사과, 자동차 X)</button>
-      <button class="opt" data-len="3">세 글자 (자동차)</button>
-      <button class="opt" data-len="0">🎲 섞어서</button>
-    </div>
+    <h2>1. 얼마나 어렵게 할까요?</h2>
+    <div class="opts" id="levels"></div>
+    <p class="lvdesc" id="lvdesc"></p>
   </div>
   <div class="box">
     <h2>2. 무슨 낱말로 놀까요?</h2>
     <div class="opts" id="cats"></div>
   </div>
-  <div class="box">
-    <h2>3. 몇 문제 풀까요?</h2>
-    <div class="opts" id="counts"></div>
+  <div class="row2">
+    <div class="box" id="lenbox">
+      <h2>3. 글자 수는?</h2>
+      <div class="opts" id="lens">
+        <button class="opt sel" data-len="2">두 글자</button>
+        <button class="opt" data-len="3">세 글자</button>
+        <button class="opt" data-len="0">🎲 섞어서</button>
+      </div>
+      <p class="offnote">이 단계는 낱말 길이가 정해져 있어요 🙂</p>
+    </div>
+    <div class="box">
+      <h2>4. 몇 문제 풀까요?</h2>
+      <div class="opts" id="counts"></div>
+    </div>
   </div>
   <button class="big" onclick="start()">시작하기!</button>
 </div>
@@ -130,12 +177,13 @@ h1{font-size:clamp(29px,5.2vh,50px);color:var(--pink-d);margin:0 0 4px;text-alig
 
   <div class="stage">
     <div class="pic" id="pic">🍎</div>
+    <div class="sentence" id="sentence" style="display:none"></div>
     <div class="hintline" id="hintline">이 그림은 무엇일까요?</div>
     <div class="answer" id="answer"></div>
     <div class="tiles" id="tiles"></div>
     <div class="tools">
-      <button class="tool" onclick="undo()">↩️ 한 글자 지우기</button>
-      <button class="tool hint" onclick="hint()">💡 힌트</button>
+      <button class="tool" id="undoBtn" onclick="undo()">↩️ 하나 지우기</button>
+      <button class="tool hint" id="hintBtn" onclick="hint()">💡 힌트</button>
       <button class="tool say" onclick="speak()">🔊 읽어주기</button>
     </div>
     <div class="fb" id="fb"></div>
@@ -155,87 +203,318 @@ h1{font-size:clamp(29px,5.2vh,50px);color:var(--pink-d);margin:0 0 4px;text-alig
 
 <script>
 "use strict";
+/* ===== 낱말 사전 =====
+   d : 난이도 1 쉬움 / 2 보통 / 3 어려움 / 4 도전(자모 조립)
+   s : 어려움·도전 단계에서 그림 대신 보여 주는 문장 힌트 (___ 자리에 낱말이 들어가요)  */
 const WORDS=[
- /* 동물 */
- {w:'강아지',e:'🐶',c:'animal'},{w:'고양이',e:'🐱',c:'animal'},{w:'토끼',e:'🐰',c:'animal'},
- {w:'사자',e:'🦁',c:'animal'},{w:'호랑이',e:'🐯',c:'animal'},{w:'코끼리',e:'🐘',c:'animal'},
- {w:'거북이',e:'🐢',c:'animal'},{w:'병아리',e:'🐤',c:'animal'},{w:'돼지',e:'🐷',c:'animal'},
- {w:'개구리',e:'🐸',c:'animal'},{w:'공룡',e:'🦖',c:'animal'},{w:'다람쥐',e:'🐿️',c:'animal'},
- {w:'물고기',e:'🐠',c:'animal'},{w:'나비',e:'🦋',c:'animal'},{w:'하마',e:'🦛',c:'animal'},
- /* 탈것 */
- {w:'자동차',e:'🚗',c:'vehicle'},{w:'버스',e:'🚌',c:'vehicle'},{w:'기차',e:'🚆',c:'vehicle'},
- {w:'비행기',e:'✈️',c:'vehicle'},{w:'로켓',e:'🚀',c:'vehicle'},{w:'자전거',e:'🚲',c:'vehicle'},
- {w:'배',e:'🚢',c:'vehicle'},{w:'택시',e:'🚕',c:'vehicle'},{w:'헬기',e:'🚁',c:'vehicle'},
- {w:'트럭',e:'🚚',c:'vehicle'},{w:'로봇',e:'🤖',c:'vehicle'},
- /* 음식 */
- {w:'사과',e:'🍎',c:'food'},{w:'바나나',e:'🍌',c:'food'},{w:'딸기',e:'🍓',c:'food'},
- {w:'수박',e:'🍉',c:'food'},{w:'포도',e:'🍇',c:'food'},{w:'당근',e:'🥕',c:'food'},
- {w:'우유',e:'🥛',c:'food'},{w:'빵',e:'🍞',c:'food'},{w:'김밥',e:'🍙',c:'food'},
- {w:'피자',e:'🍕',c:'food'},{w:'라면',e:'🍜',c:'food'},{w:'케이크',e:'🍰',c:'food'},
- /* 자연·사물 */
- {w:'나무',e:'🌳',c:'thing'},{w:'구름',e:'☁️',c:'thing'},{w:'무지개',e:'🌈',c:'thing'},
- {w:'우산',e:'☂️',c:'thing'},{w:'모자',e:'🧢',c:'thing'},{w:'가방',e:'🎒',c:'thing'},
- {w:'연필',e:'✏️',c:'thing'},{w:'시계',e:'⏰',c:'thing'},{w:'축구공',e:'⚽',c:'thing'},
- {w:'해',e:'☀️',c:'thing'},{w:'달',e:'🌙',c:'thing'},{w:'별',e:'⭐',c:'thing'},
- {w:'꽃',e:'🌸',c:'thing'},{w:'집',e:'🏠',c:'thing'},{w:'풍선',e:'🎈',c:'thing'}
+ /* ── 1단계 쉬움 : 그림 보고 두세 글자 ── */
+ {w:'강아지',e:'🐶',c:'animal',d:1},{w:'고양이',e:'🐱',c:'animal',d:1},
+ {w:'토끼',e:'🐰',c:'animal',d:1},{w:'사자',e:'🦁',c:'animal',d:1},
+ {w:'호랑이',e:'🐯',c:'animal',d:1},{w:'코끼리',e:'🐘',c:'animal',d:1},
+ {w:'거북이',e:'🐢',c:'animal',d:1},{w:'병아리',e:'🐤',c:'animal',d:1},
+ {w:'돼지',e:'🐷',c:'animal',d:1},{w:'개구리',e:'🐸',c:'animal',d:1},
+ {w:'다람쥐',e:'🐿️',c:'animal',d:1},{w:'나비',e:'🦋',c:'animal',d:1},
+ {w:'하마',e:'🦛',c:'animal',d:1},{w:'오리',e:'🦆',c:'animal',d:1},
+ {w:'자동차',e:'🚗',c:'vehicle',d:1},{w:'버스',e:'🚌',c:'vehicle',d:1},
+ {w:'기차',e:'🚆',c:'vehicle',d:1},{w:'비행기',e:'✈️',c:'vehicle',d:1},
+ {w:'자전거',e:'🚲',c:'vehicle',d:1},{w:'택시',e:'🚕',c:'vehicle',d:1},
+ {w:'트럭',e:'🚚',c:'vehicle',d:1},
+ {w:'사과',e:'🍎',c:'food',d:1},{w:'바나나',e:'🍌',c:'food',d:1},
+ {w:'딸기',e:'🍓',c:'food',d:1},{w:'포도',e:'🍇',c:'food',d:1},
+ {w:'우유',e:'🥛',c:'food',d:1},{w:'피자',e:'🍕',c:'food',d:1},
+ {w:'라면',e:'🍜',c:'food',d:1},{w:'토마토',e:'🍅',c:'food',d:1},
+ {w:'나무',e:'🌳',c:'thing',d:1},{w:'구름',e:'☁️',c:'thing',d:1},
+ {w:'무지개',e:'🌈',c:'thing',d:1},{w:'우산',e:'☂️',c:'thing',d:1},
+ {w:'모자',e:'🧢',c:'thing',d:1},{w:'가방',e:'🎒',c:'thing',d:1},
+ {w:'시계',e:'⏰',c:'thing',d:1},
+
+ /* ── 2단계 보통 : 받침 있는 낱말 ── */
+ {w:'사슴',e:'🦌',c:'animal',d:2},{w:'악어',e:'🐊',c:'animal',d:2},
+ {w:'낙타',e:'🐫',c:'animal',d:2},{w:'펭귄',e:'🐧',c:'animal',d:2},
+ {w:'달팽이',e:'🐌',c:'animal',d:2},{w:'돌고래',e:'🐬',c:'animal',d:2},
+ {w:'상어',e:'🦈',c:'animal',d:2},{w:'문어',e:'🐙',c:'animal',d:2},
+ {w:'로켓',e:'🚀',c:'vehicle',d:2},{w:'소방차',e:'🚒',c:'vehicle',d:2},
+ {w:'구급차',e:'🚑',c:'vehicle',d:2},{w:'경찰차',e:'🚓',c:'vehicle',d:2},
+ {w:'지하철',e:'🚇',c:'vehicle',d:2},{w:'킥보드',e:'🛴',c:'vehicle',d:2},
+ {w:'수박',e:'🍉',c:'food',d:2},{w:'당근',e:'🥕',c:'food',d:2},
+ {w:'김밥',e:'🍙',c:'food',d:2},{w:'옥수수',e:'🌽',c:'food',d:2},
+ {w:'감자',e:'🥔',c:'food',d:2},{w:'고구마',e:'🍠',c:'food',d:2},
+ {w:'햄버거',e:'🍔',c:'food',d:2},{w:'도넛',e:'🍩',c:'food',d:2},
+ {w:'연필',e:'✏️',c:'thing',d:2},{w:'풍선',e:'🎈',c:'thing',d:2},
+ {w:'안경',e:'👓',c:'thing',d:2},{w:'장갑',e:'🧤',c:'thing',d:2},
+ {w:'양말',e:'🧦',c:'thing',d:2},{w:'선물',e:'🎁',c:'thing',d:2},
+ {w:'열쇠',e:'🔑',c:'thing',d:2},{w:'눈사람',e:'⛄',c:'thing',d:2},
+
+ /* ── 3단계 어려움 : 긴 낱말 + 문장 힌트 (그림 없음) ── */
+ {w:'무당벌레',e:'🐞',c:'animal',d:3,s:'___는 빨간 등에 까만 점이 있어요.'},
+ {w:'코뿔소',e:'🦏',c:'animal',d:3,s:'코에 커다란 뿔이 달린 동물은 ___예요.'},
+ {w:'원숭이',e:'🐵',c:'animal',d:3,s:'___는 나무를 잘 타고 바나나를 좋아해요.'},
+ {w:'얼룩말',e:'🦓',c:'animal',d:3,s:'하얀 줄무늬가 있는 말은 ___이에요.'},
+ {w:'앵무새',e:'🦜',c:'animal',d:3,s:'사람 말을 따라 하는 새는 ___예요.'},
+ {w:'메뚜기',e:'🦗',c:'animal',d:3,s:'풀밭에서 폴짝폴짝 뛰는 곤충은 ___예요.'},
+ {w:'헬리콥터',e:'🚁',c:'vehicle',d:3,s:'___는 하늘에서 날개를 빙글빙글 돌려요.'},
+ {w:'오토바이',e:'🏍️',c:'vehicle',d:3,s:'___는 바퀴가 두 개인 탈것이에요.'},
+ {w:'우주선',e:'🛸',c:'vehicle',d:3,s:'우주로 날아가는 배를 ___이라고 해요.'},
+ {w:'케이블카',e:'🚡',c:'vehicle',d:3,s:'산 위로 줄을 타고 올라가는 것은 ___예요.'},
+ {w:'기차역',e:'🚉',c:'vehicle',d:3,s:'기차를 타고 내리는 곳은 ___이에요.'},
+ {w:'트랙터',e:'🚜',c:'vehicle',d:3,s:'밭에서 흙을 갈아 주는 큰 차는 ___예요.'},
+ {w:'여객선',e:'🛳️',c:'vehicle',d:3,s:'사람을 태우고 바다를 다니는 큰 배는 ___이에요.'},
+ {w:'케이크',e:'🍰',c:'food',d:3,s:'생일에 촛불을 켜고 먹는 것은 ___예요.'},
+ {w:'아이스크림',e:'🍦',c:'food',d:3,s:'여름에 시원하게 먹는 ___은 참 달아요.'},
+ {w:'파인애플',e:'🍍',c:'food',d:3,s:'겉이 까칠까칠한 노란 과일은 ___이에요.'},
+ {w:'김치찌개',e:'🍲',c:'food',d:3,s:'김치를 넣고 보글보글 끓이면 ___가 돼요.'},
+ {w:'떡볶이',e:'🥘',c:'food',d:3,s:'빨간 양념에 떡을 볶은 음식은 ___예요.'},
+ {w:'비빔밥',e:'🍚',c:'food',d:3,s:'여러 나물을 넣고 쓱쓱 비벼 먹는 밥은 ___이에요.'},
+ {w:'초콜릿',e:'🍫',c:'food',d:3,s:'달콤하고 갈색인 과자는 ___이에요.'},
+ {w:'복숭아',e:'🍑',c:'food',d:3,s:'분홍빛이 도는 달콤한 여름 과일은 ___예요.'},
+ {w:'해바라기',e:'🌻',c:'thing',d:3,s:'해를 따라 고개를 돌리는 노란 꽃은 ___예요.'},
+ {w:'미끄럼틀',e:'🛝',c:'thing',d:3,s:'놀이터에서 쭉 미끄러져 내려오는 것은 ___이에요.'},
+ {w:'컴퓨터',e:'💻',c:'thing',d:3,s:'글도 쓰고 그림도 그릴 수 있는 기계는 ___예요.'},
+ {w:'냉장고',e:'🧊',c:'thing',d:3,s:'음식을 차갑게 보관하는 것은 ___예요.'},
+ {w:'세탁기',e:'🧺',c:'thing',d:3,s:'빨래를 깨끗하게 해 주는 기계는 ___예요.'},
+ {w:'텔레비전',e:'📺',c:'thing',d:3,s:'만화도 보고 뉴스도 보는 것은 ___이에요.'},
+ {w:'망원경',e:'🔭',c:'thing',d:3,s:'멀리 있는 별을 보는 도구는 ___이에요.'},
+ {w:'크레파스',e:'🖍️',c:'thing',d:3,s:'그림을 그릴 때 쓰는 색깔 막대는 ___예요.'},
+
+ /* ── 4단계 도전 : 자음·모음을 모아 글자 만들기 (받침·겹받침) ── */
+ {w:'닭',e:'🐔',c:'animal',d:4,s:'꼬끼오 하고 우는 새는 ___이에요.'},
+ {w:'곰',e:'🐻',c:'animal',d:4,s:'겨울잠을 자는 커다란 동물은 ___이에요.'},
+ {w:'뱀',e:'🐍',c:'animal',d:4,s:'다리 없이 스르륵 기어가는 동물은 ___이에요.'},
+ {w:'벌',e:'🐝',c:'animal',d:4,s:'꽃에서 꿀을 모으는 곤충은 ___이에요.'},
+ {w:'늑대',e:'🐺',c:'animal',d:4,s:'달을 보고 우우 우는 동물은 ___예요.'},
+ {w:'독수리',e:'🦅',c:'animal',d:4,s:'하늘 높이 나는 커다란 새는 ___예요.'},
+ {w:'헬기',e:'🚁',c:'vehicle',d:4,s:'하늘을 나는 헬리콥터를 짧게 ___라고 해요.'},
+ {w:'돛단배',e:'⛵',c:'vehicle',d:4,s:'바람을 받아서 가는 배는 ___예요.'},
+ {w:'열기구',e:'🎈',c:'vehicle',d:4,s:'뜨거운 공기로 하늘에 두둥실 뜨는 것은 ___예요.'},
+ {w:'썰매',e:'🛷',c:'vehicle',d:4,s:'눈 위에서 미끄러지듯 타는 것은 ___예요.'},
+ {w:'달걀',e:'🥚',c:'food',d:4,s:'닭이 낳은 것은 ___이에요.'},
+ {w:'김치',e:'🥬',c:'food',d:4,s:'배추에 빨간 양념을 버무린 음식은 ___예요.'},
+ {w:'호떡',e:'🥞',c:'food',d:4,s:'겨울에 뜨겁게 구워 먹는 간식은 ___이에요.'},
+ {w:'떡국',e:'🥣',c:'food',d:4,s:'설날에 먹는 음식은 ___이에요.'},
+ {w:'팥',e:'🫘',c:'food',d:4,s:'붕어빵 속에 들어 있는 것은 ___이에요.'},
+ {w:'무릎',e:'🦵',c:'thing',d:4,s:'다리를 굽히면 접히는 곳은 ___이에요.'},
+ {w:'부엌',e:'🍳',c:'thing',d:4,s:'음식을 만드는 곳은 ___이에요.'},
+ {w:'꽃밭',e:'🌷',c:'thing',d:4,s:'꽃이 많이 피어 있는 곳은 ___이에요.'},
+ {w:'숲',e:'🌲',c:'thing',d:4,s:'나무가 아주 많은 곳은 ___이에요.'},
+ {w:'흙',e:'🟫',c:'thing',d:4,s:'땅에 있는 갈색 알갱이는 ___이에요.'},
+ {w:'값',e:'💰',c:'thing',d:4,s:'물건을 살 때 내는 돈을 ___이라고 해요.'},
+ {w:'손톱',e:'💅',c:'thing',d:4,s:'손가락 끝에 있는 것은 ___이에요.'},
+ {w:'낮잠',e:'😴',c:'thing',d:4,s:'점심 먹고 자는 잠은 ___이에요.'},
+ {w:'여덟',e:'8️⃣',c:'thing',d:4,s:'일곱 다음 숫자는 ___이에요.'}
+];
+
+const LEVELS=[
+ {id:1,l:'🙂 쉬움',   decoy:2, pic:true,  jamo:false, plausible:false,
+  desc:'그림을 보고 두세 글자 낱말을 만들어요. 방해 글자는 2개!'},
+ {id:2,l:'😀 보통',   decoy:4, pic:true,  jamo:false, plausible:true,
+  desc:'받침이 있는 낱말이 나와요. 비슷하게 생긴 글자 4개가 섞여 있어요.'},
+ {id:3,l:'😤 어려움', decoy:6, pic:false, jamo:false, plausible:true,
+  desc:'그림 없이 문장 힌트만 보고 긴 낱말을 만들어요. (💡 힌트로 그림 보기)'},
+ {id:4,l:'🔥 도전',   decoy:7, pic:false, jamo:true,  plausible:true,
+  desc:'ㄱ · ㅏ · ㅇ 자음과 모음을 모아 글자를 직접 만들어요!'}
 ];
 const CATS=[{id:'all',l:'전부 다 🎲'},{id:'animal',l:'동물 🐶'},{id:'vehicle',l:'탈것 🚗'},
             {id:'food',l:'먹을 것 🍎'},{id:'thing',l:'사물·자연 🌳'}];
 const COUNTS=[5,10,15];
 
-let wantLen=2, cat='all', total=10;
-let pool=[], qi=0, right=0, wrong=0, answered=false, hinted=0;
-let cur=null, filled=[], audioCtx=null;
+let level=0, wantLen=2, cat='all', wantTotal=10, total=10;
+let pool=[], qi=0, right=0, wrong=0, answered=false, hinted=0, picShown=true;
+let cur=null, slots=[], groups=null, filled=[], audioCtx=null;
 
-function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
-function beep(t){
+/* ===== 소리 (WebAudio, 오디오 파일 없음) ===== */
+window.__sfx=[];
+function initAudio(){
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+  }catch(e){ audioCtx=null; }
+}
+['pointerdown','touchstart','mousedown','keydown'].forEach(ev=>
+  window.addEventListener(ev,initAudio,{passive:true}));
+
+function tone(f,at,dur,type,vol){
   if(!audioCtx)return;
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.connect(g);g.connect(audioCtx.destination);
-  const c=audioCtx.currentTime;g.gain.setValueAtTime(.08,c);
-  if(t==='tap'){o.type='sine';o.frequency.setValueAtTime(660,c);o.start();o.stop(c+.06);}
-  if(t==='good'){o.type='sine';o.frequency.setValueAtTime(700,c);o.frequency.setValueAtTime(1040,c+.1);o.start();o.stop(c+.24);}
-  if(t==='bad'){o.type='sawtooth';o.frequency.setValueAtTime(230,c);o.frequency.exponentialRampToValueAtTime(120,c+.26);o.start();o.stop(c+.28);}
-  if(t==='win'){o.type='square';[440,590,780,980].forEach((f,i)=>o.frequency.setValueAtTime(f,c+i*.16));o.start();o.stop(c+.7);}
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type||'sine'; o.frequency.setValueAtTime(f,at);
+  g.gain.setValueAtTime(0.0001,at);
+  g.gain.linearRampToValueAtTime(vol,at+0.012);
+  g.gain.setValueAtTime(vol,at+dur*0.62);
+  g.gain.exponentialRampToValueAtTime(0.0001,at+dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(at); o.stop(at+dur+0.03);
+}
+const FANFARE=[523.25,659.25,783.99,1046.5];
+function beep(t){
+  window.__sfx.push(t);
+  if(!audioCtx)return;
+  const c=audioCtx.currentTime+0.01;
+  if(t==='tap'){ tone(660,c,.06,'sine',.05); }
+  // 한 낱말 정답 → 짧고 밝은 삑!
+  if(t==='good'){ tone(1046.5,c,.075,'triangle',.09); tone(1396.91,c+.065,.11,'triangle',.075); }
+  // 한 글자 완성 → 아주 짧은 딩
+  if(t==='syl'){ tone(880,c,.07,'triangle',.06); }
+  // 틀림 → 부드럽고 낮은 소리
+  if(t==='bad'){ tone(196,c,.16,'sine',.05); tone(155.56,c+.14,.22,'sine',.045); }
+  // 한 판 클리어 → 올라가는 4음 팡파르
+  if(t==='win'){ FANFARE.forEach((f,i)=>tone(f,c+i*.085,.14,'square',.08)); }
 }
 
-/* 설정 UI */
+/* ===== 한글 자모 분해·조합 ===== */
+const CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const JUNG=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const JONG=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+function decomp(ch){
+  const c=ch.charCodeAt(0)-0xAC00;
+  if(c<0||c>11171) return null;
+  return {cho:Math.floor(c/588), jung:Math.floor((c%588)/28), jong:c%28};
+}
+function comp(ci,vi,ji){ return String.fromCharCode(0xAC00+ci*588+vi*28+(ji||0)); }
+function splitWord(word){          // [{syl:'수',parts:['ㅅ','ㅜ']}, ...]
+  const out=[];
+  for(const ch of word){
+    const d=decomp(ch);
+    if(!d){ out.push({syl:ch,parts:[ch]}); continue; }
+    const parts=[CHO[d.cho],JUNG[d.jung]];
+    if(d.jong) parts.push(JONG[d.jong]);
+    out.push({syl:ch,parts});
+  }
+  return out;
+}
+
+/* ===== 그럴듯한 방해 글자 만들기 ===== */
+const CHO_GROUPS=[['ㄱ','ㅋ','ㄲ'],['ㄴ','ㄷ','ㄸ','ㅌ'],['ㅁ','ㅂ','ㅃ','ㅍ'],
+                  ['ㅅ','ㅆ','ㅈ','ㅉ','ㅊ'],['ㅇ','ㅎ'],['ㄹ','ㄴ']];
+// 아이가 읽을 수 있는 흔한 모음끼리만 바꿔서 "그럴듯한" 글자를 만들어요
+const JUNG_GROUPS=[['ㅏ','ㅑ','ㅓ','ㅕ'],['ㅗ','ㅛ','ㅜ','ㅠ'],['ㅡ','ㅣ'],
+                   ['ㅐ','ㅔ'],['ㅘ','ㅚ'],['ㅝ','ㅟ']];
+const JONG_EASY=['','ㄱ','ㄴ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ'];
+function simList(groups,ch){
+  const out=[];
+  groups.forEach(g=>{ if(g.indexOf(ch)>=0) g.forEach(x=>{ if(x!==ch&&out.indexOf(x)<0) out.push(x); }); });
+  return out;
+}
+// 답 글자를 살짝 비튼 "헷갈리는" 글자들.
+// 받침만 다른 글자를 가장 먼저 쓰고(제일 배울 게 많아요), 그다음 모음, 그다음 자음.
+function similarSyllables(ch){
+  const d=decomp(ch); if(!d) return [];
+  const byJong=[], byJung=[], byCho=[];
+  JONG_EASY.forEach(j=>{ const ji=JONG.indexOf(j); if(ji!==d.jong) byJong.push(comp(d.cho,d.jung,ji)); });
+  simList(JUNG_GROUPS,JUNG[d.jung]).forEach(v=>byJung.push(comp(d.cho,JUNG.indexOf(v),d.jong)));
+  simList(CHO_GROUPS,CHO[d.cho]).forEach(c=>byCho.push(comp(CHO.indexOf(c),d.jung,d.jong)));
+  return [shuffle(byJong),shuffle(byJung),shuffle(byCho)];
+}
+const JAMO_SIM={'ㄱ':['ㅋ','ㄲ','ㄴ'],'ㄴ':['ㄷ','ㄹ','ㄱ'],'ㄷ':['ㄴ','ㅌ','ㄸ'],'ㄹ':['ㄴ','ㅁ','ㄷ'],
+ 'ㅁ':['ㅂ','ㅇ','ㄹ'],'ㅂ':['ㅁ','ㅍ','ㅃ'],'ㅅ':['ㅈ','ㅆ','ㅊ'],'ㅇ':['ㅎ','ㅁ'],
+ 'ㅈ':['ㅅ','ㅊ','ㅉ'],'ㅊ':['ㅈ','ㅅ','ㅌ'],'ㅋ':['ㄱ','ㅌ'],'ㅌ':['ㄷ','ㅍ','ㅋ'],
+ 'ㅍ':['ㅂ','ㅌ'],'ㅎ':['ㅇ','ㅊ'],'ㄲ':['ㄱ','ㅋ'],'ㄸ':['ㄷ','ㅌ'],'ㅃ':['ㅂ','ㅍ'],
+ 'ㅆ':['ㅅ','ㅈ'],'ㅉ':['ㅈ','ㅊ'],
+ 'ㅏ':['ㅑ','ㅓ','ㅐ'],'ㅑ':['ㅏ','ㅕ'],'ㅓ':['ㅕ','ㅏ','ㅔ'],'ㅕ':['ㅓ','ㅑ'],
+ 'ㅗ':['ㅛ','ㅜ'],'ㅛ':['ㅗ','ㅠ'],'ㅜ':['ㅠ','ㅗ'],'ㅠ':['ㅜ','ㅛ'],
+ 'ㅡ':['ㅣ','ㅜ'],'ㅣ':['ㅡ','ㅓ'],'ㅐ':['ㅔ','ㅏ'],'ㅔ':['ㅐ','ㅓ'],'ㅚ':['ㅗ','ㅔ'],
+ 'ㅘ':['ㅗ','ㅏ'],'ㅝ':['ㅜ','ㅓ'],'ㅢ':['ㅡ','ㅣ'],
+ 'ㄺ':['ㄹ','ㄱ','ㄻ'],'ㄼ':['ㄹ','ㅂ','ㄺ'],'ㅄ':['ㅂ','ㅅ','ㅁ'],'ㄳ':['ㄱ','ㅅ'],
+ 'ㄵ':['ㄴ','ㅈ'],'ㄶ':['ㄴ','ㅎ'],'ㄻ':['ㄹ','ㅁ'],'ㄽ':['ㄹ','ㅅ'],'ㄾ':['ㄹ','ㅌ'],
+ 'ㄿ':['ㄹ','ㅍ'],'ㅀ':['ㄹ','ㅎ']};
+const JAMO_POOL=['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ',
+                 'ㅏ','ㅓ','ㅗ','ㅜ','ㅡ','ㅣ','ㅐ','ㅔ','ㅑ','ㅕ','ㅛ','ㅠ'];
+
+function makeDecoys(answerChars,n,jamoMode,plausible){
+  const used=new Set(answerChars), out=[];
+  const push=x=>{ if(x&&!used.has(x)&&out.indexOf(x)<0&&out.length<n) out.push(x); };
+  if(plausible){                          // 헷갈리게 비슷한 글자 (보통 단계부터)
+    if(jamoMode){
+      const cand=[];
+      answerChars.forEach(ch=>(JAMO_SIM[ch]||[]).forEach(s=>cand.push(s)));
+      shuffle(cand).forEach(push);
+    }else{
+      // 받침만 다른 글자 → 모음만 다른 글자 → 자음만 다른 글자 순으로 뽑아요
+      const tiers=answerChars.map(similarSyllables);
+      for(let t=0;t<3;t++){
+        const row=[];
+        tiers.forEach(x=>{ if(x[t]) row.push(...x[t]); });
+        shuffle(row).forEach(push);
+      }
+    }
+  }
+  if(out.length<n){                       // 모자라면 일반 글자로 채우기
+    const filler = jamoMode ? JAMO_POOL.slice()
+                            : WORDS.map(w=>w.w).join('').split('');
+    shuffle(filler).forEach(push);
+  }
+  return out;
+}
+
+/* ===== 설정 UI ===== */
+const levelsEl=document.getElementById('levels');
+const lvdescEl=document.getElementById('lvdesc');
+const lenbox=document.getElementById('lenbox');
+function paintLevel(){
+  [...levelsEl.children].forEach((x,k)=>x.classList.toggle('sel',k===level));
+  lvdescEl.textContent=LEVELS[level].desc;
+  lenbox.classList.toggle('off', LEVELS[level].id>=3);
+}
+LEVELS.forEach((L,i)=>{
+  const b=document.createElement('button');
+  b.className='opt'; b.textContent=L.l; b.dataset.level=L.id;
+  b.onclick=()=>{ initAudio(); beep('tap'); level=i; paintLevel(); };
+  levelsEl.appendChild(b);
+});
+paintLevel();
+
 document.getElementById('lens').addEventListener('click',e=>{
-  const b=e.target.closest('.opt');if(!b)return;initAudio();beep('tap');
+  const b=e.target.closest('.opt'); if(!b)return; initAudio(); beep('tap');
   wantLen=parseInt(b.dataset.len,10);
   document.querySelectorAll('#lens .opt').forEach(x=>x.classList.toggle('sel',x===b));});
 const catsEl=document.getElementById('cats');
 CATS.forEach((c,i)=>{const b=document.createElement('button');
-  b.className='opt'+(i===0?' sel':'');b.textContent=c.l;
+  b.className='opt'+(i===0?' sel':''); b.textContent=c.l;
   b.onclick=()=>{initAudio();beep('tap');cat=c.id;
     [...catsEl.children].forEach((x,k)=>x.classList.toggle('sel',k===i));};
   catsEl.appendChild(b);});
 const countsEl=document.getElementById('counts');
 COUNTS.forEach(c=>{const b=document.createElement('button');
-  b.className='opt'+(c===10?' sel':'');b.textContent=c+' 문제';
-  b.onclick=()=>{initAudio();beep('tap');total=c;
+  b.className='opt'+(c===10?' sel':''); b.textContent=c+' 문제';
+  b.onclick=()=>{initAudio();beep('tap');wantTotal=c;
     [...countsEl.children].forEach((x,k)=>x.classList.toggle('sel',COUNTS[k]===c));};
   countsEl.appendChild(b);});
 
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
   document.getElementById('end').classList.remove('on');}
-
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 function fit(){
-  const n=cur?Math.max(cur.w.length+2,5):5;
-  const s=Math.max(64,Math.floor(Math.min(window.innerHeight*0.17, (window.innerWidth*0.86)/n, 124)));
+  let n=6, hmax=.155;
+  if(cur){
+    if(groups){ n=Math.max(6, slots.length*.8 + groups.length*.6 + 2); hmax=.115; }
+    else n=Math.max(5, slots.length+2);
+  }
+  // 타일이 쓸데없이 여러 줄로 접히지 않도록 타일 개수도 함께 고려
+  const nt=document.querySelectorAll('#tiles .tile').length;
+  let byTiles=999;
+  if(nt){
+    const rowW=Math.min(900, window.innerWidth*0.94);
+    const rows=nt<=10?1:2;
+    byTiles=Math.floor(rowW/Math.ceil(nt/rows))-13;
+  }
+  const s=Math.max(60,Math.floor(Math.min(
+    window.innerHeight*hmax, (window.innerWidth*0.86)/n, byTiles, 124)));
   document.documentElement.style.setProperty('--cs',s+'px');
 }
 window.addEventListener('resize',fit);
 
+/* ===== 한 판 시작 ===== */
 function start(){
   initAudio();
-  let list=WORDS.filter(w=>cat==='all'||w.c===cat);
-  if(wantLen>0) list=list.filter(w=>w.w.length===wantLen);
-  if(list.length<3) list=WORDS.filter(w=>cat==='all'||w.c===cat);
+  const L=LEVELS[level];
+  let list=WORDS.filter(w=>w.d===L.id && (cat==='all'||w.c===cat));
+  if(list.length<5) list=WORDS.filter(w=>w.d===L.id);          // 그 단계 낱말이 적으면 전체에서
+  if(L.id<=2 && wantLen>0){
+    const f=list.filter(w=>w.w.length===wantLen);
+    if(f.length>=5) list=f;                                    // 글자 수 조건은 가능할 때만
+  }
   pool=shuffle(list.slice());
+  total=Math.min(wantTotal,pool.length);                       // 한 판 안에서 낱말이 겹치지 않게
   qi=0;right=0;wrong=0;
   document.getElementById('end').classList.remove('on');
   go('s-game'); nextQ();
@@ -243,117 +522,206 @@ function start(){
 
 function nextQ(){
   if(qi>=total){ finish(); return; }
-  qi++;answered=false;hinted=0;filled=[];
-  cur=pool[(qi-1)%pool.length];
-  document.getElementById('qlab').textContent=`문제 ${qi} / ${total}`;
-  document.getElementById('pic').textContent=cur.e;
-  document.getElementById('hintline').textContent=`글자 ${cur.w.length}개예요. 순서대로 눌러보세요!`;
+  const L=LEVELS[level];
+  qi++; answered=false; hinted=0; filled=[];
+  cur=pool[qi-1];
+  picShown=L.pic;
+
+  document.getElementById('qlab').textContent=`문제 ${qi} / ${total}  ·  ${L.l}`;
   document.getElementById('fb').textContent='';
   document.getElementById('fb').className='fb';
   document.getElementById('next').classList.remove('on');
+  document.getElementById('hintBtn').textContent = L.pic?'💡 힌트':'💡 그림 힌트';
 
-  // 정답 칸
-  const ans=document.getElementById('answer');
-  ans.innerHTML='';
-  for(let i=0;i<cur.w.length;i++){
-    const d=document.createElement('div');d.className='cell';d.id='cell-'+i;
-    ans.appendChild(d);
+  // 그림 / 문장 힌트
+  const picEl=document.getElementById('pic'), senEl=document.getElementById('sentence');
+  picEl.classList.toggle('q',!L.pic);
+  picEl.textContent = L.pic ? cur.e : '❓';
+  if(!L.pic && cur.s){
+    senEl.style.display='block';
+    senEl.innerHTML='💭 '+cur.s.replace('___','<b>'+'○'.repeat(cur.w.length)+'</b>');
+  }else senEl.style.display='none';
+
+  // 정답 칸 만들기
+  const ans=document.getElementById('answer'), tEl=document.getElementById('tiles');
+  ans.innerHTML=''; tEl.innerHTML='';
+  ans.classList.toggle('jamo',L.jamo);
+  tEl.classList.toggle('jamo',L.jamo);
+
+  if(L.jamo){
+    groups=splitWord(cur.w);
+    slots=[];
+    groups.forEach((g,gi)=>{
+      g.start=slots.length;
+      const box=document.createElement('div'); box.className='syl';
+      const out=document.createElement('div'); out.className='sylout'; out.id='syl-'+gi; out.textContent='';
+      const row=document.createElement('div'); row.className='jrow';
+      g.parts.forEach(p=>{
+        const d=document.createElement('div'); d.className='cell j'; d.id='cell-'+slots.length;
+        row.appendChild(d); slots.push(p);
+      });
+      box.appendChild(out); box.appendChild(row); ans.appendChild(box);
+    });
+    document.getElementById('hintline').textContent=
+      `자음과 모음 ${slots.length}개로 ${groups.length}글자를 만들어요!`;
+  }else{
+    groups=null;
+    slots=cur.w.split('');
+    slots.forEach((_,i)=>{
+      const d=document.createElement('div'); d.className='cell'; d.id='cell-'+i;
+      ans.appendChild(d);
+    });
+    document.getElementById('hintline').textContent =
+      L.pic ? `글자 ${slots.length}개예요. 순서대로 눌러보세요!`
+            : `글자 ${slots.length}개예요. 힌트를 잘 읽어 보세요!`;
   }
-  // 글자 타일 = 정답 글자 + 방해 글자
-  const letters=cur.w.split('');
-  const others=shuffle(WORDS.filter(w=>w!==cur).map(w=>w.w).join('').split('')
-                       .filter(ch=>!letters.includes(ch)));
-  const extra=Math.min(3, Math.max(2, 5-letters.length));
-  const tiles=shuffle(letters.concat(others.slice(0,extra)));
-  const tEl=document.getElementById('tiles');
-  tEl.innerHTML='';
-  tiles.forEach((ch,i)=>{
+
+  // 타일 = 정답 글자 + 방해 글자
+  const decoys=makeDecoys(slots,L.decoy,L.jamo,L.plausible);
+  shuffle(slots.concat(decoys)).forEach(ch=>{
     const b=document.createElement('button');
-    b.className='tile';b.textContent=ch;b.dataset.i=i;
+    b.className='tile'; b.textContent=ch;
     b.onclick=()=>tap(b,ch);
     tEl.appendChild(b);
   });
+
   fit(); updateScore();
 }
 
+/* ===== 타일 놓기 ===== */
+function previewOf(gi){
+  const g=groups[gi], got=[];
+  for(let i=0;i<g.parts.length;i++){
+    const f=filled[g.start+i];
+    got.push(f?f.ch:undefined);
+  }
+  if(got[0]===undefined) return '';
+  const ci=CHO.indexOf(got[0]);
+  if(got[1]===undefined) return got[0];
+  const vi=JUNG.indexOf(got[1]);
+  if(ci<0||vi<0) return got.filter(Boolean).join('');
+  if(got.length<3||got[2]===undefined) return comp(ci,vi,0);
+  const ji=JONG.indexOf(got[2]);
+  return ji<0 ? comp(ci,vi,0)+got[2] : comp(ci,vi,ji);
+}
+function paintPreview(){
+  if(!groups) return;
+  groups.forEach((g,gi)=>{
+    const el=document.getElementById('syl-'+gi);
+    const txt=previewOf(gi);
+    el.textContent=txt;
+    el.classList.toggle('done', filled.length>=g.start+g.parts.length && txt===g.syl);
+  });
+}
 function tap(btn,ch){
-  if(answered||filled.length>=cur.w.length) return;
-  initAudio();beep('tap');
+  if(answered||filled.length>=slots.length) return;
+  initAudio();
   btn.classList.add('used');
   filled.push({ch,btn});
   const cell=document.getElementById('cell-'+(filled.length-1));
   cell.textContent=ch; cell.classList.add('filled');
-  if(filled.length===cur.w.length) judge();
+  // 한 글자가 딱 완성되면 기분 좋은 짧은 소리
+  let sylDone=false;
+  if(groups){
+    const g=groups.find(g=>g.start+g.parts.length===filled.length);
+    sylDone = !!g && previewOf(groups.indexOf(g))===g.syl;
+    paintPreview();
+  }
+  beep(sylDone?'syl':'tap');
+  if(filled.length===slots.length) judge();
 }
 function undo(){
   if(answered||!filled.length) return;
-  initAudio();beep('tap');
+  initAudio(); beep('tap');
   const last=filled.pop();
   last.btn.classList.remove('used');
   const cell=document.getElementById('cell-'+filled.length);
-  cell.textContent='';cell.className='cell';
+  cell.textContent=''; cell.className=groups?'cell j':'cell';
+  paintPreview();
 }
 function judge(){
   const made=filled.map(f=>f.ch).join('');
-  if(made===cur.w){
-    answered=true;right++;beep('good');
-    for(let i=0;i<cur.w.length;i++)document.getElementById('cell-'+i).className='cell ok';
+  const want=slots.join('');
+  if(made===want){
+    answered=true; right++; beep('good');
+    slots.forEach((_,i)=>{
+      const c=document.getElementById('cell-'+i);
+      c.className=(groups?'cell j ':'cell ')+'ok';
+    });
+    paintPreview();
     const f=document.getElementById('fb');
     f.className='fb good';
-    f.textContent=hinted?`정답! 「${cur.w}」 ${cur.e} 잘했어요!`:`정답이에요! 「${cur.w}」 ${cur.e} 참 잘했어요! 🎉`;
+    f.textContent = hinted ? `정답! 「${cur.w}」 ${cur.e} 잘했어요!`
+                           : `정답이에요! 「${cur.w}」 ${cur.e} 참 잘했어요! 🎉`;
+    document.getElementById('pic').classList.remove('q');
+    document.getElementById('pic').textContent=cur.e;
     speak();
     document.getElementById('next').classList.add('on');
   }else{
     beep('bad');
-    // 어디가 틀렸는지 알려주기 (스스로 고칠 기회)
-    for(let i=0;i<cur.w.length;i++){
+    slots.forEach((s,i)=>{
       const c=document.getElementById('cell-'+i);
-      c.className='cell '+(filled[i].ch===cur.w[i]?'ok':'no');
-    }
+      c.className=(groups?'cell j ':'cell ')+(filled[i].ch===s?'ok':'no');
+    });
     const f=document.getElementById('fb');
     f.className='fb bad';
     f.textContent='초록 칸은 맞았어요! 빨간 칸만 다시 골라볼까요? 🤔';
-    // 틀린 글자만 되돌려주기
+    // 틀린 칸만 비워 주고 다시 도전 (게임은 끝나지 않아요)
     setTimeout(()=>{
-      for(let i=cur.w.length-1;i>=0;i--){
-        if(filled[i] && filled[i].ch!==cur.w[i]){
+      if(answered) return;
+      for(let i=slots.length-1;i>=0;i--){
+        if(filled[i] && filled[i].ch!==slots[i]){
           filled[i].btn.classList.remove('used');
-          const c=document.getElementById('cell-'+i);
-          c.textContent='';c.className='cell';
           filled.splice(i,1);
         }
       }
-      // 남은 것들을 앞에서부터 다시 채움
       const keep=filled.slice(); filled=[];
+      slots.forEach((_,i)=>{
+        const c=document.getElementById('cell-'+i);
+        c.textContent=''; c.className=groups?'cell j':'cell';
+      });
       keep.forEach((k,i)=>{
         filled.push(k);
         const c=document.getElementById('cell-'+i);
-        c.textContent=k.ch;c.className='cell ok';
+        c.textContent=k.ch; c.className=(groups?'cell j ':'cell ')+'ok';
       });
+      paintPreview();
     },1100);
   }
   updateScore();
 }
 function hint(){
   if(answered) return;
-  initAudio();beep('tap');
-  hinted++;
+  initAudio(); beep('tap'); hinted++;
+  // 그림이 숨겨진 단계에서는 첫 힌트가 그림을 보여 줘요
+  if(!picShown){
+    picShown=true;
+    const p=document.getElementById('pic');
+    p.classList.remove('q'); p.textContent=cur.e;
+    document.getElementById('hintBtn').textContent='💡 힌트';
+    document.getElementById('hintline').textContent='그림을 보고 다시 생각해 볼까요? 🙂';
+    return;
+  }
   const i=filled.length;
-  if(i>=cur.w.length) return;
-  const want=cur.w[i];
-  document.getElementById('hintline').textContent=`💡 ${i+1}번째 글자는 「${want}」 예요!`;
-  // 해당 타일을 반짝이게
+  if(i>=slots.length) return;
+  const want=slots[i];
+  document.getElementById('hintline').textContent=
+    groups ? `💡 ${i+1}번째 자리에는 「${want}」 가 들어가요!`
+           : `💡 ${i+1}번째 글자는 「${want}」 예요!`;
   document.querySelectorAll('.tile').forEach(t=>{
     if(t.textContent===want && !t.classList.contains('used')){
-      t.style.borderColor='#facc15';t.style.background='#fef9c3';
+      t.style.borderColor='#facc15'; t.style.background='#fef9c3';
       setTimeout(()=>{t.style.borderColor='';t.style.background='';},1400);
     }
   });
 }
 function speak(){
-  if(!('speechSynthesis' in window)) return;
+  if(!('speechSynthesis' in window)||!cur) return;
+  // 아직 못 풀었는데 어려운 단계면 정답 대신 힌트 문장을 읽어 줘요
+  const text=(!answered && !LEVELS[level].pic && cur.s)
+             ? cur.s.replace('___','무엇') : cur.w;
   try{
-    const u=new SpeechSynthesisUtterance(cur.w);
+    const u=new SpeechSynthesisUtterance(text);
     u.lang='ko-KR'; u.rate=0.85;
     speechSynthesis.cancel(); speechSynthesis.speak(u);
   }catch(e){}
@@ -361,9 +729,9 @@ function speak(){
 function updateScore(){ document.getElementById('score').textContent=`⭕ ${right}  ❌ ${wrong}`; }
 
 function finish(){
-  beep('win');confetti();
+  beep('win'); confetti();
   document.getElementById('end-title').textContent = right===total?'전부 다 맞췄어요! 🌟':'다 풀었어요! 🎉';
-  document.getElementById('end-msg').textContent=`${total}문제 중 ${right}낱말을 만들었어요!`;
+  document.getElementById('end-msg').textContent=`${LEVELS[level].l} 단계에서 ${total}문제 중 ${right}낱말을 만들었어요!`;
   document.getElementById('end').classList.add('on');
 }
 function confetti(){
@@ -377,6 +745,22 @@ function confetti(){
     document.body.appendChild(d);setTimeout(()=>d.remove(),3600);
   }
 }
+
+/* 검증용 훅 */
+window.getAudioState=()=>audioCtx?audioCtx.state:'none';
+window.__state=()=>({level:LEVELS[level].id, word:cur&&cur.w, slots:slots.slice(),
+  jamo:!!groups, tiles:document.querySelectorAll('#tiles .tile').length,
+  total, qi, right, wrong, answered});
+window.__solve=()=>{                       // 남은 칸을 정답 타일로 채우기
+  while(!answered && filled.length<slots.length){
+    const want=slots[filled.length];
+    const t=[...document.querySelectorAll('#tiles .tile')]
+            .find(b=>b.textContent===want && !b.classList.contains('used'));
+    if(!t) return false;
+    t.click();
+  }
+  return true;
+};
 fit();
 </script>
 </body>

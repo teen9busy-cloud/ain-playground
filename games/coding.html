@@ -12,6 +12,7 @@
   --bg:#f8fafc; --ink:#1f2937; --muted:#6b7280; --card:#fff;
   --blue:#3b82f6; --blue-d:#1d4ed8; --red:#ef4444; --red-d:#b91c1c;
   --green:#22c55e; --green-d:#15803d;
+  --bs:360px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%;margin:0}
@@ -19,15 +20,17 @@ body{
   font-family:'Jua','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
   background:var(--bg);color:var(--ink);user-select:none;overflow-x:hidden;overflow-y:auto;
   min-height:100vh;
-  display:flex;flex-direction:column;align-items:center;padding:8px 10px 28px;
+  display:flex;flex-direction:column;align-items:center;padding:8px 10px 20px;
 }
 button{font-family:inherit;cursor:pointer;border:none}
-.home{position:fixed;top:8px;left:8px;min-height:56px;display:inline-flex;align-items:center;font-size:17px;padding:0 20px;z-index:60;background:rgba(255,255,255,.9);
+.home{position:fixed;top:8px;left:8px;min-height:56px;display:inline-flex;align-items:center;
+  z-index:60;background:rgba(255,255,255,.92);white-space:nowrap;
   color:var(--muted);padding:9px 16px;border-radius:999px;font-size:17px;
   text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.08);border:1px solid #e5e7eb}
 
-header{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:14px;flex-shrink:0;margin:0 0 12px}
-header h1{font-size:clamp(22px,3.6vh,34px);color:var(--blue-d);margin:0;font-weight:normal;white-space:nowrap}
+header{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:14px;flex-shrink:0;
+  margin:0 0 10px;padding-left:150px;width:100%}
+header h1{font-size:clamp(21px,3.4vh,32px);color:var(--blue-d);margin:0;font-weight:normal;white-space:nowrap}
 .lvbar{display:flex;gap:10px;align-items:center}
 .lvbar button{background:#e5e7eb;color:#374151;padding:12px 18px;border-radius:12px;font-size:20px;
   min-height:54px;white-space:nowrap}
@@ -35,37 +38,37 @@ header h1{font-size:clamp(22px,3.6vh,34px);color:var(--blue-d);margin:0;font-wei
   min-height:54px;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap}
 .lvbar .rnd{background:#a855f7;color:#fff}
 
-main{display:flex;gap:14px;width:100%;max-width:1100px;flex:1 0 auto;align-items:flex-start}
+main{display:flex;gap:18px;width:100%;max-width:1500px;flex:1 0 auto;align-items:flex-start;
+  justify-content:center}
 .col{display:flex;flex-direction:column}
 .left{flex:0 0 auto;align-items:center;justify-content:flex-start}
-.right{flex:1;gap:8px;min-width:0}
+.right{flex:1 1 auto;gap:10px;min-width:0;max-width:640px}
 
 .board{display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);
-  gap:4px;background:#cbd5e1;padding:7px;border-radius:14px;position:relative;
-  box-shadow:0 8px 20px rgba(0,0,0,.1);
-  width:var(--bs,330px);height:var(--bs,330px)}
-.cell{background:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;
-  font-size:calc(var(--bs,330px)/13)}
-.cell.ghost{background:#dbeafe;box-shadow:inset 0 0 0 2px #93c5fd}
-.cell .gn{font-size:calc(var(--bs,330px)/26);color:#1d4ed8}
+  gap:5px;background:#cbd5e1;padding:8px;border-radius:16px;position:relative;
+  box-shadow:0 8px 22px rgba(0,0,0,.12);
+  width:var(--bs);height:var(--bs)}
+.cell{background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:calc(var(--bs)/12)}
 .robot{position:absolute;transition:left .28s ease-in-out,top .28s ease-in-out;
-  display:flex;align-items:center;justify-content:center;font-size:calc(var(--bs,330px)/11);z-index:10}
+  display:flex;align-items:center;justify-content:center;font-size:calc(var(--bs)/10);z-index:10}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .shake{animation:shake .3s ease-in-out}
 
-.msg{width:var(--bs,330px);margin-top:8px;padding:10px;border-radius:12px;text-align:center;
-  font-size:19px;opacity:0;transition:opacity .25s;min-height:44px}
+.msg{width:var(--bs);margin-top:10px;padding:10px;border-radius:12px;text-align:center;
+  font-size:20px;opacity:0;transition:opacity .25s;min-height:46px}
 .msg.err{background:#fee2e2;color:#991b1b}
 .msg.warn{background:#fef3c7;color:#92400e}
 .msg.ok{background:#dcfce7;color:#166534}
 
-.panel{background:var(--card);border:2px solid #eef2f7;border-radius:16px;padding:12px;
+.panel{background:var(--card);border:2px solid #eef2f7;border-radius:18px;padding:14px;
   box-shadow:0 4px 14px rgba(0,0,0,.05)}
-.panel h2{margin:0 0 10px;font-size:18px;color:var(--muted);font-weight:normal;text-align:center}
+.panel h2{margin:0 0 10px;font-size:19px;color:var(--muted);font-weight:normal;text-align:center}
 
-.dirs{display:flex;flex-direction:column;align-items:center;gap:10px}
-.dirs .row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
-.dir{padding:14px 6px;width:128px;min-height:62px;border-radius:14px;font-size:21px;border:3px solid;transition:.08s;white-space:nowrap}
+.dirs{display:flex;flex-direction:column;align-items:center;gap:12px}
+.dirs .row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.dir{padding:14px 6px;width:clamp(130px,14vw,186px);min-height:72px;border-radius:16px;
+  font-size:clamp(21px,2.9vh,26px);border:3px solid;transition:.08s;white-space:nowrap}
 .dir:active{transform:translateY(3px)}
 .d-up{background:#dcfce7;border-color:#4ade80;color:#166534}
 .d-left{background:#fef9c3;border-color:#facc15;color:#854d0e}
@@ -73,30 +76,46 @@ main{display:flex;gap:14px;width:100%;max-width:1100px;flex:1 0 auto;align-items
 .d-right{background:#f3e8ff;border-color:#c084fc;color:#6b21a8}
 
 .queue-wrap{flex:1 0 auto;display:flex;flex-direction:column}
-.queue{flex:1 0 auto;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;
-  padding:10px;background:#f9fafb;border:2px dashed #d1d5db;border-radius:12px;
-  min-height:120px}
-.slot{width:54px;height:54px;background:#fff;border:2px solid #d1d5db;border-radius:12px;
-  display:flex;align-items:center;justify-content:center;font-size:29px;
+.queue{flex:1 0 auto;display:flex;flex-wrap:wrap;gap:9px;align-content:flex-start;
+  padding:11px;background:#f9fafb;border:2px dashed #d1d5db;border-radius:14px;
+  min-height:138px}
+.slot{width:64px;height:64px;background:#fff;border:2px solid #d1d5db;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:34px;
   box-shadow:0 1px 3px rgba(0,0,0,.08);transition:.15s}
 .slot.run{border-color:var(--red);background:#fee2e2;transform:scale(1.12)}
 .slot.done{opacity:.45}
 
-.play{width:100%;margin-top:12px;background:var(--red);color:#fff;font-size:26px;padding:16px 10px;
-  min-height:64px;white-space:nowrap;border-radius:999px;box-shadow:0 5px 0 var(--red-d);transition:.08s}
+.play{width:100%;margin-top:14px;background:var(--red);color:#fff;font-size:29px;padding:16px 10px;
+  min-height:72px;white-space:nowrap;border-radius:999px;box-shadow:0 5px 0 var(--red-d);transition:.08s}
 .play:active{transform:translateY(4px);box-shadow:0 0 0 var(--red-d)}
 .play:disabled{opacity:.55}
 
-.erasers{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid #eef2f7}
-.erasers button{flex:1 1 140px;background:#f3f4f6;border:2px solid #e5e7eb;color:#6b7280;
-  padding:14px 8px;min-height:54px;border-radius:12px;font-size:18px;white-space:nowrap}
+.erasers{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid #eef2f7}
+.erasers button{flex:1 1 150px;background:#f3f4f6;border:2px solid #e5e7eb;color:#6b7280;
+  padding:14px 8px;min-height:56px;border-radius:12px;font-size:19px;white-space:nowrap}
 
-.hintbox{background:#eef2ff;border:2px solid #c7d2fe;border-radius:14px;padding:12px 14px;flex-shrink:0}
-.hintbox .top{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:8px}
-.hintbox .top span{font-size:18px;color:#3730a3;white-space:nowrap}
-.hintbox button{background:#818cf8;color:#fff;padding:12px 18px;min-height:54px;border-radius:12px;font-size:18px;white-space:nowrap}
-.hintbox p{margin:0;background:#fff;border:1px solid #e0e7ff;border-radius:10px;
-  padding:10px 12px;font-size:17px;line-height:1.4;color:#312e81}
+/* 넷북처럼 세로가 짧은 화면 → 스크롤 없이 한 화면에 들어오게 */
+@media (max-height:680px){
+  body{padding-bottom:6px}
+  header{margin-bottom:6px}
+  .right{gap:8px}
+  .panel{padding:10px}
+  .dirs{gap:9px}
+  .dirs .row{gap:9px}
+  .dir{min-height:62px;padding:10px 6px}
+  .queue{min-height:96px;padding:9px}
+  .slot{width:56px;height:56px;font-size:30px}
+  .play{min-height:62px;font-size:25px;margin-top:10px}
+  .erasers{margin-top:10px;padding-top:9px}
+  .erasers button{min-height:54px;font-size:18px}
+  .msg{margin-top:6px;min-height:40px;font-size:18px}
+}
+
+@media (max-width:859px){
+  main{flex-direction:column;align-items:center}
+  header{padding-left:0;margin-top:60px}
+  .right{max-width:100%;width:100%}
+}
 
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);overflow-y:auto;padding:16px;
   align-items:center;align-items:safe center;justify-content:center;z-index:80}
@@ -150,11 +169,6 @@ main{display:flex;gap:14px;width:100%;max-width:1100px;flex:1 0 auto;align-items
         <button onclick="clearAll()">🗑️ 모두 지우기</button>
       </div>
     </div>
-
-    <div class="hintbox">
-      <div class="top"><span>🤖 AI 친구 띠띠</span><button onclick="hint()">💡 힌트</button></div>
-      <p id="ai-msg">안녕, 아인아! 로봇이 배터리(🔋)까지 갈 수 있게 방향을 알려줘!</p>
-    </div>
   </div>
 </main>
 
@@ -188,38 +202,47 @@ const DELTA={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]};
 
 let currentLevel=1, map=[], start={x:0,y:0}, robot={x:0,y:0};
 let queue=[], running=false, audioCtx=null;
+let randomStreak=0;          // 랜덤 지도를 연속으로 몇 개 깼는지
 
-/* ---- 소리 ---- */
-function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
-function beep(type){
-  if(!audioCtx) return;
-  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-  o.connect(g); g.connect(audioCtx.destination);
-  const t=audioCtx.currentTime; g.gain.setValueAtTime(0.08,t);
-  if(type==='click'){o.type='sine';o.frequency.setValueAtTime(800,t);o.start();o.stop(t+.08);}
-  else if(type==='move'){o.type='triangle';o.frequency.setValueAtTime(420,t);o.start();o.stop(t+.13);}
-  else if(type==='error'){o.type='sawtooth';o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(100,t+.3);o.start();o.stop(t+.3);}
-  else if(type==='win'){o.type='square';[440,590,780].forEach((f,i)=>o.frequency.setValueAtTime(f,t+i*.18));o.start();o.stop(t+.58);}
-}
-
-/* ---- 랜덤 맵 ---- */
-function randomMap(){
-  for(let tries=0;tries<400;tries++){
-    const m=Array.from({length:N},()=>Array(N).fill(0));
-    const sx=Math.floor(Math.random()*2), sy=Math.floor(Math.random()*N);
-    const gx=3+Math.floor(Math.random()*2), gy=Math.floor(Math.random()*N);
-    if(sx===gx&&sy===gy) continue;
-    m[sy][sx]=3; m[gy][gx]=2;
-    const num=5+Math.floor(Math.random()*5);
-    for(let i=0;i<num;i++){
-      const ox=Math.floor(Math.random()*N), oy=Math.floor(Math.random()*N);
-      if(m[oy][ox]===0) m[oy][ox]=1;
-    }
-    if(shortestPath(m,sx,sy)) return m;
+/* ---- 소리 (WebAudio · 오디오 파일 없음) ---- */
+function initAudio(){
+  if(!audioCtx){
+    try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
   }
-  return JSON.parse(JSON.stringify(MAPS[1]));
+  if(audioCtx.state==='suspended') audioCtx.resume();
 }
-/* BFS: 최단 경로(명령 문자열) 반환, 없으면 null */
+function tone(freq,dur,type,gain,delay){
+  if(!audioCtx) return;
+  const t=audioCtx.currentTime+(delay||0);
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type||'sine'; o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(gain,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t); o.stop(t+dur+0.02);
+}
+function sfxClick(){ tone(760,0.07,'sine',0.05,0); }
+/* 한 칸 성공적으로 이동 → 짧고 밝은 소리 */
+function sfxStep(){ tone(880,0.09,'sine',0.06,0); tone(1318.5,0.06,'sine',0.03,0.035); }
+function sfxError(){
+  if(!audioCtx) return;
+  const t=audioCtx.currentTime;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='sawtooth'; o.frequency.setValueAtTime(220,t);
+  o.frequency.exponentialRampToValueAtTime(100,t+.3);
+  g.gain.setValueAtTime(0.07,t); g.gain.exponentialRampToValueAtTime(0.0001,t+.3);
+  o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t+.32);
+}
+/* 단계 클리어 → 올라가는 4음 팡파레 */
+const FANFARE=[523.25,659.25,783.99,1046.5];
+function sfxFanfare(){ FANFARE.forEach((f,i)=>tone(f,0.14,'square',0.08,i*0.085)); }
+
+/* 첫 사용자 제스처에서 오디오 준비 (브라우저 자동재생 차단 대응) */
+['pointerdown','keydown','touchstart'].forEach(ev=>
+  window.addEventListener(ev,initAudio,{passive:true}));
+
+/* ---- BFS: 최단 경로(명령 문자열) 반환, 없으면 null ---- */
 function shortestPath(m,sx,sy){
   const seen=Array.from({length:N},()=>Array(N).fill(false));
   const q=[{x:sx,y:sy,path:''}]; seen[sy][sx]=true;
@@ -235,19 +258,102 @@ function shortestPath(m,sx,sy){
   }
   return null;
 }
+/* 최단 경로 길이만 (없으면 -1) */
+function shortestPathLength(m,sx,sy){
+  const p=shortestPath(m,sx,sy);
+  return p===null ? -1 : p.length;
+}
+
+/* ---- 랜덤 지도: 깰수록 점점 어려워짐 ----
+   streak = 랜덤 지도를 연속으로 깬 횟수(0부터)
+   · 요구 최단거리: 4에서 시작해 12까지 상승 (5x5 격자에서 낼 수 있는 한계에 가깝게)
+   · 돌멩이 개수: 4 → 13
+   · 시작점과 배터리 사이 최소 거리: 2 → 5                                   */
+function requiredMinPath(streak){ return Math.min(4+streak, 12); }
+function obstacleCount(streak){ return Math.min(4+streak, 13); }
+function minSeparation(streak){ return Math.min(2+Math.floor(streak/2), 4); }
+
+/* 길이가 정확히 len 걸음인 "겹치지 않는 길"을 무작위로 그린다 (되돌아가기 탐색) */
+function shuffleArr(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function carvePath(len){
+  const sx=Math.floor(Math.random()*N), sy=Math.floor(Math.random()*N);
+  const seen=Array.from({length:N},()=>Array(N).fill(false));
+  const path=[[sx,sy]];
+  seen[sy][sx]=true;
+  let budget=6000;
+  function dfs(x,y,depth){
+    if(depth===len) return true;
+    if(budget--<=0) return false;
+    const opts=[];
+    for(const k in DELTA){
+      const [dx,dy]=DELTA[k], nx=x+dx, ny=y+dy;
+      if(nx<0||nx>=N||ny<0||ny>=N) continue;
+      if(seen[ny][nx]) continue;
+      opts.push([nx,ny]);
+    }
+    for(const [nx,ny] of shuffleArr(opts)){
+      seen[ny][nx]=true; path.push([nx,ny]);
+      if(dfs(nx,ny,depth+1)) return true;
+      path.pop(); seen[ny][nx]=false;
+    }
+    return false;
+  }
+  return dfs(sx,sy,0) ? path : null;
+}
+
+/* 길을 그린 뒤 나머지를 돌멩이로 채우고, 최단거리를 지키는 선에서 돌을 덜어낸다 */
+function buildMap(target,obs,sep){
+  for(let attempt=0;attempt<400;attempt++){
+    const p=carvePath(target);
+    if(!p) continue;
+    const [sx,sy]=p[0], [gx,gy]=p[p.length-1];
+    if(Math.abs(sx-gx)+Math.abs(sy-gy) < sep) continue;
+
+    const m=Array.from({length:N},()=>Array(N).fill(1));
+    p.forEach(([x,y])=>{ m[y][x]=0; });
+    m[sy][sx]=3; m[gy][gx]=2;
+    // 길이 스스로 맞닿아 지름길이 생겼으면 버린다
+    if(shortestPathLength(m,sx,sy)<target) continue;
+
+    // 돌멩이를 목표 개수까지 덜어내되, 최단거리가 짧아지면 되돌린다
+    const rocks=[];
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++) if(m[y][x]===1) rocks.push([x,y]);
+    shuffleArr(rocks);
+    let count=rocks.length;
+    for(const [x,y] of rocks){
+      if(count<=obs) break;
+      m[y][x]=0;
+      if(shortestPathLength(m,sx,sy)<target) m[y][x]=1; else count--;
+    }
+    return {map:m,len:shortestPathLength(m,sx,sy)};
+  }
+  return null;
+}
+
+function generateRandomMap(streak){
+  const need=requiredMinPath(streak);
+  const obs=obstacleCount(streak);
+  const sep=minSeparation(streak);
+  // 목표 길이를 맞추지 못하면 조금씩 낮춘다 → 절대 풀 수 없는 지도는 나오지 않음
+  for(let target=need;target>=2;target--){
+    const r=buildMap(target,obs,Math.min(sep,target));
+    if(r) return {map:r.map,need:need,len:r.len};
+  }
+  return {map:JSON.parse(JSON.stringify(MAPS[1])),need:need,len:4};
+}
 
 /* ---- 레벨 ---- */
 function loadLevel(lv){
   if(running) return;
   currentLevel=lv;
   if(lv==='random'){
-    document.getElementById('level-display').textContent='🎲 랜덤';
-    map=randomMap();
-    say('띠띠가 새 지도를 만들었어! 돌멩이를 피해서 배터리를 찾아보자!');
+    const r=generateRandomMap(randomStreak);
+    map=r.map;
+    document.getElementById('level-display').textContent='🎲 랜덤 '+(randomStreak+1)+'단계';
   }else{
+    randomStreak=0;                     // 랜덤 모드를 벗어나면 난이도 초기화
     document.getElementById('level-display').textContent=lv+'단계';
     map=JSON.parse(JSON.stringify(MAPS[lv]));
-    say(`${lv}단계야! 로봇이 🔋로 갈 수 있게 길을 만들어줘.`);
   }
   for(let y=0;y<N;y++)for(let x=0;x<N;x++) if(map[y][x]===3){ start={x,y}; }
   robot={...start};
@@ -285,14 +391,19 @@ function drawBoard(){
 }
 function placeRobot(){
   const r=document.getElementById('robot'); if(!r)return;
-  r.style.width='calc(20% - 4px)'; r.style.height='calc(20% - 4px)';
-  r.style.left=`calc(${robot.x*20}% + 5px)`;
-  r.style.top=`calc(${robot.y*20}% + 5px)`;
+  r.style.width='calc(20% - 5px)'; r.style.height='calc(20% - 5px)';
+  r.style.left=`calc(${robot.x*20}% + 6px)`;
+  r.style.top=`calc(${robot.y*20}% + 6px)`;
 }
 function fitBoard(){
-  // 넷북 세로에 맞춰 보드 크기 결정
-  const avail=Math.min(window.innerHeight-190, window.innerWidth*0.42, 480);
-  document.documentElement.style.setProperty('--bs', Math.max(300,Math.floor(avail))+'px');
+  // AI 패널을 없앤 만큼 보드를 크게 — 화면에 꽉 차게
+  const wide=window.innerWidth>=860;
+  const head=(document.querySelector('header').offsetHeight||70)+16;
+  const reserve=window.innerHeight<=680 ? 58 : 84;         // 메시지 줄 여유
+  const availH=window.innerHeight-head-reserve;
+  const availW=wide ? window.innerWidth*0.50-30 : window.innerWidth-26;
+  const bs=Math.max(280,Math.floor(Math.min(availH,availW,640)));
+  document.documentElement.style.setProperty('--bs', bs+'px');
 }
 window.addEventListener('resize',fitBoard);
 
@@ -301,13 +412,13 @@ document.querySelectorAll('.dir').forEach(b=>{
   b.addEventListener('pointerdown',e=>{
     e.preventDefault();
     if(running) return;
-    initAudio(); beep('click');
+    initAudio(); sfxClick();
     queue.push(b.dataset.cmd);
-    renderQueue(); previewPath();
+    renderQueue();
   });
 });
-function undo(){ if(running||!queue.length)return; initAudio();beep('click');queue.pop();renderQueue();previewPath(); }
-function clearAll(){ if(running)return; queue=[]; renderQueue(); previewPath(); }
+function undo(){ if(running||!queue.length)return; initAudio(); sfxClick(); queue.pop(); renderQueue(); }
+function clearAll(){ if(running)return; queue=[]; renderQueue(); }
 function renderQueue(){
   const q=document.getElementById('queue'); q.innerHTML='';
   queue.forEach((c,i)=>{
@@ -318,25 +429,7 @@ function renderQueue(){
   document.getElementById('qcount').textContent=queue.length;
   q.scrollTop=q.scrollHeight;
 }
-/* 실행 전에 갈 길을 미리 보여줌 (과정 시각화) */
-function previewPath(){
-  document.querySelectorAll('.cell').forEach(c=>{c.classList.remove('ghost');
-    const g=c.querySelector('.gn'); if(g)g.remove();});
-  let x=start.x,y=start.y,n=0;
-  for(const cmd of queue){
-    const [dx,dy]=DELTA[cmd]; x+=dx; y+=dy; n++;
-    if(x<0||x>=N||y<0||y>=N) break;
-    if(map[y][x]===1) break;
-    const cell=document.getElementById(`c-${x}-${y}`);
-    if(cell && !cell.textContent.trim()){
-      cell.classList.add('ghost');
-      const s=document.createElement('span'); s.className='gn'; s.textContent=n;
-      cell.appendChild(s);
-    } else if(cell){ cell.classList.add('ghost'); }
-  }
-}
 
-function say(t){ document.getElementById('ai-msg').textContent=t; }
 function showMsg(text,kind){
   const m=document.getElementById('msg');
   m.textContent=text; m.className='msg '+kind; m.style.opacity='1';
@@ -349,8 +442,6 @@ async function run(){
   running=true; initAudio();
   const btn=document.getElementById('btn-play');
   btn.disabled=true; btn.textContent='🏃 로봇 이동 중...';
-  document.querySelectorAll('.cell').forEach(c=>{c.classList.remove('ghost');
-    const g=c.querySelector('.gn'); if(g)g.remove();});
 
   robot={...start}; placeRobot();
   await sleep(300);
@@ -367,7 +458,7 @@ async function run(){
     if(map[ny][nx]===1){ bump('쿵! 돌멩이에 부딪혔어요!'); ok=false; break; }
 
     robot.x=nx; robot.y=ny;
-    beep('move'); placeRobot();
+    sfxStep(); placeRobot();
     if(s)s.classList.add('done');
     await sleep(340);
   }
@@ -375,55 +466,33 @@ async function run(){
 
   if(ok){
     if(map[robot.y][robot.x]===2){ await win(); }
-    else { beep('error'); showMsg('명령이 끝났는데 배터리에 도착 못 했어요.','warn'); ok=false; }
+    else { sfxError(); showMsg('명령이 끝났는데 배터리에 도착 못 했어요.','warn'); ok=false; }
   }
   if(!ok){
-    setTimeout(()=>{ robot={...start}; placeRobot(); previewPath();
+    setTimeout(()=>{ robot={...start}; placeRobot();
       document.querySelectorAll('.slot').forEach(s=>s.classList.remove('done')); },1200);
   }
   running=false; btn.disabled=false; btn.textContent='▶️ 출발하기!';
 }
 function bump(text){
-  beep('error');
+  sfxError();
   const r=document.getElementById('robot');
   r.classList.add('shake'); setTimeout(()=>r.classList.remove('shake'),320);
   showMsg(text,'err');
-  say('괜찮아! 어디서 막혔는지 보고 다시 해보자 💪');
 }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 async function win(){
-  beep('win');
+  sfxFanfare();
+  if(currentLevel==='random') randomStreak++;   // 랜덤은 깰수록 어려워짐
   const best=shortestPath(map,start.x,start.y);
   const msgs=['아인아 정말 대단해! 코딩 천재인가봐! 🤩',
               '우와! 돌멩이를 요리조리 잘 피했네! 🚀',
               '로봇이 배터리를 먹고 기운이 났어! 고마워! 🔋'];
   let t=msgs[Math.floor(Math.random()*msgs.length)];
   if(best && queue.length===best.length) t='최소한의 명령으로 딱 맞게 갔어요! 완벽해요! 🏆';
-  else if(best) t+=` (가장 짧은 길은 ${best.length}칸이래요!)`;
   document.getElementById('win-msg').textContent=t;
   document.getElementById('win-modal').classList.add('on');
-}
-
-/* ---- 힌트: 실제 최단 경로 첫 걸음을 알려줌 ---- */
-const NAME={U:'위로 ⬆️',D:'아래로 ⬇️',L:'왼쪽으로 ⬅️',R:'오른쪽으로 ➡️'};
-function hint(){
-  initAudio(); beep('click');
-  say('띠띠가 생각 중이야... ⏳');
-  setTimeout(()=>{
-    // 지금까지 넣은 명령을 따라간 위치에서 힌트 계산
-    let x=start.x,y=start.y,blocked=false;
-    for(const c of queue){
-      const [dx,dy]=DELTA[c], nx=x+dx, ny=y+dy;
-      if(nx<0||nx>=N||ny<0||ny>=N||map[ny][nx]===1){ blocked=true; break; }
-      x=nx;y=ny;
-    }
-    if(blocked){ say('지금 명령대로 가면 중간에 부딪혀요. 뒤쪽 명령을 지우고 다시 생각해볼까? 🤔'); return; }
-    const p=shortestPath(map,x,y);
-    if(p===null){ say('여기서는 배터리까지 갈 수 없어요. 모두 지우고 처음부터 해볼까? 🔄'); return; }
-    if(p===''){ say('벌써 배터리 위에 있어요! 출발하기를 눌러봐요! ▶️'); return; }
-    say(`💡 다음은 ${NAME[p[0]]} 가면 좋아요. 배터리까지 ${p.length}칸 남았어!`);
-  },600);
 }
 
 loadLevel(1);

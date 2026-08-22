@@ -14,6 +14,7 @@
   --blue:#3b82f6; --blue-d:#1d4ed8;
   --red:#ef4444; --red-d:#b91c1c;
   --card:#ffffff;
+  --boardW:460px; --boardH:340px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%;margin:0}
@@ -25,8 +26,9 @@ body{
 }
 button{font-family:inherit;cursor:pointer;border:none}
 
-.home{position:fixed;top:8px;left:8px;min-height:56px;display:inline-flex;align-items:center;font-size:17px;padding:0 20px;z-index:60;background:rgba(255,255,255,.9);
-  color:var(--muted);padding:9px 16px;border-radius:999px;font-size:17px;
+.home{position:fixed;top:8px;left:8px;min-height:56px;display:inline-flex;align-items:center;
+  z-index:60;background:rgba(255,255,255,.92);
+  color:var(--muted);padding:9px 16px;border-radius:999px;font-size:17px;white-space:nowrap;
   text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.08);border:1px solid #e5e7eb}
 
 .screen{display:none;flex-direction:column;align-items:center;justify-content:center;
@@ -66,26 +68,36 @@ h1{font-size:clamp(31px,5.5vh,52px);color:var(--green-d);margin:0 0 10px;text-al
 .link{background:none;color:var(--muted);text-decoration:underline;font-size:18px;padding:14px 10px;min-height:52px;white-space:nowrap}
 
 /* --- game screen --- */
-#screen-game{justify-content:flex-start;padding-top:6px}
-.bar{display:flex;justify-content:space-between;align-items:center;
-  width:100%;max-width:var(--boardW,460px);margin-bottom:6px;padding:0 2px}
-.bar h2{margin:0;font-size:clamp(20px,3.1vh,29px);color:var(--blue-d);font-weight:normal;white-space:nowrap}
+#screen-game{justify-content:center;padding:6px 8px 12px}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  width:100%;max-width:1240px;margin-bottom:8px;padding-left:158px;padding-right:2px}
+.bar h2{margin:0;font-size:clamp(19px,2.9vh,28px);color:var(--blue-d);font-weight:normal;white-space:nowrap}
 .quit{background:#fecaca;color:#991b1b;font-size:17px;padding:12px 18px;min-height:52px;border-radius:12px;white-space:nowrap}
 
+/* 미로 + 방향패드를 나란히 */
+.play-area{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:20px;width:100%}
+
 #game-canvas{
+  flex:0 0 auto;
   touch-action:none;box-shadow:0 8px 20px rgba(0,0,0,.1);border-radius:12px;background:#fff;
-  width:var(--boardW,460px);height:var(--boardW,460px);max-width:96vw
+  width:var(--boardW);height:var(--boardH);max-width:98vw
 }
 
-.pad{margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.pad{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:12px}
 .pad-row{display:flex;gap:14px}
 .dbtn{background:var(--green);color:#fff;border-radius:16px;
-  width:clamp(64px,9.6vh,80px);height:clamp(64px,9.6vh,80px);
-  font-size:clamp(26px,4.4vh,39px);display:flex;align-items:center;justify-content:center;
+  width:clamp(64px,9.6vh,84px);height:clamp(64px,9.6vh,84px);
+  font-size:clamp(26px,4.4vh,40px);display:flex;align-items:center;justify-content:center;
   box-shadow:0 4px 0 var(--green-d);transition:.07s;touch-action:none}
 .dbtn:active{transform:translateY(4px);box-shadow:0 0 0 var(--green-d)}
-.tip{font-size:16px;color:var(--muted);margin:6px 0 0;text-align:center}
-.steps{font-size:17px;color:var(--muted);white-space:nowrap}
+.tip{font-size:15px;color:var(--muted);margin:2px 0 0;text-align:center;max-width:270px;line-height:1.35}
+.steps{font-size:clamp(17px,2.4vh,23px);color:var(--muted);white-space:nowrap}
+
+/* 좁은/세로 화면 → 방향패드를 미로 아래로 */
+@media (max-width:759px){
+  .play-area{flex-direction:column;gap:12px}
+  .bar{padding-left:0;margin-top:62px;max-width:96vw}
+}
 
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);overflow-y:auto;padding:16px;
   align-items:center;align-items:safe center;justify-content:center;z-index:80}
@@ -145,15 +157,17 @@ h1{font-size:clamp(31px,5.5vh,52px);color:var(--green-d);margin:0 0 10px;text-al
     <span class="steps" id="steps">0 걸음</span>
     <button class="quit" onclick="goLevels()">그만하기</button>
   </div>
-  <canvas id="game-canvas"></canvas>
-  <div class="pad">
-    <button class="dbtn" data-dc="0" data-dr="-1">⬆️</button>
-    <div class="pad-row">
-      <button class="dbtn" data-dc="-1" data-dr="0">⬅️</button>
-      <button class="dbtn" data-dc="0" data-dr="1">⬇️</button>
-      <button class="dbtn" data-dc="1" data-dr="0">➡️</button>
+  <div class="play-area">
+    <canvas id="game-canvas"></canvas>
+    <div class="pad" id="pad">
+      <button class="dbtn" data-dc="0" data-dr="-1">⬆️</button>
+      <div class="pad-row">
+        <button class="dbtn" data-dc="-1" data-dr="0">⬅️</button>
+        <button class="dbtn" data-dc="0" data-dr="1">⬇️</button>
+        <button class="dbtn" data-dc="1" data-dr="0">➡️</button>
+      </div>
+      <p class="tip">키보드 방향키로도 움직일 수 있어요!</p>
     </div>
-    <p class="tip">키보드 방향키로도 움직일 수 있어요!</p>
   </div>
 </div>
 
@@ -176,6 +190,37 @@ let player={c:0,r:0}, goal={c:0,r:0}, playing=false, steps=0, trail=[];
 
 const canvas=document.getElementById('game-canvas');
 const ctx=canvas.getContext('2d');
+
+/* ===== 소리 (WebAudio · 오디오 파일 없음) ===== */
+let audioCtx=null;
+function initAudio(){
+  if(!audioCtx){
+    try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
+  }
+  if(audioCtx.state==='suspended') audioCtx.resume();
+}
+function tone(freq,dur,type,gain,delay){
+  if(!audioCtx) return;
+  const t=audioCtx.currentTime+(delay||0);
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type||'sine'; o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(gain,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t); o.stop(t+dur+0.02);
+}
+/* 한 걸음 성공 → 짧고 밝은 소리 */
+function sfxStep(){ tone(880,0.09,'sine',0.06,0); tone(1318.5,0.06,'sine',0.03,0.035); }
+/* 벽에 막힘 */
+function sfxBlock(){ tone(150,0.10,'square',0.035,0); }
+/* 단계 클리어 → 올라가는 4음 팡파레 */
+const FANFARE=[523.25,659.25,783.99,1046.5];
+function sfxFanfare(){ FANFARE.forEach((f,i)=>tone(f,0.14,'square',0.08,i*0.085)); }
+
+/* 첫 사용자 제스처에서 오디오 준비 (브라우저 자동재생 차단 대응) */
+['pointerdown','keydown','touchstart'].forEach(ev=>
+  window.addEventListener(ev,initAudio,{once:false,passive:true}));
 
 const dinoPixels=[
 "       ███████  ","       ███ ████ ","       ████████ ","       ████████ ",
@@ -223,18 +268,22 @@ function selectLevel(lv){
 let seed=1;
 function rnd(){ let x=Math.sin(seed++)*10000; return x-Math.floor(x); }
 
-/* ===== 게임 시작 ===== */
+/* ===== 게임 시작 =====
+   미로는 정사각형이 아니라 가로로 긴 직사각형 (가로 화면에 맞춤) */
+const LEVEL_SIZE=[[7,5],[9,6],[11,7],[13,8],[16,9]];
+
 function startGame(stage){
+  initAudio();
   currentStage=stage;
   show('screen-game');
   document.getElementById('win-modal').classList.remove('on');
 
-  const sizes=[6,8,11,14,18];
-  mazeCols=mazeRows=sizes[currentLevel-1];
+  const sz=LEVEL_SIZE[currentLevel-1];
+  mazeCols=sz[0]; mazeRows=sz[1];
 
   const t=document.getElementById('game-title');
   if(stage==='random'){ t.textContent=currentLevel+'단계 · 랜덤 미로'; seed=Math.floor(Math.random()*99999)+1; }
-  else { t.textContent=currentLevel+'단계 · '+stage+'판'; seed=currentLevel*100+stage; }
+  else { t.textContent=currentLevel+'단계 · '+stage+'판'; seed=currentLevel*1000+stage*7+1; }
 
   generateMaze(mazeCols,mazeRows);
   player={c:0,r:0}; goal={c:mazeCols-1,r:mazeRows-1};
@@ -275,25 +324,37 @@ function removeWalls(a,b){
 }
 
 /* ===== 렌더 ===== */
+const MAX_CELL=98;
 function resizeCanvas(){
-  // 넷북(1366x768 등) 세로 공간 우선: 방향패드/헤더 공간을 뺀 크기
-  const btnH = Math.min(Math.max(window.innerHeight*0.096,64),80);
-  const padH = btnH*2 + 58;              // 방향패드 두 줄 + 안내문
-  const avail = window.innerHeight - padH - 78;   // 상단 바 여유
-  const size = Math.max(300, Math.floor(Math.min(avail, window.innerWidth*0.92, 470)));
-  document.documentElement.style.setProperty('--boardW', size+'px');
+  if(!mazeCols||!mazeRows) return;
+  const wide = window.innerWidth>=760;
+  const padEl=document.getElementById('pad');
+  const padW = wide ? (padEl.offsetWidth||280)+22 : 0;
+  const btnH = Math.min(Math.max(window.innerHeight*0.096,64),84);
+  const padBelow = wide ? 0 : (btnH*2+70);
+  const headH = wide ? 62 : 132;   // 상단 바 (좁은 화면은 🏠 버튼 아래로 내려감)
+
+  const availW = Math.max(220, window.innerWidth - padW - 22);
+  const availH = Math.max(180, window.innerHeight - headH - padBelow - 14);
+
+  let cell = Math.min(availW/mazeCols, availH/mazeRows, MAX_CELL);
+  cell = Math.max(cell, 26);       // 아주 작은 화면에서도 최소 크기 보장
+  cellSize = Math.floor(cell);
+
+  const w=cellSize*mazeCols, h=cellSize*mazeRows;
+  document.documentElement.style.setProperty('--boardW', w+'px');
+  document.documentElement.style.setProperty('--boardH', h+'px');
   const dpr=window.devicePixelRatio||1;
-  canvas.width=size*dpr; canvas.height=size*dpr;
+  canvas.width=w*dpr; canvas.height=h*dpr;
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  cellSize=size/mazeCols;
   draw();
 }
 window.addEventListener('resize',()=>{ if(playing) resizeCanvas(); });
 
 function draw(){
-  const size=cellSize*mazeCols;
-  ctx.clearRect(0,0,size,size);
-  ctx.fillStyle='#fffbeb'; ctx.fillRect(0,0,size,size);
+  const w=cellSize*mazeCols, h=cellSize*mazeRows;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#fffbeb'; ctx.fillRect(0,0,w,h);
 
   // 지나온 길 표시 (스스로 경로를 추적할 수 있게)
   ctx.fillStyle='rgba(134,239,172,.45)';
@@ -303,12 +364,12 @@ function draw(){
   ctx.lineWidth=Math.max(2.5,Math.floor(cellSize/9));
   ctx.lineCap='round';
   for(let c=0;c<mazeCols;c++)for(let r=0;r<mazeRows;r++){
-    const x=c*cellSize,y=r*cellSize,w=maze[c][r].walls;
+    const x=c*cellSize,y=r*cellSize,wl=maze[c][r].walls;
     ctx.beginPath();
-    if(w[0]){ctx.moveTo(x,y);ctx.lineTo(x+cellSize,y);}
-    if(w[1]){ctx.moveTo(x+cellSize,y);ctx.lineTo(x+cellSize,y+cellSize);}
-    if(w[2]){ctx.moveTo(x,y+cellSize);ctx.lineTo(x+cellSize,y+cellSize);}
-    if(w[3]){ctx.moveTo(x,y);ctx.lineTo(x,y+cellSize);}
+    if(wl[0]){ctx.moveTo(x,y);ctx.lineTo(x+cellSize,y);}
+    if(wl[1]){ctx.moveTo(x+cellSize,y);ctx.lineTo(x+cellSize,y+cellSize);}
+    if(wl[2]){ctx.moveTo(x,y+cellSize);ctx.lineTo(x+cellSize,y+cellSize);}
+    if(wl[3]){ctx.moveTo(x,y);ctx.lineTo(x,y+cellSize);}
     ctx.stroke();
   }
 
@@ -348,7 +409,7 @@ function tryMove(dc,dr){
 // pointerdown 하나만 사용 → 터치에서 mousedown이 또 발생하는 문제 제거
 document.querySelectorAll('.dbtn').forEach(btn=>{
   btn.addEventListener('pointerdown',e=>{
-    e.preventDefault();
+    e.preventDefault(); initAudio();
     tryMove(parseInt(btn.dataset.dc,10), parseInt(btn.dataset.dr,10));
   });
   btn.addEventListener('contextmenu',e=>e.preventDefault());
@@ -368,10 +429,10 @@ window.addEventListener('keydown',e=>{
 function movePlayer(dc,dr){
   if(!playing) return;
   const cell=maze[player.c][player.r];
-  if(dr===-1&&cell.walls[0])return;
-  if(dc===1 &&cell.walls[1])return;
-  if(dr===1 &&cell.walls[2])return;
-  if(dc===-1&&cell.walls[3])return;
+  if(dr===-1&&cell.walls[0]){sfxBlock();return;}
+  if(dc===1 &&cell.walls[1]){sfxBlock();return;}
+  if(dr===1 &&cell.walls[2]){sfxBlock();return;}
+  if(dc===-1&&cell.walls[3]){sfxBlock();return;}
 
   player.c+=dc; player.r+=dr;
   steps++;
@@ -383,11 +444,13 @@ function movePlayer(dc,dr){
 
   draw();
   if(player.c===goal.c&&player.r===goal.r) gameClear();
+  else sfxStep();
 }
 
 /* ===== 클리어 ===== */
 function gameClear(){
   playing=false;
+  sfxFanfare();
   confetti();
   const best=(mazeCols-1)+(mazeRows-1);
   document.getElementById('win-msg').textContent =

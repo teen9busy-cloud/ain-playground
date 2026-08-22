@@ -40,3 +40,15 @@ games/            게임 파일들 (maze, math, coding, puzzle, clock, memory, h
 - 시작 화면에서 난이도와 문제 수를 고를 수 있게 하고, 랜덤 생성으로 무한히 놀 수 있게 합니다.
 - 화면 버튼은 `pointerdown` 하나만 씁니다. `onmousedown` 과 `ontouchstart` 를 같이 쓰면 터치 기기에서 두 번 눌립니다.
 - 키보드 입력은 `if (e.repeat) return;` 으로 길게 누르기를 막습니다.
+
+## 해설위원 사진 넣기 (소싸움 대회)
+
+`games` 폴더에 **`caster.png`** 파일을 넣으면, 소싸움 게임의 해설위원이
+도트 캐릭터 대신 그 사진으로 바뀝니다.
+(`caster.jpg`, `caster.jpeg`, `caster.webp` 도 됩니다.)
+
+- 사진은 세로로 살짝 긴 비율(3:4 정도)이 가장 잘 맞습니다.
+- 도트 느낌을 살리려고 일부러 거칠게 확대해서 보여줍니다.
+- 파일을 넣지 않으면 지금처럼 도트 캐릭터가 나옵니다.
+- 해설위원 이름은 `games/bull.html` 위쪽의
+  `const CASTER_NAME = '황소 아저씨';` 한 줄을 고치면 바뀝니다.

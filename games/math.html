@@ -644,6 +644,41 @@
     <!-- [JavaScript] -->
     <!-- ========================================== -->
     <script>
+        /* ============ 소리 (WebAudio · 파일 없이 오실레이터로 생성) ============ */
+        let AC = null;
+        function initAudio() {
+            try {
+                if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+                if (AC && AC.state === 'suspended') AC.resume();
+            } catch (e) { AC = null; }
+        }
+        /* 첫 사용자 동작에서 오디오를 깨움 (모바일/사파리 자동재생 차단 대응) */
+        ['pointerdown', 'touchstart', 'keydown'].forEach(ev =>
+            window.addEventListener(ev, initAudio, { passive: true }));
+
+        /* 모든 소리는 AC.currentTime 기준으로 미리 예약 → 게임 진행을 절대 막지 않음 */
+        function tone(freq, dur, type, vol, delay, glide) {
+            if (!AC) return;
+            try {
+                const t0 = AC.currentTime + (delay || 0);
+                const o = AC.createOscillator(), g = AC.createGain();
+                o.type = type || 'sine';
+                o.frequency.setValueAtTime(freq, t0);
+                if (glide) o.frequency.exponentialRampToValueAtTime(glide, t0 + dur);
+                g.gain.setValueAtTime(.0001, t0);
+                g.gain.exponentialRampToValueAtTime(vol || .06, t0 + .012);
+                g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+                o.connect(g); g.connect(AC.destination);
+                o.start(t0); o.stop(t0 + dur + .02);
+            } catch (e) {}
+        }
+        const SFX = {
+            tap()  { tone(660, .06, 'sine', .05, 0); },                                       /* 숫자 누름 */
+            good() { tone(880, .10, 'sine', .07, 0); tone(1318.5, .14, 'sine', .06, .09); },  /* 정답! */
+            bad()  { tone(196, .30, 'sine', .05, 0, 156); },                                  /* 부드럽고 낮은 실패음 */
+            clear(){ [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, .14, 'square', .08, i * .085)); }
+        };
+
         // 전역 상태 변수
         let baseMaxQuestions = 10;
         let currentDifficulty = 20; // 동적 난이도 조절용 변수
@@ -843,12 +878,14 @@
             if (isAnswerChecked) return;
             if (userInput.length < 3) {
                 userInput += num.toString();
+                SFX.tap();
                 updateDisplay();
             }
         }
 
         function deleteNumber() {
             if (isAnswerChecked) return;
+            SFX.tap();
             userInput = userInput.slice(0, -1);
             updateDisplay();
         }
@@ -959,6 +996,7 @@
                 // 정답 처리
                 isAnswerChecked = true;
                 animCounter = 0;
+                SFX.good();
                 consecutiveCorrect++;
 
                 // 난이도 상향 조정 (연속 2번 정답시)
@@ -996,6 +1034,7 @@
                 // 오답 처리
                 if (attemptCount === 0) {
                     // 첫 번째 시도 실패: 두 번째 기회 및 힌트 제공
+                    SFX.bad();
                     attemptCount = 1;
                     userInput = ""; // 입력값 초기화
                     updateDisplay();
@@ -1009,6 +1048,7 @@
                     // 두 번째 시도 실패: 완전 오답 처리
                     isAnswerChecked = true;
                     animCounter = 0;
+                    SFX.bad();
 
                     // 난이도 하향 조정
                     consecutiveCorrect = 0;
@@ -1169,6 +1209,7 @@
         }
 
         function showFinalEndScreen() {
+            SFX.clear();
             const endScreen = document.getElementById('end-screen');
             let msg = score === baseMaxQuestions ? "모든 문제를 한 번에 맞혔어요! 천재인가요? 🌟" : "틀린 문제까지 모두 잘 풀어냈어요! 정말 대단해요! 👏";
 
