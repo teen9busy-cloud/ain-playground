@@ -124,15 +124,16 @@ h1{font-size:clamp(26px,5.2vh,50px);margin:0 0 6px;text-align:center;color:var(-
 .vs{font-size:clamp(15px,2.2vh,20px);color:var(--gold)}
 
 /* 위: 경기장 + 해설위원 / 아래: 문제 */
-.stage{flex:1 1 auto;min-height:0;display:flex;gap:8px;align-items:stretch;justify-content:center}
+.stage{flex:1 1 auto;min-height:0;max-height:44vh;display:flex;gap:8px;
+  align-items:stretch;justify-content:center}
 .arenabox{background:#000;border:4px solid var(--line);display:flex;
   align-items:center;justify-content:center;overflow:hidden}
 
 .caster{background:var(--panel);border:4px solid var(--line);padding:7px;
   display:flex;flex-direction:column;align-items:center;gap:6px;
-  flex:0 0 248px;width:248px;min-height:0;justify-content:flex-start}
+  flex:0 0 216px;width:216px;min-height:0;justify-content:flex-start}
 .caster .who{font-size:14px;color:var(--gold);text-align:center;white-space:nowrap;flex:0 0 auto}
-.portrait{width:min(146px,70%);flex:0 0 auto;border:3px solid #3d2f66;background:#231a3e}
+.portrait{width:min(112px,62%);flex:0 0 auto;border:3px solid #3d2f66;background:#231a3e}
 .portrait canvas,.portrait img{width:100%;height:auto;display:block;image-rendering:pixelated}
 .bubble{background:var(--panel2);border:3px solid var(--line);padding:9px 10px;
   font-size:clamp(14px,2vh,18px);line-height:1.6;color:var(--cream);
@@ -154,24 +155,25 @@ h1{font-size:clamp(26px,5.2vh,50px);margin:0 0 6px;text-align:center;color:var(-
 }
 
 /* 문제 */
-.qbox{flex:0 0 auto;background:var(--panel);border:4px solid var(--line);padding:8px 10px 10px}
-.qhead{display:flex;gap:9px;align-items:center;margin-bottom:6px}
-.subj{background:var(--gold);color:#3a2405;padding:4px 11px;font-size:13px;border:3px solid var(--gold-d);white-space:nowrap}
-.qno{font-size:13px;color:#a99cc9;white-space:nowrap}
-.qtext{font-size:clamp(20px,3.4vh,32px);color:#fff;line-height:1.4;margin-bottom:9px;
-  text-align:center;word-break:keep-all;text-shadow:3px 3px 0 rgba(0,0,0,.5)}
+.qbox{flex:1 1 auto;min-height:0;background:var(--panel);border:4px solid var(--line);
+  padding:10px 12px 12px;display:flex;flex-direction:column;justify-content:center}
+.qhead{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.subj{background:var(--gold);color:#3a2405;padding:6px 14px;font-size:16px;border:3px solid var(--gold-d);white-space:nowrap}
+.qno{font-size:15px;color:#a99cc9;white-space:nowrap}
+.qtext{font-size:clamp(27px,5vh,46px);color:#fff;line-height:1.35;margin-bottom:12px;
+  text-align:center;word-break:keep-all;text-shadow:3px 3px 0 rgba(0,0,0,.5);padding:4px 0}
 .opts{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 @media (max-width:700px){ .opts{grid-template-columns:repeat(2,1fr)} }
 .opt{background:var(--blue);color:#fff;border:4px solid var(--blue-d);
-  min-height:60px;padding:10px 8px;font-size:clamp(17px,2.6vh,24px);
+  min-height:82px;padding:12px 10px;font-size:clamp(22px,3.8vh,34px);
   box-shadow:0 5px 0 rgba(0,0,0,.5);transition:.08s;word-break:keep-all;line-height:1.35}
 .opt:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.5)}
 .opt:disabled{cursor:default}
 .opt.right{background:var(--green);border-color:var(--green-d)}
 .opt.wrong{background:var(--red);border-color:var(--red-d)}
 .opt.dim{opacity:.3}
-.nextbtn{width:100%;margin-top:9px;background:var(--gold);color:#3a2405;
-  border:4px solid var(--gold-d);min-height:58px;font-size:clamp(17px,2.6vh,23px);
+.nextbtn{width:100%;margin-top:10px;background:var(--gold);color:#3a2405;
+  border:4px solid var(--gold-d);min-height:68px;font-size:clamp(20px,3.1vh,28px);
   box-shadow:0 5px 0 rgba(0,0,0,.55);display:none}
 .nextbtn.on{display:block}
 .nextbtn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.55)}
@@ -179,11 +181,13 @@ h1{font-size:clamp(26px,5.2vh,50px);margin:0 0 6px;text-align:center;color:var(-
 /* 화면이 낮으면 더 촘촘하게 */
 @media (max-height:660px){
   .hpbar{height:14px}
-  .opt{min-height:52px;font-size:clamp(15px,2.4vh,20px)}
-  .nextbtn{min-height:50px}
-  .qtext{font-size:clamp(18px,3vh,26px);margin-bottom:7px}
-  .caster{flex:0 0 214px;width:214px}
-  .portrait{width:min(104px,58%)}
+  .stage{max-height:38vh}
+  .opt{min-height:64px;font-size:clamp(19px,3.4vh,26px)}
+  .nextbtn{min-height:56px;font-size:clamp(18px,2.9vh,23px)}
+  .qtext{font-size:clamp(23px,4.4vh,32px);margin-bottom:8px}
+  .subj{font-size:14px} .qno{font-size:13px}
+  .caster{flex:0 0 186px;width:186px}
+  .portrait{width:min(86px,54%)}
 }
 
 /* ── 팝업 ── */
@@ -253,6 +257,7 @@ h1{font-size:clamp(26px,5.2vh,50px);margin:0 0 6px;text-align:center;color:var(-
   <div class="topbar">
     <span class="rd" id="round-lab">8강</span>
     <div class="tb-right">
+      <button class="icobtn" id="voice-btn" onclick="toggleVoice()">🗣</button>
       <button class="icobtn" id="bgm-btn" onclick="toggleBGM()">🔊</button>
       <button class="icobtn" onclick="quitFight()">그만두기</button>
     </div>
@@ -309,7 +314,7 @@ h1{font-size:clamp(26px,5.2vh,50px);margin:0 0 6px;text-align:center;color:var(-
    ║   (caster.jpg / caster.jpeg / caster.webp 도 됩니다)            ║
    ║   사진이 있으면 자동으로 도트 캐릭터 대신 사진이 나옵니다.        ║
    ╚════════════════════════════════════════════════════════════════╝ */
-const CASTER_NAME  = '강동길 해설';
+const CASTER_NAME  = '황소 아저씨';
 const CASTER_PHOTO = ['caster.png','caster.jpg','caster.jpeg','caster.webp'];
 
 /* ══════════════ 소 데이터 ══════════════ */
@@ -344,11 +349,12 @@ const SAY_START=['자~ 오늘도 뜨겁습니더! 시작해 보입시더!',
  '모래판이 딱 좋습니더. 자, 갑니다!','아인이 소, 오늘 눈빛이 살아 있습니더!'];
 const SAY_ASK=['자, {n}번 문제 나갑니더!','{n}번 문제! 잘 보이소~',
  '이번 문제 중요합니더. 집중하이소!','자~ 다음 문제 갑니더!'];
-const SAY_RIGHT=['맞췄어요~!! 밀어봐라~!!! 밀어 봐라!!!!','가자 가자!!!! 아이고 잘한다!!',
- '맞췄습니더!! 박수 한번 주이소!!!!','옳지! 지금입니더, 확 밀어붙이이소!!',
- '캬~ 정답입니더! 힘이 붙었어요!!'];
-const SAY_CRIT=['우와~!! 완전히 들어뿠어요!!! 박수 한번 주이소!!!!',
- '아이고~ 이건 뭐 그냥 밀어뿌네예!! 대단합니더!!','어어~ 넘어갑니더! 회심의 한 방입니더!!'];
+const SAY_RIGHT=['맞췄어요! 밀어봐라, 밀어봐라!','으라차차차! 가자 가자!',
+ '맞췄습니더! 박수 한번 주이소!','옳지! 지금입니더, 확 밀어붙이이소!',
+ '캬, 정답입니더! 힘이 붙었어요!','좋습니더! 밀어봐라, 밀어!'];
+const SAY_CRIT=['우와! 완전히 들어뿠어요! 박수 한번 주이소!',
+ '아이고, 이건 뭐 그냥 밀어뿌네예! 대단합니더!',
+ '으라차차차! 넘어갑니더, 넘어가요!'];
 const SAY_WRONG=['아... 중앙 자리를 내어주고 있어요.','아이고~ 밀립니더, 밀려요...',
  '지금 힘이 딸리는데예... 정신 차리이소!','아쉽습니더. 한 발 물러섰어요.',
  '어어~ 뒤로 밀립니더. 다시 버티 보이소!'];
@@ -589,14 +595,60 @@ function noise(dur,vol){
     src.connect(g); g.connect(AC.destination); src.start(t);
   }catch(e){}
 }
+/* 잡음을 필터에 통과시켜 '딱' '푹' '와아아' 같은 소리를 만든다 */
+function band(dur,type,freq,vol,when,swell){
+  if(!AC) return;
+  try{
+    const t=when||AC.currentTime, n=Math.max(1,Math.floor(AC.sampleRate*dur));
+    const buf=AC.createBuffer(1,n,AC.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<n;i++) d[i]=Math.random()*2-1;
+    const src=AC.createBufferSource(); src.buffer=buf;
+    const f=AC.createBiquadFilter(); f.type=type; f.frequency.setValueAtTime(freq,t);
+    if(type==='bandpass') f.Q.setValueAtTime(.8,t);
+    const g=AC.createGain();
+    if(swell){                                   // 관중 함성: 서서히 커졌다 작아짐
+      g.gain.setValueAtTime(.0001,t);
+      g.gain.linearRampToValueAtTime(vol,t+dur*0.28);
+      g.gain.setValueAtTime(vol,t+dur*0.5);
+      g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      f.frequency.linearRampToValueAtTime(freq*1.5,t+dur*0.4);
+    }else{
+      g.gain.setValueAtTime(vol,t);
+      g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    }
+    src.connect(f); f.connect(g); g.connect(AC.destination); src.start(t);
+  }catch(e){}
+}
 const SFX={
   tap  :()=>tone(760,.06,'square',.06),
   right:()=>{ const t=AC?AC.currentTime:0;
               [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,.14,'square',.08,t+i*.085)); },
   wrong:()=>{ const t=AC?AC.currentTime:0; tone(196,.2,'sine',.05,t); tone(156,.26,'sine',.05,t+.16); },
-  hit  :()=>{ noise(.22,.16); tone(120,.2,'square',.09); },
-  crit :()=>{ noise(.32,.2); const t=AC?AC.currentTime:0;
-              [180,140,110].forEach((f,i)=>tone(f,.18,'square',.1,t+i*.06)); },
+  /* 소가 부딪히는 소리 — 낮은 쿵 + 뿔이 딱 부딪히는 소리 + 흙먼지 */
+  hit  :(big)=>{
+    if(!AC) return;
+    const t=AC.currentTime, k=big?1.5:1;
+    try{
+      const o=AC.createOscillator(), g=AC.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(150*k,t);
+      o.frequency.exponentialRampToValueAtTime(42,t+.30);
+      g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(.34*k,t+.012);
+      g.gain.exponentialRampToValueAtTime(.0001,t+.34);
+      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t+.36);
+    }catch(e){}
+    band(.055,'highpass',1800,.30*k,t);        // 뿔이 딱
+    band(.42 ,'lowpass', 900 ,.20*k,t+.02);    // 흙먼지 푹
+    tone(74*k,.26,'triangle',.16*k,t+.005);
+  },
+  crit :()=>{ SFX.hit(true); const t=AC?AC.currentTime:0;
+              [180,140,110].forEach((f,i)=>tone(f,.2,'square',.1,t+i*.07));
+              band(.5,'lowpass',700,.22,t+.1); },
+  /* 관중 함성 — 우와아아 하고 부풀었다 사그라듦 */
+  crowd:(big)=>{
+    if(!AC) return;
+    const t=AC.currentTime, dur=big?2.0:1.3;
+    band(dur,'bandpass',(big?760:620),(big?.30:.20),t,true);
+  },
   win  :()=>{ const t=AC?AC.currentTime:0;
               [523.25,659.25,783.99,1046.5,783.99,1046.5].forEach((f,i)=>tone(f,.18,'square',.09,t+i*.14)); },
   lose :()=>{ const t=AC?AC.currentTime:0;
@@ -622,6 +674,80 @@ function bgmStart(){
   },140);
 }
 function bgmStop(){ if(bgmTimer){clearInterval(bgmTimer);bgmTimer=null;} }
+
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  해설 음성                                                        ║
+   ║                                                                  ║
+   ║  1) games/voice 폴더에 mp3 를 넣으면 그 소리가 먼저 나옵니다.      ║
+   ║     right1.mp3 right2.mp3 ... (맞혔을 때)                        ║
+   ║     wrong1.mp3 ...           (틀렸을 때)                          ║
+   ║     crit1.mp3 / start1.mp3 / win1.mp3 / lose1.mp3                ║
+   ║  2) 파일이 없으면 브라우저가 한국어로 직접 읽어 줍니다.            ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+const VOICE_DIR='voice/';
+const VOICE_SETS={start:2,right:5,crit:3,wrong:5,tank:2,win:2,lose:2};
+const voiceCache={};                       // 'right1' → Audio | false(없음) | null(확인중)
+let voiceOn=true, koVoice=null;
+
+function primeVoice(kind){                 // 파일이 있는지 미리 살짝 확인
+  const n=VOICE_SETS[kind]||0;
+  for(let i=1;i<=n;i++){
+    const k=kind+i;
+    if(voiceCache[k]!==undefined) continue;
+    voiceCache[k]=null;
+    const a=new Audio(VOICE_DIR+k+'.mp3');
+    a.preload='auto';
+    a.oncanplaythrough=()=>{ voiceCache[k]=a; };
+    a.onerror=()=>{ voiceCache[k]=false; };
+    try{ a.load(); }catch(e){ voiceCache[k]=false; }
+    return;                                // 한 번에 하나씩만 (요청 폭주 방지)
+  }
+}
+function playVoiceFile(kind){
+  const n=VOICE_SETS[kind]||0, ready=[];
+  for(let i=1;i<=n;i++){ const v=voiceCache[kind+i]; if(v && v!==true) ready.push(v); }
+  primeVoice(kind);
+  if(!ready.length) return false;
+  const a=pick(ready);
+  try{ a.currentTime=0; const pr=a.play(); if(pr&&pr.catch) pr.catch(()=>{}); return true; }
+  catch(e){ return false; }
+}
+function pickKoVoice(){
+  if(!('speechSynthesis' in window)) return;
+  const vs=speechSynthesis.getVoices()||[];
+  koVoice = vs.find(v=>/^ko/i.test(v.lang)) || vs.find(v=>/korean|한국/i.test(v.name)) || null;
+}
+if('speechSynthesis' in window){
+  pickKoVoice();
+  speechSynthesis.onvoiceschanged=pickKoVoice;
+}
+function speakLine(text){
+  if(!('speechSynthesis' in window)) return false;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='ko-KR'; u.rate=1.12; u.pitch=1.15; u.volume=1;
+    if(koVoice) u.voice=koVoice;
+    speechSynthesis.speak(u);
+    return true;
+  }catch(e){ return false; }
+}
+/* 부딪히는 소리가 잦아든 뒤에 해설이 터진다 */
+function callOut(kind,text,delay){
+  if(!voiceOn) return;
+  setTimeout(()=>{
+    if(!voiceOn) return;
+    if(playVoiceFile(kind)) return;       // 녹음 파일이 있으면 그것으로
+    speakLine(text);                      // 없으면 브라우저가 읽어 줌
+  }, delay||0);
+}
+function stopVoice(){ if('speechSynthesis' in window){ try{speechSynthesis.cancel();}catch(e){} } }
+function toggleVoice(){
+  voiceOn=!voiceOn;
+  document.getElementById('voice-btn').textContent = voiceOn?'🗣':'🤐';
+  if(!voiceOn && 'speechSynthesis' in window){ try{speechSynthesis.cancel();}catch(e){} }
+  if(voiceOn) ['right','wrong'].forEach(primeVoice);
+}
 function toggleBGM(){
   initAudio(); bgmOn=!bgmOn;
   document.getElementById('bgm-btn').textContent = bgmOn?'🔊':'🔇';
@@ -1002,7 +1128,11 @@ function setupFight(label){
   document.getElementById('op-name').textContent=op.b.n;
   document.getElementById('bgm-btn').textContent=bgmOn?'🔊':'🔇';
   updateHP(); updateScore(); go('s-fight');
-  say(pick(SAY_START),()=>askQuestion());
+  document.getElementById('voice-btn').textContent = voiceOn?'🗣':'🤐';
+  ['right','wrong','crit'].forEach(primeVoice);
+  const opening=pick(SAY_START);
+  say(opening,()=>askQuestion());
+  callOut('start',opening,250);
 }
 function updateHP(){
   document.getElementById('me-hp').style.width=Math.max(0,me.hp/HPMAX*100)+'%';
@@ -1071,11 +1201,14 @@ function doAttack(iAttack){
   scene='closeup';
   fx.cu={t0:fx.t,dur:1.45,atk,def,tech,crit,mine:iAttack};
   fx.shake=crit?16:9; fx.flash=crit?.55:.3;
-  setTimeout(()=>{ crit?SFX.crit():SFX.hit(); },380);
+  setTimeout(()=>{ crit?SFX.crit():SFX.hit(); },380);      // ① 소가 부딪히는 소리
+  setTimeout(()=>SFX.crowd(crit||iAttack),  520);          // ② 관중 함성
 
   casterMood=iAttack?'excited':'sad';
+  const kind = crit? 'crit' : (iAttack? 'right' : (tank? 'tank' : 'wrong'));
   const line = crit? pick(SAY_CRIT) : (iAttack? pick(SAY_RIGHT) : (tank? pick(SAY_TANK) : pick(SAY_WRONG)));
   setTimeout(()=>say(line),420);
+  callOut(kind, line, 900);                                // ③ 해설 음성
   setTimeout(()=>{ def.hp=Math.max(0,def.hp-dmg); updateHP(); },700);
   setTimeout(()=>{
     scene='wide'; fx.cu=null;
@@ -1100,8 +1233,11 @@ function endFight(){
              : (me.hp<=0||wrong>=LOSE_WRONG) ? false
              : (right>wrong ? true : (me.hp>=op.hp && right>=wrong));
   casterMood=iWon?'excited':'sad';
-  say(pick(iWon?SAY_WIN:SAY_LOSE));
+  const endLine=pick(iWon?SAY_WIN:SAY_LOSE);
+  say(endLine);
   iWon? SFX.win() : SFX.lose();
+  if(iWon) SFX.crowd(true);
+  callOut(iWon?'win':'lose', endLine, 700);
   document.getElementById('nextbtn').classList.remove('on');
   const stat=`10문제 중 <span style="color:var(--green)">${right}문제</span>를 맞혔어요.`;
   setTimeout(()=>{
@@ -1158,7 +1294,7 @@ function quitFight(){
   showModal(`<div class="em">🐂</div><h2>경기를 그만할까요?</h2>
     <p>지금까지의 경기 기록은 사라집니다.</p>
     <button class="m-go" onclick="closeModal()">계속 할래요</button>
-    <button class="m-alt" onclick="closeModal();bgmStop();go('s-home')">그만하기</button>`);
+    <button class="m-alt" onclick="closeModal();bgmStop();stopVoice();go('s-home')">그만하기</button>`);
 }
 
 /* ══════════════ 규칙 ══════════════ */
