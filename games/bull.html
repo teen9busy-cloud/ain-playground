@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>소싸움 대회 · 아인이의 놀이터</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐂</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#2b1f14; --sand:#d9b380; --ink:#241a10; --paper:#fffaf2;
+  --muted:#8a7a68;
+  --red:#dc2626; --red-d:#991b1b;
+  --blue:#2563eb; --blue-d:#1d4ed8;
+  --gold:#f59e0b; --gold-d:#b45309;
+  --green:#16a34a; --green-d:#15803d;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{
+  font-family:'Jua','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  background:
+    radial-gradient(900px 420px at 50% 0%, #4a3520 0%, transparent 60%),
+    linear-gradient(#3a2a1a, #241a10);
+  color:var(--paper); user-select:none; overflow:hidden;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:6px;
+}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit}
+.home{position:fixed;top:8px;left:8px;z-index:70;background:rgba(255,255,255,.88);
+  color:#6b5a48;padding:5px 12px;border-radius:999px;font-size:13px;text-decoration:none;
+  box-shadow:0 2px 8px rgba(0,0,0,.3)}
+
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;
+  width:100%;height:100%}
+.screen.on{display:flex;animation:f .3s ease-out}
+@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+h1{font-family:'Black Han Sans',sans-serif;font-weight:400;
+  font-size:clamp(30px,6.4vh,58px);margin:0;letter-spacing:.02em;
+  color:#ffd88a;text-shadow:0 4px 0 #7c4a11, 0 8px 22px rgba(0,0,0,.5)}
+.sub{font-size:clamp(12px,2vh,18px);color:#d9c3a5;margin:8px 0 22px;text-align:center}
+
+.modes{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.mode{background:linear-gradient(#fff7ea,#f3e0c4);color:var(--ink);
+  border:4px solid #a9743a;border-radius:20px;padding:18px 26px;width:min(260px,42vw);
+  box-shadow:0 8px 0 #7c4a11, 0 14px 28px rgba(0,0,0,.35);transition:.1s;text-align:center}
+.mode:active{transform:translateY(8px);box-shadow:0 0 0 #7c4a11}
+.mode .em{font-size:clamp(32px,5.4vh,48px);line-height:1.1}
+.mode .t{font-family:'Black Han Sans',sans-serif;font-size:clamp(17px,2.8vh,24px);margin:6px 0 3px}
+.mode .d{font-size:clamp(11px,1.7vh,14px);color:#6b5a48;line-height:1.45}
+
+.helpbtn{margin-top:20px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.28);
+  color:#f0dfc6;padding:8px 20px;border-radius:999px;font-size:14px}
+
+/* ---------- 소 고르기 ---------- */
+#s-pick{justify-content:flex-start;padding-top:10px}
+.pickhead{font-family:'Black Han Sans',sans-serif;font-size:clamp(18px,3.2vh,28px);
+  color:#ffd88a;margin:4px 0 2px;text-align:center}
+.pickhint{font-size:clamp(11px,1.8vh,15px);color:#d9c3a5;margin:0 0 10px}
+.bulls{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;
+  width:min(1040px,98vw);overflow-y:auto;padding:2px}
+.bull{background:linear-gradient(#fffaf2,#f0e2cd);color:var(--ink);border:3px solid #b98a52;
+  border-radius:13px;padding:5px 4px 6px;transition:.12s;text-align:center}
+.bull:hover{transform:translateY(-3px)}
+.bull.sel{border-color:#facc15;box-shadow:0 0 0 3px #facc15,0 8px 18px rgba(0,0,0,.4)}
+.bull.taken{opacity:.32;pointer-events:none}
+.bull canvas{width:100%;height:auto;display:block}
+.bull .nm{font-family:'Black Han Sans',sans-serif;font-size:clamp(12px,1.9vh,16px);margin-top:1px}
+.bull .st{display:flex;gap:3px;justify-content:center;margin-top:3px}
+.pip{font-size:9.5px;padding:1px 4px;border-radius:5px;font-family:'Jua',sans-serif}
+.p-p{background:#fee2e2;color:#991b1b}
+.p-t{background:#dbeafe;color:#1e40af}
+.p-s{background:#dcfce7;color:#166534}
+.bull .tag{font-size:10px;color:#7a6853;margin-top:2px;line-height:1.25;min-height:24px}
+
+.pickbar{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;justify-content:center}
+.go{background:var(--gold);color:#3b2607;font-family:'Black Han Sans',sans-serif;
+  font-size:clamp(16px,2.6vh,24px);padding:11px 40px;border-radius:999px;
+  box-shadow:0 6px 0 var(--gold-d);transition:.1s}
+.go:active{transform:translateY(6px);box-shadow:0 0 0 var(--gold-d)}
+.go:disabled{opacity:.4;box-shadow:0 6px 0 var(--gold-d);transform:none;cursor:default}
+.back{background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);
+  color:#f0dfc6;padding:9px 18px;border-radius:999px;font-size:14px}
+
+/* ---------- 대진표 ---------- */
+#s-bracket{justify-content:center}
+.bracket{display:flex;gap:clamp(10px,3vw,42px);align-items:center;justify-content:center;
+  margin:14px 0 18px}
+.rnd{display:flex;flex-direction:column;gap:clamp(5px,1.1vh,12px)}
+.rnd .lab{font-size:11px;color:#c9b394;text-align:center;margin-bottom:2px}
+.slot{background:rgba(255,255,255,.09);border:2px solid rgba(255,255,255,.18);
+  border-radius:9px;padding:5px 10px;min-width:clamp(76px,10vw,118px);
+  font-size:clamp(11px,1.8vh,15px);text-align:center;white-space:nowrap;transition:.2s}
+.slot.me{background:#fde68a;color:#3b2607;border-color:#f59e0b;font-family:'Black Han Sans',sans-serif}
+.slot.win{background:rgba(34,197,94,.22);border-color:#22c55e}
+.slot.out{opacity:.35;text-decoration:line-through}
+.slot.now{box-shadow:0 0 0 3px #f87171;border-color:#f87171}
+
+/* ---------- 경기 ---------- */
+#s-fight{justify-content:flex-start;padding-top:4px}
+.topbar{display:flex;justify-content:space-between;align-items:center;
+  width:min(1000px,99vw);margin-bottom:4px;gap:10px}
+.topbar{padding-left:104px}   /* 왼쪽 위 「놀이터로」 버튼과 겹치지 않게 */
+.topbar .rd{font-family:'Black Han Sans',sans-serif;font-size:clamp(13px,2.1vh,19px);color:#ffd88a}
+.topbar .turn{font-size:12.5px;color:#d9c3a5}
+.quit{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
+  color:#f0dfc6;padding:5px 12px;border-radius:9px;font-size:12.5px}
+
+.hpwrap{display:flex;gap:10px;width:min(1000px,99vw);align-items:center;margin-bottom:4px}
+.side{flex:1;min-width:0}
+.side .nm{font-family:'Black Han Sans',sans-serif;font-size:clamp(13px,2.2vh,20px);
+  margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side.r{text-align:right}
+.bar{height:clamp(13px,2.1vh,19px);background:rgba(0,0,0,.45);border-radius:999px;
+  overflow:hidden;border:2px solid rgba(255,255,255,.22)}
+.fill{height:100%;transition:width .35s ease-out;border-radius:999px}
+.fill.me{background:linear-gradient(90deg,#22c55e,#86efac)}
+.fill.op{background:linear-gradient(90deg,#f87171,#dc2626);margin-left:auto}
+.vs{font-family:'Black Han Sans',sans-serif;font-size:clamp(15px,2.4vh,22px);color:#ffd88a;padding:0 2px}
+
+#arena{width:min(1000px,99vw);height:auto;display:block;border-radius:14px;
+  box-shadow:0 10px 26px rgba(0,0,0,.45);background:#c9a271}
+
+.log{width:min(1000px,99vw);margin-top:5px;min-height:clamp(30px,4.6vh,42px);
+  display:grid;place-items:center;text-align:center;
+  font-size:clamp(13px,2.1vh,19px);color:#ffe9c4;padding:0 8px;line-height:1.3}
+.log b{color:#fca5a5}
+.log .ok{color:#86efac}
+
+.controls{width:min(1000px,99vw);margin-top:2px}
+.grp{display:flex;gap:clamp(5px,1vw,10px);justify-content:center;flex-wrap:wrap}
+.grp+.grp{margin-top:6px}
+.mv{border-radius:14px;padding:clamp(6px,1.2vh,11px) clamp(8px,1.2vw,16px);
+  min-width:clamp(88px,13vw,148px);transition:.09s;text-align:center;
+  border:3px solid transparent;position:relative}
+.mv .em{font-size:clamp(18px,2.9vh,26px);line-height:1.1}
+.mv .t{font-family:'Black Han Sans',sans-serif;font-size:clamp(13px,2vh,18px);white-space:nowrap}
+.mv .d{font-size:clamp(9.5px,1.4vh,12px);opacity:.8;white-space:nowrap}
+.mv:active{transform:translateY(5px)}
+.atk{background:linear-gradient(#ef4444,#c81e1e);box-shadow:0 5px 0 #7f1d1d}
+.atk:active{box-shadow:0 0 0 #7f1d1d}
+.def{background:linear-gradient(#3b82f6,#1d4ed8);box-shadow:0 5px 0 #172554}
+.def:active{box-shadow:0 0 0 #172554}
+.mv:disabled{opacity:.45;transform:none;cursor:default}
+.mv.hintme{border-color:#fde047;animation:glow .9s infinite alternate}
+@keyframes glow{from{box-shadow:0 5px 0 rgba(0,0,0,.4)}to{box-shadow:0 5px 0 rgba(0,0,0,.4),0 0 16px #fde047}}
+.grplab{font-size:11.5px;color:#c9b394;text-align:center;margin-bottom:3px}
+
+/* ---------- 팝업 ---------- */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);
+  align-items:center;justify-content:center;z-index:90;padding:12px}
+.modal.on{display:flex}
+.modal .m{background:linear-gradient(#fffaf2,#f0e2cd);color:var(--ink);
+  border:5px solid #a9743a;border-radius:24px;padding:22px 22px 20px;text-align:center;
+  max-width:520px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.6);
+  max-height:94vh;overflow-y:auto}
+.modal .em{font-size:clamp(38px,7vh,60px);line-height:1}
+.modal h2{font-family:'Black Han Sans',sans-serif;font-weight:400;
+  font-size:clamp(21px,3.6vh,32px);margin:6px 0 8px}
+.modal p{margin:0 0 14px;color:#6b5a48;font-size:clamp(13px,2vh,16px);line-height:1.55}
+.modal button{width:100%;padding:12px;border-radius:14px;font-size:clamp(15px,2.3vh,19px);
+  margin-top:8px;font-family:'Black Han Sans',sans-serif;font-weight:400}
+.m-go{background:var(--gold);color:#3b2607;box-shadow:0 5px 0 var(--gold-d)}
+.m-alt{background:#e7dccb;color:#5b4b39;box-shadow:0 5px 0 #bfae97}
+
+/* 상성표 */
+.rules{text-align:left}
+.rules h3{font-family:'Black Han Sans',sans-serif;font-weight:400;font-size:16px;
+  margin:14px 0 7px;color:#8a4b12}
+.pair{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid #e4d5bd;
+  border-radius:11px;padding:7px 10px;margin-bottom:6px;font-size:14px}
+.pair .a{color:#b91c1c;font-family:'Black Han Sans',sans-serif;min-width:74px}
+.pair .arrow{color:#9a8873}
+.pair .b{color:#1d4ed8;font-family:'Black Han Sans',sans-serif;min-width:74px}
+.pair .why{color:#7a6853;font-size:12px;flex:1;text-align:right}
+.tri{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;
+  background:#fff;border:2px solid #e4d5bd;border-radius:11px;padding:9px;font-size:14px}
+.tri b{font-family:'Black Han Sans',sans-serif}
+.tri .w{color:#b91c1c}
+
+.dust{position:fixed;pointer-events:none;border-radius:50%;z-index:60}
+.shout{position:fixed;left:50%;top:34%;transform:translate(-50%,-50%) scale(.6);
+  font-family:'Black Han Sans',sans-serif;font-size:clamp(26px,5.6vh,52px);
+  color:#fff;text-shadow:0 4px 0 #b91c1c,0 0 26px rgba(0,0,0,.6);
+  opacity:0;z-index:65;pointer-events:none;white-space:nowrap}
+.shout.go{animation:shout .85s ease-out forwards}
+@keyframes shout{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}
+  25%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}
+  70%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-58%) scale(1)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:820px){ .bulls{grid-template-columns:repeat(5,1fr)} }
+</style>
+</head>
+<body>
+
+<a class="home" href="../index.html">🏠 놀이터로</a>
+<div class="shout" id="shout"></div>
+
+<!-- ============ 시작 ============ -->
+<div id="s-home" class="screen on">
+  <h1>🐂 아인이의 소싸움 대회 🐂</h1>
+  <p class="sub">진주 소싸움에 나오는 소 14마리가 모였어요!<br>공격과 수비의 상성을 읽고 이겨 보세요.</p>
+  <div class="modes">
+    <button class="mode" onclick="startMode('cup')">
+      <div class="em">🏆</div>
+      <div class="t">천하장사 대회</div>
+      <div class="d">내 소 한 마리를 골라<br>8강 · 4강 · 결승을 이겨요</div>
+    </button>
+    <button class="mode" onclick="startMode('duel')">
+      <div class="em">⚔️</div>
+      <div class="t">1대1 대결</div>
+      <div class="d">소 두 마리를 직접 골라<br>바로 붙여 봐요</div>
+    </button>
+  </div>
+  <button class="helpbtn" onclick="showRules()">📖 규칙 보기 (상성표)</button>
+</div>
+
+<!-- ============ 소 고르기 ============ -->
+<div id="s-pick" class="screen">
+  <div class="pickhead" id="pick-title">내 소를 골라 주세요</div>
+  <p class="pickhint" id="pick-hint">💪 힘 · 🌀 기술 · 🔥 끈기 를 보고 고르세요</p>
+  <div class="bulls" id="bulls"></div>
+  <div class="pickbar">
+    <button class="back" onclick="go('s-home')">← 뒤로</button>
+    <button class="go" id="pick-go" onclick="confirmPick()" disabled>정했어요!</button>
+  </div>
+</div>
+
+<!-- ============ 대진표 ============ -->
+<div id="s-bracket" class="screen">
+  <div class="pickhead" id="br-title">🏆 천하장사 대회 대진표</div>
+  <div class="bracket" id="bracket"></div>
+  <button class="go" id="br-go" onclick="beginMatch()">경기 시작!</button>
+</div>
+
+<!-- ============ 경기 ============ -->
+<div id="s-fight" class="screen">
+  <div class="topbar">
+    <span class="rd" id="round-lab">8강</span>
+    <span class="turn" id="turn-lab">1 / 14 합</span>
+    <button class="quit" onclick="quitFight()">그만하기</button>
+  </div>
+
+  <div class="hpwrap">
+    <div class="side">
+      <div class="nm" id="me-name">불검</div>
+      <div class="bar"><div class="fill me" id="me-hp" style="width:100%"></div></div>
+    </div>
+    <span class="vs">VS</span>
+    <div class="side r">
+      <div class="nm" id="op-name">흑기사</div>
+      <div class="bar"><div class="fill op" id="op-hp" style="width:100%"></div></div>
+    </div>
+  </div>
+
+  <canvas id="arena" width="1000" height="380"></canvas>
+
+  <div class="log" id="log">기술을 골라 보세요!</div>
+
+  <div class="controls">
+    <div class="grp" id="grp-atk">
+      <button class="mv atk" data-mv="push"><div class="em">💪</div><div class="t">밀치기</div><div class="d">힘으로 밀어붙여</div></button>
+      <button class="mv atk" data-mv="horn"><div class="em">⚡</div><div class="t">뿔치기</div><div class="d">뿔을 빠르게 흔들어</div></button>
+      <button class="mv atk" data-mv="hook"><div class="em">🪝</div><div class="t">뿔걸이</div><div class="d">뿔을 걸어 넘겨</div></button>
+    </div>
+    <div class="grp" id="grp-def">
+      <button class="mv def" data-mv="hold"><div class="em">🦵</div><div class="t">버티기</div><div class="d">밀치기를 막아</div></button>
+      <button class="mv def" data-mv="block"><div class="em">🛡️</div><div class="t">받아치기</div><div class="d">뿔치기를 막아</div></button>
+      <button class="mv def" data-mv="dodge"><div class="em">💨</div><div class="t">빠지기</div><div class="d">뿔걸이를 막아</div></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 팝업 ============ -->
+<div class="modal" id="modal">
+  <div class="m" id="modal-box"></div>
+</div>
+
+<script>
+"use strict";
+
+/* =======================================================
+   소 데이터 — 진주 소싸움에 나오는 소 이름
+   ======================================================= */
+const BULLS=[
+ {n:'불검',    c:'red',   p:5,t:3,s:3, tag:'불처럼 달려드는 힘'},
+ {n:'화랑',    c:'brown', p:4,t:4,s:4, tag:'빈틈 없는 균형'},
+ {n:'용암산',  c:'dark',  p:5,t:2,s:5, tag:'산처럼 버티는 거구'},
+ {n:'빙점',    c:'white', p:3,t:5,s:3, tag:'차가운 기술의 달인'},
+ {n:'금삼',    c:'gold',  p:4,t:4,s:3, tag:'황금빛 뿔의 주인'},
+ {n:'흑기사',  c:'black', p:4,t:5,s:3, tag:'검은 갑옷의 기사'},
+ {n:'태검',    c:'brown', p:5,t:3,s:2, tag:'큰 뿔로 한 방'},
+ {n:'장검',    c:'gray',  p:3,t:5,s:4, tag:'길고 날카로운 뿔'},
+ {n:'흑마',    c:'black', p:3,t:4,s:5, tag:'지치지 않는 다리'},
+ {n:'흑곰',    c:'black', p:5,t:2,s:5, tag:'곰처럼 육중한 몸'},
+ {n:'대타',    c:'brown', p:4,t:3,s:4, tag:'한 방을 노린다'},
+ {n:'대한',    c:'gold',  p:3,t:3,s:5, tag:'끝까지 버틴다'},
+ {n:'라송',    c:'gray',  p:3,t:5,s:3, tag:'영리한 뿔걸이'},
+ {n:'메가샤크',c:'dark',  p:5,t:4,s:2, tag:'상어처럼 몰아친다'}
+];
+
+const HIDE={
+  red:  {body:'#8d3a22',dark:'#6b2a17',light:'#b1543a'},
+  brown:{body:'#9a6636',dark:'#734a26',light:'#bb8a55'},
+  dark: {body:'#4a3a2c',dark:'#33271d',light:'#67523f'},
+  white:{body:'#e8e2d6',dark:'#c4bcae',light:'#f6f2ea'},
+  gold: {body:'#c9922f',dark:'#9c6f20',light:'#e3b354'},
+  black:{body:'#2f2b28',dark:'#1c1a18',light:'#4a443f'},
+  gray: {body:'#7d7a74',dark:'#5c5a55',light:'#9c9891'}
+};
+
+/* 기술 정의 */
+const MOVES={
+  push :{k:'atk',n:'밀치기',em:'💪',beat:'horn', by:'hold' },
+  horn :{k:'atk',n:'뿔치기',em:'⚡',beat:'hook', by:'block'},
+  hook :{k:'atk',n:'뿔걸이',em:'🪝',beat:'push', by:'dodge'},
+  hold :{k:'def',n:'버티기',em:'🦵',stops:'push'},
+  block:{k:'def',n:'받아치기',em:'🛡️',stops:'horn'},
+  dodge:{k:'def',n:'빠지기',em:'💨',stops:'hook'}
+};
+const ATKS=['push','horn','hook'];
+const DEFS=['hold','block','dodge'];
+
+/* =======================================================
+   상태
+   ======================================================= */
+let mode='cup';            // 'cup' | 'duel'
+let pickStage=0;           // duel 모드에서 0=내 소, 1=상대 소
+let myBull=null, opBull=null;
+let bracket=null, roundIdx=0;
+let me=null, op=null;      // 경기 중 선수 상태
+let turn=1, maxTurn=14, busy=false, telegraph=null;
+let myHistory=[];
+let audioCtx=null;
+
+/* =======================================================
+   소리
+   ======================================================= */
+function initAudio(){ if(!audioCtx) try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+function beep(type){
+  if(!audioCtx)return;
+  const t=audioCtx.currentTime;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.connect(g); g.connect(audioCtx.destination);
+  if(type==='tap'){o.type='sine';o.frequency.setValueAtTime(680,t);g.gain.setValueAtTime(.07,t);o.start();o.stop(t+.07);}
+  else if(type==='clash'){
+    o.type='sawtooth';o.frequency.setValueAtTime(150,t);
+    o.frequency.exponentialRampToValueAtTime(60,t+.25);
+    g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);
+    o.start();o.stop(t+.32);
+    // 흙먼지 노이즈
+    try{
+      const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.2,audioCtx.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
+      const src=audioCtx.createBufferSource(); src.buffer=buf;
+      const ng=audioCtx.createGain(); ng.gain.setValueAtTime(.1,t);
+      src.connect(ng); ng.connect(audioCtx.destination); src.start();
+    }catch(e){}
+  }
+  else if(type==='block'){o.type='square';o.frequency.setValueAtTime(320,t);
+    o.frequency.setValueAtTime(240,t+.08);g.gain.setValueAtTime(.1,t);o.start();o.stop(t+.16);}
+  else if(type==='rest'){o.type='sine';o.frequency.setValueAtTime(420,t);
+    o.frequency.setValueAtTime(520,t+.1);g.gain.setValueAtTime(.06,t);o.start();o.stop(t+.2);}
+  else if(type==='win'){o.type='square';[392,523,659,784].forEach((f,i)=>o.frequency.setValueAtTime(f,t+i*.15));
+    g.gain.setValueAtTime(.1,t);o.start();o.stop(t+.66);}
+  else if(type==='lose'){o.type='triangle';o.frequency.setValueAtTime(400,t);
+    o.frequency.exponentialRampToValueAtTime(140,t+.6);g.gain.setValueAtTime(.1,t);o.start();o.stop(t+.62);}
+}
+
+/* =======================================================
+   소 그리기 (옆모습, 몸통에 이름)
+   ======================================================= */
+function drawBull(g,o){
+  const {x,y,s,dir,hide,name}=o;
+  const pose=o.pose||'idle', ph=o.ph||0, lean=o.lean||0, shake=o.shake||0;
+  const H=HIDE[hide]||HIDE.brown;
+
+  g.save();
+  g.translate(x + (shake?Math.sin(ph*40)*shake:0), y);
+  g.scale(dir*s, s);
+  g.rotate(lean*dir);
+
+  const br=Math.sin(ph*2)*1.6;               // 숨쉬기
+  const legSwing=pose==='charge'?Math.sin(ph*14)*7:0;
+
+  /* 그림자 */
+  g.fillStyle='rgba(0,0,0,.22)';
+  g.beginPath(); g.ellipse(0,86,108,15,0,0,Math.PI*2); g.fill();
+
+  /* 꼬리 */
+  g.strokeStyle=H.dark; g.lineWidth=7; g.lineCap='round';
+  g.beginPath(); g.moveTo(-96,-26);
+  g.quadraticCurveTo(-128,-4+Math.sin(ph*3)*6, -120,42);
+  g.stroke();
+  g.fillStyle=H.dark; g.beginPath(); g.ellipse(-120,48,7,12,0,0,Math.PI*2); g.fill();
+
+  /* 뒷다리 */
+  g.fillStyle=H.dark;
+  rr(g,-78,26-legSwing*0.4,21,58,7); g.fill();
+  rr(g,-46,26+legSwing*0.4,21,58,7); g.fill();
+  g.fillStyle='#2a2018';
+  rr(g,-79,78-legSwing*0.4,23,10,4); g.fill();
+  rr(g,-47,78+legSwing*0.4,23,10,4); g.fill();
+
+  /* 몸통 */
+  g.fillStyle=H.body;
+  g.beginPath();
+  g.moveTo(-100,-14);
+  g.quadraticCurveTo(-104,-58+br, -58,-62+br);
+  g.lineTo(46,-58+br);
+  g.quadraticCurveTo(96,-56+br, 100,-16);
+  g.quadraticCurveTo(104,36, 44,42);
+  g.lineTo(-52,42);
+  g.quadraticCurveTo(-104,40, -100,-14);
+  g.closePath(); g.fill();
+
+  /* 등마루(어깨 융기) */
+  g.fillStyle=H.light;
+  g.beginPath();
+  g.moveTo(28,-58+br);
+  g.quadraticCurveTo(62,-84+br, 92,-46+br);
+  g.quadraticCurveTo(64,-54+br, 30,-52+br);
+  g.closePath(); g.fill();
+
+  /* 배 그늘 */
+  g.fillStyle='rgba(0,0,0,.13)';
+  g.beginPath(); g.ellipse(-6,34,74,12,0,0,Math.PI*2); g.fill();
+
+  /* 앞다리 */
+  g.fillStyle=H.dark;
+  rr(g,42,26+legSwing*0.5,22,58,7); g.fill();
+  rr(g,74,26-legSwing*0.5,22,58,7); g.fill();
+  g.fillStyle='#2a2018';
+  rr(g,41,78+legSwing*0.5,24,10,4); g.fill();
+  rr(g,73,78-legSwing*0.5,24,10,4); g.fill();
+
+  /* 목 */
+  const hd = pose==='charge'? 10 : (pose==='guard'? -6 : 0);
+  const hdY = pose==='charge'? 8 : (pose==='guard'? 6 : 0);
+  g.fillStyle=H.body;
+  g.beginPath();
+  g.moveTo(72,-56+br); g.lineTo(112+hd,-52+hdY);
+  g.lineTo(116+hd,-6+hdY); g.lineTo(78,4);
+  g.closePath(); g.fill();
+
+  /* 머리 */
+  g.save();
+  g.translate(126+hd,-30+hdY);
+  g.rotate(pose==='charge'?0.22:(pose==='guard'?0.3:0.06));
+  g.fillStyle=H.body;
+  rr(g,-24,-26,58,52,17); g.fill();
+  /* 주둥이 */
+  g.fillStyle=H.light;
+  rr(g,20,-6,30,30,12); g.fill();
+  g.fillStyle='#3a2d24';
+  g.beginPath(); g.ellipse(42,4,3.5,5,0,0,Math.PI*2); g.fill();
+  g.beginPath(); g.ellipse(42,16,3.5,5,0,0,Math.PI*2); g.fill();
+  /* 눈 */
+  g.fillStyle='#fff'; g.beginPath(); g.ellipse(12,-10,7,8,0,0,Math.PI*2); g.fill();
+  g.fillStyle='#151210'; g.beginPath(); g.ellipse(14,-10,4,5.5,0,0,Math.PI*2); g.fill();
+  /* 귀 */
+  g.fillStyle=H.dark;
+  g.beginPath(); g.ellipse(-16,-14,15,8,-0.5,0,Math.PI*2); g.fill();
+  /* 뿔 */
+  g.strokeStyle='#efe4cf'; g.lineWidth=11; g.lineCap='round';
+  g.beginPath(); g.moveTo(-6,-24); g.quadraticCurveTo(16,-58, 48,-52); g.stroke();
+  g.beginPath(); g.moveTo(-14,-22); g.quadraticCurveTo(-34,-52, -54,-34); g.stroke();
+  g.strokeStyle='#cbbda2'; g.lineWidth=4;
+  g.beginPath(); g.moveTo(34,-56); g.quadraticCurveTo(44,-56, 48,-52); g.stroke();
+  g.restore();
+
+  /* 이름판 — 몸통 옆면 */
+  g.save();
+  g.scale(dir,1);                       // 글자는 항상 똑바로
+  const nx = dir>0 ? -14 : 14;
+  g.fillStyle='rgba(255,255,255,.93)';
+  const nw = Math.max(96, name.length*30+26);
+  rr(g, nx-nw/2, -30, nw, 50, 12); g.fill();
+  g.strokeStyle='rgba(0,0,0,.28)'; g.lineWidth=3; g.stroke();
+  g.fillStyle='#241a10';
+  g.font='700 '+(name.length>3?30:36)+"px 'Black Han Sans','Jua',sans-serif";
+  g.textAlign='center'; g.textBaseline='middle';
+  g.fillText(name, nx, -3);
+  g.restore();
+
+  g.restore();
+}
+function rr(g,x,y,w,h,r){
+  g.beginPath();
+  g.moveTo(x+r,y);
+  g.arcTo(x+w,y,x+w,y+h,r);
+  g.arcTo(x+w,y+h,x,y+h,r);
+  g.arcTo(x,y+h,x,y,r);
+  g.arcTo(x,y,x+w,y,r);
+  g.closePath();
+}
+
+/* 관중석 — 한 번만 만들어 두고 계속 씀 */
+const CROWD=(()=>{
+  let sd=20250822;
+  const rnd=()=>{ sd=(sd*1103515245+12345)&0x7fffffff; return sd/0x7fffffff; };
+  const cols=['#d9b380','#c98f5c','#f0d9b5','#a97545','#efe0c8','#b98a52','#8a6440'];
+  const a=[];
+  for(let row=0;row<5;row++){
+    const y=18+row*22;
+    for(let i=0;i<46;i++){
+      a.push({ x:(i*22 + (row%2)*11 + rnd()*7)%1010 - 5,
+               y:y+rnd()*5, r:5+rnd()*2,
+               c:cols[Math.floor(rnd()*cols.length)] });
+    }
+  }
+  return a;
+})();
+
+/* =======================================================
+   아레나 렌더링
+   ======================================================= */
+const arena=document.getElementById('arena');
+const A=arena.getContext('2d');
+const AW=1000, AH=380;
+let anim={t:0, meOff:0, opOff:0, mePose:'idle', opPose:'idle', meShake:0, opShake:0, flash:0};
+let particles=[];
+let rafId=null;
+
+function fitArena(){
+  // 위(제목·기력바)와 아래(로그·버튼)에 필요한 공간을 뺀 나머지를 모두 경기장에 준다
+  const maxH=Math.max(140, window.innerHeight-296);
+  const w=Math.min(window.innerWidth*0.99, 1000, maxH*AW/AH);
+  arena.style.width=w+'px';
+  arena.style.height=(w*AH/AW)+'px';
+  const r=arena.getBoundingClientRect();
+  const el=document.getElementById('shout');
+  el.style.left=(r.left+r.width/2)+'px';
+  el.style.top=(r.top+r.height*0.50)+'px';
+}
+window.addEventListener('resize',()=>{fitArena();fitPick();});
+
+function drawArena(){
+  A.clearRect(0,0,AW,AH);
+
+  /* 하늘 & 관중석 */
+  const sky=A.createLinearGradient(0,0,0,AH);
+  sky.addColorStop(0,'#3d2b1a'); sky.addColorStop(1,'#7a5a37');
+  A.fillStyle=sky; A.fillRect(0,0,AW,AH);
+
+  /* 관중 (점) */
+  A.fillStyle='#4b3826'; A.fillRect(0,0,AW,120);
+  CROWD.forEach(c=>{
+    A.fillStyle=c.c;
+    A.beginPath(); A.arc(c.x,c.y,c.r,0,Math.PI*2); A.fill();   // 머리
+    A.fillRect(c.x-c.r*0.9, c.y+c.r*0.7, c.r*1.8, c.r*1.5);    // 어깨
+  });
+  A.fillStyle='rgba(0,0,0,.28)'; A.fillRect(0,0,AW,120);
+
+  /* 현수막 */
+  A.fillStyle='#8c2f2f'; A.fillRect(0,104,AW,30);
+  A.fillStyle='#ffe9c4';
+  A.font="700 21px 'Black Han Sans','Jua',sans-serif";
+  A.textAlign='center'; A.textBaseline='middle';
+  A.fillText('제 1 회  아인이배  천하장사  소싸움  대회', AW/2, 120);
+
+  /* 모래판 */
+  const sand=A.createLinearGradient(0,134,0,AH);
+  sand.addColorStop(0,'#c8a173'); sand.addColorStop(1,'#e0bd8e');
+  A.fillStyle=sand; A.fillRect(0,134,AW,AH-134);
+  A.strokeStyle='rgba(255,255,255,.35)'; A.lineWidth=5;
+  A.beginPath(); A.ellipse(AW/2,300,430,116,0,0,Math.PI*2); A.stroke();
+  /* 모래 결 */
+  A.fillStyle='rgba(140,100,60,.16)';
+  for(let i=0;i<70;i++){
+    const sx=((i*7919)%1000), sy=160+((i*5417)%200);
+    A.fillRect(sx, sy, 16, 3);
+  }
+
+  /* 두 소 */
+  const baseY=286;
+  const meX=332+anim.meOff, opX=668+anim.opOff;
+  if(op) drawBull(A,{x:opX,y:baseY,s:0.96,dir:-1,hide:op.b.c,name:op.b.n,
+                     pose:anim.opPose,ph:anim.t,shake:anim.opShake});
+  if(me) drawBull(A,{x:meX,y:baseY,s:0.96,dir:1, hide:me.b.c,name:me.b.n,
+                     pose:anim.mePose,ph:anim.t,shake:anim.meShake});
+
+  /* 흙먼지 */
+  particles.forEach(p=>{
+    A.fillStyle=`rgba(200,160,110,${p.a})`;
+    A.beginPath(); A.arc(p.x,p.y,p.r,0,Math.PI*2); A.fill();
+  });
+
+  /* 충돌 섬광 */
+  if(anim.flash>0){
+    A.fillStyle=`rgba(255,255,255,${anim.flash*0.5})`;
+    A.fillRect(0,134,AW,AH-134);
+  }
+
+  /* 다음 수 예고 (말풍선) */
+  if(telegraph && !busy){
+    const m=MOVES[telegraph];
+    const bx=opX-10, by=140;
+    A.fillStyle='rgba(255,255,255,.94)';
+    rr(A,bx-92,by-4,184,46,14); A.fill();
+    A.strokeStyle='#b45309'; A.lineWidth=3; A.stroke();
+    A.beginPath(); A.moveTo(bx-8,by+42); A.lineTo(bx+8,by+42); A.lineTo(bx,by+56); A.closePath(); A.fill();
+    A.fillStyle='#7c2d12';
+    A.font="700 20px 'Black Han Sans','Jua',sans-serif";
+    A.textAlign='center'; A.textBaseline='middle';
+    A.fillText(m.em+' '+m.n+' 준비!', bx, by+19);
+  }
+}
+function loop(){
+  anim.t+=0.05;
+  if(anim.flash>0) anim.flash=Math.max(0,anim.flash-0.06);
+  anim.meOff*=0.86; anim.opOff*=0.86;
+  anim.meShake*=0.88; anim.opShake*=0.88;
+  particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.25;p.a-=0.022;p.r*=0.985;});
+  particles=particles.filter(p=>p.a>0);
+  drawArena();
+  rafId=requestAnimationFrame(loop);
+}
+function dust(x,y,n){
+  for(let i=0;i<n;i++){
+    particles.push({x:x+(Math.random()-.5)*40, y:y+(Math.random()-.5)*18,
+      vx:(Math.random()-.5)*7, vy:-Math.random()*5-1,
+      r:5+Math.random()*11, a:.75});
+  }
+}
+function shout(text,color){
+  const el=document.getElementById('shout');
+  el.textContent=text;
+  el.style.textShadow=`0 4px 0 ${color||'#b91c1c'},0 0 26px rgba(0,0,0,.6)`;
+  el.classList.remove('go'); void el.offsetWidth; el.classList.add('go');
+}
+
+/* =======================================================
+   화면 이동
+   ======================================================= */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  if(id==='s-fight'){ fitArena(); if(!rafId) loop(); }
+  else if(rafId){ cancelAnimationFrame(rafId); rafId=null; }
+  if(id==='s-pick') fitPick();
+}
+function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+
+/* =======================================================
+   소 고르기
+   ======================================================= */
+function startMode(m){
+  initAudio(); beep('tap');
+  mode=m; pickStage=0; myBull=null; opBull=null;
+  buildPickList();
+  go('s-pick');
+}
+function buildPickList(){
+  const box=document.getElementById('bulls');
+  box.innerHTML='';
+  document.getElementById('pick-title').textContent =
+    (mode==='duel' && pickStage===1) ? '상대 소를 골라 주세요' : '내 소를 골라 주세요';
+  document.getElementById('pick-hint').innerHTML =
+    (mode==='duel' && pickStage===1)
+      ? `내 소는 <b style="color:#fde047">${myBull.n}</b> 이에요. 붙여 볼 상대를 고르세요!`
+      : '💪 힘 · 🌀 기술 · 🔥 끈기 를 보고 골라 보세요';
+  document.getElementById('pick-go').disabled=true;
+
+  BULLS.forEach((b,i)=>{
+    const btn=document.createElement('button');
+    btn.className='bull';
+    if(mode==='duel' && pickStage===1 && myBull && b.n===myBull.n) btn.classList.add('taken');
+    btn.dataset.i=i;
+    btn.innerHTML=`<canvas width="150" height="96"></canvas>
+      <div class="nm">${b.n}</div>
+      <div class="st">
+        <span class="pip p-p">💪${b.p}</span>
+        <span class="pip p-t">🌀${b.t}</span>
+        <span class="pip p-s">🔥${b.s}</span>
+      </div>
+      <div class="tag">${b.tag}</div>`;
+    btn.onclick=()=>{
+      initAudio(); beep('tap');
+      document.querySelectorAll('.bull').forEach(x=>x.classList.remove('sel'));
+      btn.classList.add('sel');
+      document.getElementById('pick-go').disabled=false;
+      document.getElementById('pick-go').dataset.i=i;
+    };
+    box.appendChild(btn);
+    const g=btn.querySelector('canvas').getContext('2d');
+    g.save(); g.translate(0,6);
+    drawBull(g,{x:78,y:74,s:0.30,dir:1,hide:b.c,name:b.n,ph:i});
+    g.restore();
+  });
+}
+function fitPick(){
+  const box=document.getElementById('bulls');
+  if(box) box.style.maxHeight=(window.innerHeight-170)+'px';
+}
+function confirmPick(){
+  const i=parseInt(document.getElementById('pick-go').dataset.i,10);
+  initAudio(); beep('tap');
+  if(mode==='duel' && pickStage===0){
+    myBull=BULLS[i]; pickStage=1; buildPickList(); return;
+  }
+  if(mode==='duel'){
+    opBull=BULLS[i];
+    startDuel(); return;
+  }
+  myBull=BULLS[i];
+  makeBracket();
+  go('s-bracket');
+}
+
+/* =======================================================
+   대진표 (8강)
+   ======================================================= */
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function makeBracket(){
+  const rest=shuffle(BULLS.filter(b=>b.n!==myBull.n)).slice(0,7);
+  const eight=shuffle([myBull].concat(rest));
+  bracket={r8:eight, r4:[null,null,null,null], r2:[null,null], champ:null};
+  roundIdx=0;
+  renderBracket();
+}
+const ROUND_NAME=['8강','4강','결승'];
+function myIndexIn(list){ return list.findIndex(b=>b&&b.n===myBull.n); }
+
+function renderBracket(){
+  const el=document.getElementById('bracket');
+  el.innerHTML='';
+  const cols=[
+    {lab:'8강', list:bracket.r8},
+    {lab:'4강', list:bracket.r4},
+    {lab:'결승',list:bracket.r2},
+    {lab:'천하장사',list:[bracket.champ]}
+  ];
+  cols.forEach((c,ci)=>{
+    const d=document.createElement('div');
+    d.className='rnd';
+    d.innerHTML=`<div class="lab">${c.lab}</div>`;
+    c.list.forEach((b,bi)=>{
+      const s=document.createElement('div');
+      s.className='slot';
+      s.textContent=b?b.n:'?';
+      if(b && b.n===myBull.n) s.classList.add('me');
+      // 현재 라운드의 내 경기 표시
+      if(ci===roundIdx){
+        const mine=myIndexIn(c.list);
+        if(mine>=0 && (bi===mine || bi===(mine^1))) s.classList.add('now');
+      }
+      if(ci<roundIdx && b) s.classList.add('win');
+      d.appendChild(s);
+    });
+    el.appendChild(d);
+  });
+  const cur=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
+  const mine=myIndexIn(cur);
+  const foe=cur[mine^1];
+  document.getElementById('br-title').innerHTML=
+    bracket.champ ? `🏆 ${bracket.champ.n} 천하장사 등극!`
+    : `🏆 ${ROUND_NAME[roundIdx]} — <b style="color:#fde047">${myBull.n}</b> vs <b style="color:#fca5a5">${foe?foe.n:'?'}</b>`;
+  document.getElementById('br-go').style.display = bracket.champ ? 'none':'inline-block';
+}
+
+/* =======================================================
+   경기 준비
+   ======================================================= */
+function mkFighter(b){
+  const hp=90+b.s*12;
+  return {b, hp, max:hp};
+}
+function startDuel(){
+  me=mkFighter(myBull); op=mkFighter(opBull);
+  setupFight('1대1 대결');
+}
+function beginMatch(){
+  const cur=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
+  const mine=myIndexIn(cur);
+  me=mkFighter(cur[mine]); op=mkFighter(cur[mine^1]);
+  setupFight(ROUND_NAME[roundIdx]);
+}
+function setupFight(label){
+  initAudio();
+  turn=1; busy=false; myHistory=[]; particles=[];
+  anim={t:0,meOff:0,opOff:0,mePose:'idle',opPose:'idle',meShake:0,opShake:0,flash:0};
+  document.getElementById('round-lab').textContent=label;
+  document.getElementById('me-name').textContent=me.b.n;
+  document.getElementById('op-name').textContent=op.b.n;
+  updateHP(); updateTurn();
+  setLog('두 소가 마주 섰어요! 기술을 골라 보세요 🐂');
+  pickTelegraph();      // 먼저 상대 수를 정하고
+  enableMoves(true);    // 그 다음 막는 수비를 강조해야 첫 합부터 힌트가 보인다
+  go('s-fight');
+}
+function updateHP(){
+  document.getElementById('me-hp').style.width=Math.max(0,me.hp/me.max*100)+'%';
+  document.getElementById('op-hp').style.width=Math.max(0,op.hp/op.max*100)+'%';
+}
+function updateTurn(){
+  document.getElementById('turn-lab').textContent=`${turn} / ${maxTurn} 합`;
+}
+function setLog(html){ document.getElementById('log').innerHTML='<span>'+html+'</span>'; }
+function enableMoves(on){
+  document.querySelectorAll('.mv').forEach(b=>{
+    b.disabled=!on;
+    b.classList.remove('hintme');
+  });
+  if(on && telegraph){
+    const counter=MOVES[telegraph].by;   // 예고된 공격을 막는 수비
+    if(counter){
+      const el=document.querySelector(`.mv[data-mv="${counter}"]`);
+      if(el) el.classList.add('hintme');
+    }
+  }
+}
+
+/* 상대의 다음 수 결정 + 예고 */
+function pickTelegraph(){
+  const smart = 0.15 + roundIdx*0.15;             // 라운드가 올라갈수록 눈치 빠름
+  let choice;
+  if(myHistory.length>=2 && Math.random()<smart){
+    // 플레이어가 자주 쓴 공격을 카운터
+    const counts={};
+    myHistory.slice(-5).forEach(m=>counts[m]=(counts[m]||0)+1);
+    const fav=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
+    if(MOVES[fav].k==='atk') choice=MOVES[fav].by;      // 막는 수비
+    else choice=ATKS[Math.floor(Math.random()*3)];
+  }else{
+    const pool = Math.random()<0.68 ? ATKS : DEFS;      // 공격 성향
+    choice = pool[Math.floor(Math.random()*3)];
+  }
+  telegraph = choice;
+}
+
+/* =======================================================
+   한 합 진행
+   ======================================================= */
+document.querySelectorAll('.mv').forEach(btn=>{
+  btn.addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    if(busy||btn.disabled) return;
+    playTurn(btn.dataset.mv);
+  });
+});
+
+function playTurn(myMove){
+  busy=true;
+  initAudio(); beep('tap');
+  enableMoves(false);
+  myHistory.push(myMove);
+  const opMove=telegraph;
+  telegraph=null;
+
+  const M=MOVES[myMove], O=MOVES[opMove];
+  let dmgOp=0, dmgMe=0, msg='', kind='clash';
+
+  const pw=n=>n.b.p, tc=n=>n.b.t;
+  const R=(a,b)=>a+Math.random()*(b-a);
+
+  if(M.k==='atk' && O.k==='atk'){
+    if(M.beat===opMove){
+      dmgOp = 11 + pw(me)*2.2 + R(0,6);
+      dmgMe = 3 + R(0,3);
+      msg=`정면 충돌! <span class="ok">${M.n}가 ${O.n}를 이겼어요!</span>`;
+      kind='clash';
+    }else if(O.beat===myMove){
+      dmgMe = 11 + pw(op)*2.2 + R(0,6);
+      dmgOp = 3 + R(0,3);
+      msg=`정면 충돌! <b>${O.n}에 밀렸어요…</b>`;
+      kind='clash';
+    }else{
+      const d=(pw(me)-pw(op))*2.5;
+      dmgOp = Math.max(2, 6+d+R(0,4));
+      dmgMe = Math.max(2, 6-d+R(0,4));
+      msg=`같은 기술끼리 쿵! 힘으로 겨뤄요!`;
+      kind='clash';
+    }
+  }
+  else if(M.k==='atk' && O.k==='def'){
+    if(O.stops===myMove){
+      dmgMe = 5 + tc(op)*1.6 + R(0,3);
+      msg=`<b>${op.b.n}가 ${O.n}로 막았어요!</b> 되치기를 맞았어요.`;
+      kind='block';
+    }else{
+      dmgOp = 15 + pw(me)*2.6 + tc(me)*1.2 + R(0,6);
+      msg=`<span class="ok">${M.n} 명중! 수비가 어긋났어요!</span>`;
+      kind='hit';
+    }
+  }
+  else if(M.k==='def' && O.k==='atk'){
+    if(M.stops===opMove){
+      dmgOp = 5 + tc(me)*1.6 + R(0,3);
+      msg=`<span class="ok">${M.n}로 잘 막았어요!</span> 되치기 성공!`;
+      kind='block';
+    }else{
+      dmgMe = 15 + pw(op)*2.6 + R(0,6);
+      msg=`<b>${O.n}에 정통으로 맞았어요…</b>`;
+      kind='hit';
+    }
+  }
+  else{
+    me.hp=Math.min(me.max, me.hp+7);
+    op.hp=Math.min(op.max, op.hp+7);
+    msg=`둘 다 숨을 고릅니다… 기력을 조금 회복했어요.`;
+    kind='rest';
+  }
+
+  dmgOp=Math.round(dmgOp); dmgMe=Math.round(dmgMe);
+  op.hp=Math.max(0, op.hp-dmgOp);
+  me.hp=Math.max(0, me.hp-dmgMe);
+
+  animateTurn(myMove,opMove,kind,dmgMe,dmgOp);
+
+  const head=`나 ${M.em}${M.n} <span style="color:#c9b394">vs</span> ${op.b.n} ${O.em}${O.n} — `;
+  setLog(head+msg);
+
+  setTimeout(()=>{
+    updateHP();
+    setTimeout(()=>finishTurn(), 480);
+  }, 460);
+}
+
+function animateTurn(myMove,opMove,kind,dmgMe,dmgOp){
+  const myAtk=MOVES[myMove].k==='atk', opAtk=MOVES[opMove].k==='atk';
+  anim.mePose = myAtk?'charge':'guard';
+  anim.opPose = opAtk?'charge':'guard';
+  anim.meOff = myAtk? 70 : -18;
+  anim.opOff = opAtk? -70 : 18;
+
+  setTimeout(()=>{
+    anim.flash=1;
+    dust(500,300, kind==='rest'?4:16);
+    if(kind==='clash'){ beep('clash'); shout('쿵!','#b91c1c'); }
+    else if(kind==='block'){ beep('block'); shout('막았다!','#1d4ed8'); }
+    else if(kind==='hit'){ beep('clash'); shout('명중!','#b45309'); }
+    else { beep('rest'); }
+    if(dmgMe>dmgOp) anim.meShake=9;
+    else if(dmgOp>dmgMe) anim.opShake=9;
+    anim.meOff = dmgMe>4? -34 : 0;
+    anim.opOff = dmgOp>4?  34 : 0;
+    setTimeout(()=>{ anim.mePose='idle'; anim.opPose='idle'; }, 420);
+  }, 240);
+}
+
+function finishTurn(){
+  if(me.hp<=0 || op.hp<=0){ endFight(); return; }
+  turn++;
+  if(turn>maxTurn){ endFight(true); return; }
+  updateTurn();
+  pickTelegraph();
+  enableMoves(true);
+  busy=false;
+}
+
+/* =======================================================
+   경기 종료
+   ======================================================= */
+function endFight(byJudge){
+  busy=true;
+  enableMoves(false);
+  const iWon = op.hp<=0 ? true : (me.hp<=0 ? false : me.hp>=op.hp);
+  const draw = byJudge && Math.abs(me.hp-op.hp)<1;
+
+  if(iWon){ beep('win'); shout('이겼다!','#15803d'); }
+  else{ beep('lose'); }
+
+  setTimeout(()=>{
+    if(mode==='duel'){ duelResult(iWon,byJudge); return; }
+    if(iWon) cupWin(byJudge);
+    else cupLose(byJudge);
+  }, 900);
+}
+
+function judgeLine(byJudge){
+  return byJudge
+    ? `<br><span style="font-size:.9em">14합을 다 겨뤘어요. 심판 다섯 명이 손을 들어 판정했습니다.</span>`
+    : '';
+}
+
+function duelResult(iWon,byJudge){
+  const w=iWon?me.b:op.b, l=iWon?op.b:me.b;
+  showModal(`
+    <div class="em">${iWon?'🏆':'😤'}</div>
+    <h2>${w.n} 승리!</h2>
+    <p>${w.n} 가 ${l.n} 를 이겼어요.${judgeLine(byJudge)}</p>
+    <button class="m-go" onclick="startDuel()">같은 소로 한 판 더!</button>
+    <button class="m-alt" onclick="startMode('duel')">다른 소 골라서 하기</button>
+    <button class="m-alt" onclick="closeModal();go('s-home')">처음으로</button>
+  `);
+}
+
+function cupWin(byJudge){
+  // 다음 라운드 진출 처리
+  const cur=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
+  const next=[bracket.r4,bracket.r2,null][roundIdx];
+  const mine=myIndexIn(cur);
+
+  if(roundIdx<2){
+    // 내 경기 결과 반영
+    next[Math.floor(mine/2)] = me.b;
+    // 나머지 경기들은 스탯 기반으로 자동 진행
+    for(let i=0;i<cur.length;i+=2){
+      if(i===mine || i===(mine^1)) continue;
+      const a=cur[i], b=cur[i+1];
+      if(!a||!b) continue;
+      const sa=a.p+a.t+a.s+Math.random()*5, sb=b.p+b.t+b.s+Math.random()*5;
+      next[i/2] = sa>=sb ? a : b;
+    }
+    roundIdx++;
+    renderBracket();
+    const nc=[bracket.r8,bracket.r4,bracket.r2][roundIdx];
+    const foe=nc[myIndexIn(nc)^1];
+    showModal(`
+      <div class="em">🎉</div>
+      <h2>${ROUND_NAME[roundIdx-1]} 통과!</h2>
+      <p><b>${me.b.n}</b> 가 <b>${op.b.n}</b> 를 이겼어요.${judgeLine(byJudge)}
+      <br><br>다음은 <b style="color:#b45309">${ROUND_NAME[roundIdx]}</b>,
+      상대는 <b style="color:#b91c1c">${foe?foe.n:'?'}</b> 예요!</p>
+      <button class="m-go" onclick="closeModal();go('s-bracket')">대진표 보기</button>
+      <button class="m-alt" onclick="closeModal();beginMatch()">바로 다음 경기!</button>
+    `);
+  }else{
+    bracket.champ=me.b;
+    renderBracket();
+    showModal(`
+      <div class="em">🏆👑</div>
+      <h2>${me.b.n} 천하장사!</h2>
+      <p>8강, 4강, 결승을 모두 이겼어요.<br>
+      아인이와 <b>${me.b.n}</b> 가 대회 우승입니다! 정말 대단해요!${judgeLine(byJudge)}</p>
+      <button class="m-go" onclick="closeModal();startMode('cup')">다른 소로 또 도전!</button>
+      <button class="m-alt" onclick="closeModal();go('s-home')">처음으로</button>
+    `);
+  }
+}
+
+function cupLose(byJudge){
+  showModal(`
+    <div class="em">😢</div>
+    <h2>${ROUND_NAME[roundIdx]}에서 아쉽게…</h2>
+    <p><b>${op.b.n}</b> 가 한 수 위였어요.${judgeLine(byJudge)}
+    <br><br>기술 상성을 다시 보고 한 번 더 붙어 볼까요?</p>
+    <button class="m-go" onclick="closeModal();beginMatch()">이 경기 다시 하기</button>
+    <button class="m-alt" onclick="closeModal();showRules()">📖 상성표 다시 보기</button>
+    <button class="m-alt" onclick="closeModal();startMode('cup')">소 다시 고르기</button>
+  `);
+}
+
+function quitFight(){
+  showModal(`
+    <div class="em">🐂</div>
+    <h2>경기를 그만할까요?</h2>
+    <p>지금까지의 경기 기록은 사라져요.</p>
+    <button class="m-go" onclick="closeModal()">계속 할래요</button>
+    <button class="m-alt" onclick="closeModal();go('s-home')">그만하기</button>
+  `);
+}
+
+/* =======================================================
+   규칙 팝업
+   ======================================================= */
+function showRules(){
+  showModal(`
+    <div class="em">📖</div>
+    <h2>소싸움 기술 상성</h2>
+    <div class="rules">
+      <h3>① 상대가 수비하면 — 짝이 맞는 수비에만 막혀요</h3>
+      <div class="pair"><span class="a">💪 밀치기</span><span>는</span><span class="b">🦵 버티기</span><span class="why">발로 버티면 못 밀어요</span></div>
+      <div class="pair"><span class="a">⚡ 뿔치기</span><span>는</span><span class="b">🛡️ 받아치기</span><span class="why">뿔로 맞받으면 튕겨요</span></div>
+      <div class="pair"><span class="a">🪝 뿔걸이</span><span>는</span><span class="b">💨 빠지기</span><span class="why">옆으로 빠지면 헛걸려요</span></div>
+      <h3>② 둘 다 공격하면 — 가위바위보처럼!</h3>
+      <div class="tri">
+        <b class="w">💪 힘</b> ▸ <b>⚡ 빠르기</b> ▸ <b>🪝 기술</b> ▸ <b class="w">💪 힘</b>
+      </div>
+      <p style="margin-top:8px;font-size:13px">밀치기는 뿔치기를, 뿔치기는 뿔걸이를, 뿔걸이는 밀치기를 이겨요.</p>
+      <h3>③ 둘 다 수비하면</h3>
+      <p style="margin:0;font-size:13px">둘 다 숨을 고르며 기력을 조금 회복해요.</p>
+      <h3>④ 승부</h3>
+      <p style="margin:0;font-size:13px">기력이 먼저 바닥나면 져요. 14합까지 가면 기력이 많은 소가 심판 판정으로 이겨요.</p>
+    </div>
+    <button class="m-go" onclick="closeModal()">알겠어요!</button>
+  `);
+}
+function showModal(html){
+  document.getElementById('modal-box').innerHTML=html;
+  document.getElementById('modal').classList.add('on');
+}
+
+/* 초기 */
+fitArena();
+</script>
+</body>
+</html>
