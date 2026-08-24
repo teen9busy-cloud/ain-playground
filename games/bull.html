@@ -695,7 +695,7 @@ function primeVoice(kind){                 // 파일이 있는지 미리 살짝 
     const k=kind+i;
     if(voiceCache[k]!==undefined) continue;
     voiceCache[k]=null;
-    const a=new Audio(VOICE_DIR+k+'.mp3');
+    const a=new Audio(VOICE_DIR+k+'.m4a');
     a.preload='auto';
     a.oncanplaythrough=()=>{ voiceCache[k]=a; };
     a.onerror=()=>{ voiceCache[k]=false; };
