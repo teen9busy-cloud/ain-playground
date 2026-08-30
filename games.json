@@ -1,6 +1,6 @@
 {
   "title": "아인이의 놀이터",
-  "updated": "2026-08-22",
+  "updated": "2026-08-30",
   "games": [
     {
       "id": "maze",
@@ -81,6 +81,15 @@
       "desc": "문제를 맞히면 내 소가 밀어붙여요! 해설위원과 함께하는 도트 소싸움.",
       "skill": "여러 과목 · 집중",
       "file": "games/bull.html",
+      "color": "orange"
+    },
+    {
+      "id": "spot",
+      "title": "틀린 그림 찾기",
+      "emoji": "🔎",
+      "desc": "공룡 숲·우주·바닷속 등 여섯 가지 그림에서 다른 곳을 찾아요. 매번 새 그림이 나와요.",
+      "skill": "관찰력 · 집중",
+      "file": "games/spot.html",
       "color": "orange"
     }
   ]
