@@ -1,6 +1,6 @@
 {
   "title": "아인이의 놀이터",
-  "updated": "2026-08-30",
+  "updated": "2026-09-13",
   "games": [
     {
       "id": "maze",
@@ -91,6 +91,15 @@
       "skill": "관찰력 · 집중",
       "file": "games/spot.html",
       "color": "orange"
+    },
+    {
+      "id": "world-flags",
+      "title": "아인이의 세계 대탐험",
+      "emoji": "🌎",
+      "desc": "세계수도송에 나오는 국기와 나라, 수도를 재미있게 맞춰요!",
+      "skill": "세계 지리 · 상식",
+      "file": "games/world-flags.html",
+      "color": "blue"
     }
   ]
 }
