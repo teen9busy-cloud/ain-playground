@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>아인이의 세계 대탐험</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        :root {
+            --bg: #F4F7F6;
+            --primary: #4A90E2;
+            --secondary: #FFB74D;
+            --success: #4CAF50;
+            --danger: #FF5252;
+            --text-dark: #2C3E50;
+            --text-light: #FFFFFF;
+            --panel: #FFFFFF;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+        }
+        .screen.active { display: flex; }
+
+        h1 {
+            font-size: clamp(28px, 5vh, 42px);
+            color: var(--primary);
+            text-align: center;
+            margin: 0 0 20px 0;
+            text-shadow: 2px 2px 0px #DDE6ED;
+        }
+        
+        .subtitle {
+            font-size: clamp(16px, 2.5vh, 20px);
+            color: #546E7A;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .mode-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 800px;
+        }
+
+        .mode-btn {
+            background: var(--panel);
+            border: 4px solid var(--primary);
+            border-radius: 20px;
+            padding: 20px;
+            width: 220px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            box-shadow: 0 8px 0 var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .mode-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 0 var(--primary);
+        }
+        .mode-icon { font-size: 40px; margin-bottom: 10px; }
+        .mode-title { font-size: 22px; font-weight: 800; color: var(--text-dark); margin-bottom: 5px; }
+        .mode-desc { font-size: 14px; color: #78909C; }
+
+        .top-bar {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .home-btn {
+            background: #90A4AE;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #607D8B;
+        }
+        .home-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #607D8B; }
+
+        .score-board {
+            display: flex;
+            gap: 15px;
+        }
+        .score-badge {
+            background: var(--panel);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #CFD8DC;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .question-area {
+            background: var(--panel);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 800px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border: 3px solid #ECEFF1;
+        }
+
+        .flag-img {
+            width: auto;
+            height: 160px;
+            max-width: 90%;
+            border: 1px solid #E0E0E0;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            object-fit: contain;
+        }
+
+        .question-text {
+            font-size: clamp(24px, 4.5vh, 38px);
+            font-weight: 800;
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+
+        .opt-btn {
+            background: var(--secondary);
+            color: #4E342E;
+            border: 4px solid #F57C00;
+            border-radius: 16px;
+            font-size: clamp(18px, 3.5vh, 26px);
+            font-weight: 700;
+            padding: 20px 10px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #F57C00;
+            transition: all 0.1s;
+            word-break: keep-all;
+        }
+        .opt-btn:active:not(:disabled) { transform: translateY(6px); box-shadow: 0 0 0 #F57C00; }
+        .opt-btn:disabled { cursor: default; }
+        .opt-btn.correct { background: var(--success); border-color: #2E7D32; color: white; box-shadow: 0 6px 0 #2E7D32; }
+        .opt-btn.wrong { background: var(--danger); border-color: #C62828; color: white; box-shadow: 0 6px 0 #C62828; }
+        .opt-btn.dim { opacity: 0.4; }
+
+        .feedback {
+            position: absolute;
+            font-size: 80px;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+        }
+        .feedback.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .result-box {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            border: 4px solid var(--primary);
+            box-shadow: 0 10px 0 var(--primary);
+        }
+        .result-box h2 { font-size: 36px; margin: 0 0 20px 0; color: var(--text-dark); }
+        .result-box p { font-size: 22px; color: #546E7A; margin-bottom: 30px; }
+        .restart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: 800;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #1565C0;
+        }
+        .restart-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #1565C0; }
+
+        @media (max-height: 650px) {
+            .flag-img { height: 110px; margin-bottom: 10px; }
+            .question-text { margin-bottom: 15px; }
+            .opt-btn { padding: 12px 10px; }
+        }
+    </style>
+</head>
+<body>
+<a href="../index.html" style="position:fixed;top:8px;left:8px;z-index:9999;background:rgba(255,255,255,.9);color:#6b7280;padding:5px 12px;border-radius:999px;font-size:13px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.08);border:1px solid #e5e7eb;font-family:'Jua','Apple SD Gothic Neo',sans-serif">🏠 놀이터로</a>
+
+
+    <div id="screen-home" class="screen active">
+        <h1>아인이의 세계 국기 대탐험 🌎</h1>
+        <div class="subtitle">어떤 탐험을 떠나볼까요?</div>
+        
+        <div class="mode-container">
+            <button class="mode-btn" onclick="startGame('flag-country')">
+                <div class="mode-icon">🇰🇷 ➡️ ❓</div>
+                <div class="mode-title">국기 보고 나라 찾기</div>
+                <div class="mode-desc">국기를 보고 어느 나라인지 맞춰요</div>
+            </button>
+            <button class="mode-btn" onclick="startGame('country-capital')">
+                <div class="mode-icon">🗺️ ➡️ 🏛️</div>
+                <div class="mode-title">나라 보고 수도 찾기</div>
+                <div class="mode-desc">나라 이름을 보고 수도를 맞춰요</div>
+            </button>
+            <button class="mode-btn" onclick="startGame('capital-country')">
+                <div class="mode-icon">🏛️ ➡️ 🗺️</div>
+                <div class="mode-title">수도 보고 나라 찾기</div>
+                <div class="mode-desc">수도 이름을 보고 나라를 맞춰요</div>
+            </button>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="top-bar">
+            <button class="home-btn" onclick="goHome()">◀ 처음으로</button>
+            <div class="score-board">
+                <div class="score-badge">📝 <span id="q-counter">1/10</span></div>
+                <div class="score-badge">⭕ <span id="score-right" style="color:var(--success)">0</span></div>
+                <div class="score-badge">❌ <span id="score-wrong" style="color:var(--danger)">0</span></div>
+            </div>
+        </div>
+
+        <div class="question-area">
+            <img id="q-flag" class="flag-img" src="" alt="국기" style="display:none;">
+            <div id="q-text" class="question-text">질문 내용</div>
+            <div id="options" class="options-grid"></div>
+        </div>
+        
+        <div id="feedback-emoji" class="feedback">⭕</div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <div class="result-box">
+            <h2 id="r-title">탐험 완료! 🎉</h2>
+            <p id="r-desc">10문제 중 8문제를 맞혔어요!</p>
+            <button class="restart-btn" onclick="goHome()">다시 탐험하기</button>
+        </div>
+    </div>
+
+    <script>
+        const COUNTRY_DATA = [
+            { code: 'kr', name: '대한민국', capital: '서울' },
+            { code: 'jp', name: '일본', capital: '도쿄' },
+            { code: 'cn', name: '중국', capital: '베이징' },
+            { code: 'tw', name: '대만', capital: '타이베이' },
+            { code: 'mn', name: '몽골', capital: '울란바토르' },
+            { code: 'vn', name: '베트남', capital: '하노이' },
+            { code: 'th', name: '태국', capital: '방콕' },
+            { code: 'ph', name: '필리핀', capital: '마닐라' },
+            { code: 'sg', name: '싱가포르', capital: '싱가포르' },
+            { code: 'kh', name: '캄보디아', capital: '프놈펜' },
+            { code: 'id', name: '인도네시아', capital: '자카르타' },
+            { code: 'my', name: '말레이시아', capital: '쿠알라룸푸르' },
+            { code: 'in', name: '인도', capital: '뉴델리' },
+            { code: 'bd', name: '방글라데시', capital: '다카' },
+            { code: 'pk', name: '파키스탄', capital: '이슬라마바드' },
+            { code: 'bt', name: '부탄', capital: '팀푸' },
+            { code: 'np', name: '네팔', capital: '카트만두' },
+            { code: 'ae', name: '아랍에미리트', capital: '아부다비' },
+            { code: 'qa', name: '카타르', capital: '도하' },
+            { code: 'kw', name: '쿠웨이트', capital: '쿠웨이트시티' },
+            { code: 'ye', name: '예멘', capital: '사나' },
+            { code: 'sa', name: '사우디아라비아', capital: '리야드' },
+            { code: 'tr', name: '튀르키예', capital: '앙카라' },
+            { code: 'ir', name: '이란', capital: '테헤란' },
+            { code: 'iq', name: '이라크', capital: '바그다드' },
+
+            { code: 'gb', name: '영국', capital: '런던' },
+            { code: 'fr', name: '프랑스', capital: '파리' },
+            { code: 'de', name: '독일', capital: '베를린' },
+            { code: 'it', name: '이탈리아', capital: '로마' },
+            { code: 'es', name: '스페인', capital: '마드리드' },
+            { code: 'pt', name: '포르투갈', capital: '리스본' },
+            { code: 'ch', name: '스위스', capital: '베른' },
+            { code: 'nl', name: '네덜란드', capital: '암스테르담' },
+            { code: 'be', name: '벨기에', capital: '브뤼셀' },
+            { code: 'ru', name: '러시아', capital: '모스크바' },
+            { code: 'gr', name: '그리스', capital: '아테네' },
+            { code: 'se', name: '스웨덴', capital: '스톡홀름' },
+            { code: 'no', name: '노르웨이', capital: '오슬로' },
+            { code: 'fi', name: '핀란드', capital: '헬싱키' },
+            { code: 'dk', name: '덴마크', capital: '코펜하겐' },
+            { code: 'is', name: '아이슬란드', capital: '레이캬비크' },
+            { code: 'ie', name: '아일랜드', capital: '더블린' },
+            { code: 'lu', name: '룩셈부르크', capital: '룩셈부르크' },
+
+            { code: 'us', name: '미국', capital: '워싱턴 D.C.' },
+            { code: 'ca', name: '캐나다', capital: '오타와' },
+            { code: 'mx', name: '멕시코', capital: '멕시코시티' },
+            { code: 'cu', name: '쿠바', capital: '아바나' },
+            { code: 'jm', name: '자메이카', capital: '킹스턴' },
+            { code: 'pa', name: '파나마', capital: '파나마시티' },
+            { code: 'cr', name: '코스타리카', capital: '산호세' },
+            { code: 'gt', name: '과테말라', capital: '과테말라시티' },
+            { code: 'br', name: '브라질', capital: '브라질리아' },
+            { code: 'ar', name: '아르헨티나', capital: '부에노스아이레스' },
+            { code: 'cl', name: '칠레', capital: '산티아고' },
+            { code: 'co', name: '콜롬비아', capital: '보고타' },
+            { code: 'pe', name: '페루', capital: '리마' },
+            { code: 'uy', name: '우루과이', capital: '몬테비데오' },
+            { code: 'py', name: '파라과이', capital: '아순시온' },
+            { code: 've', name: '베네수엘라', capital: '카라카스' },
+
+            { code: 'eg', name: '이집트', capital: '카이로' },
+            { code: 'ke', name: '케냐', capital: '나이로비' },
+            { code: 'za', name: '남아프리카공화국', capital: '프리토리아' },
+            { code: 'ug', name: '우간다', capital: '캄팔라' },
+            { code: 'ly', name: '리비아', capital: '트리폴리' },
+            { code: 'tn', name: '튀니지', capital: '튀니스' },
+            { code: 'dz', name: '알제리', capital: '알제' },
+            { code: 'mg', name: '마다가스카르', capital: '안타나나리보' },
+            { code: 'cm', name: '카메룬', capital: '야운데' },
+            { code: 'gh', name: '가나', capital: '아크라' },
+            { code: 'sn', name: '세네갈', capital: '다카르' },
+
+            { code: 'au', name: '호주', capital: '캔버라' },
+            { code: 'nz', name: '뉴질랜드', capital: '웰링턴' }
+        ];
+
+        let currentMode = '';
+        let quizList = [];
+        let currentQIndex = 0;
+        let rightCount = 0;
+        let wrongCount = 0;
+        let isLocked = false;
+        
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTone(freq, type, duration) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playRight() {
+            playTone(523.25, 'square', 0.1);
+            setTimeout(() => playTone(659.25, 'square', 0.1), 100);
+            setTimeout(() => playTone(783.99, 'square', 0.2), 200);
+        }
+
+        function playWrong() {
+            playTone(250, 'triangle', 0.15);
+            setTimeout(() => playTone(200, 'triangle', 0.3), 150);
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function goHome() {
+            showScreen('screen-home');
+        }
+
+        function shuffle(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startGame(mode) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            currentMode = mode;
+            currentQIndex = 0;
+            rightCount = 0;
+            wrongCount = 0;
+            
+            let shuffledData = shuffle(COUNTRY_DATA);
+            quizList = shuffledData.slice(0, 10);
+            
+            updateScoreBoard();
+            showScreen('screen-game');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isLocked = false;
+            const qData = quizList[currentQIndex];
+            const flagImg = document.getElementById('q-flag');
+            const qText = document.getElementById('q-text');
+            
+            flagImg.src = `https://flagcdn.com/w320/${qData.code}.png`;
+            
+            let answerText = "";
+            let type = "";
+
+            if (currentMode === 'flag-country') {
+                flagImg.style.display = 'block';
+                qText.innerText = "이 국기는 어느 나라일까요?";
+                answerText = qData.name;
+                type = 'name';
+            } else if (currentMode === 'country-capital') {
+                flagImg.style.display = 'none';
+                qText.innerHTML = `<span style="color:#4A90E2">${qData.name}</span>의 수도는 어디일까요?`;
+                answerText = qData.capital;
+                type = 'capital';
+            } else if (currentMode === 'capital-country') {
+                flagImg.style.display = 'none';
+                qText.innerHTML = `<span style="color:#FFB74D">${qData.capital}</span>(은)는 어느 나라의 수도일까요?`;
+                answerText = qData.name;
+                type = 'name';
+            }
+
+            let wrongs = COUNTRY_DATA.filter(d => d.code !== qData.code).map(d => d[type]);
+            wrongs = shuffle(wrongs).slice(0, 3);
+            let options = shuffle([answerText, ...wrongs]);
+
+            const optionsBox = document.getElementById('options');
+            optionsBox.innerHTML = '';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, answerText, btn);
+                optionsBox.appendChild(btn);
+            });
+            
+            document.getElementById('q-counter').innerText = `${currentQIndex + 1}/10`;
+        }
+
+        function checkAnswer(selected, correct, btnElement) {
+            if (isLocked) return;
+            isLocked = true;
+
+            const isRight = (selected === correct);
+            const feedback = document.getElementById('feedback-emoji');
+            
+            document.querySelectorAll('.opt-btn').forEach(btn => {
+                btn.disabled = true;
+                if (btn.innerText === correct) {
+                    btn.classList.add('correct');
+                } else if (btn === btnElement && !isRight) {
+                    btn.classList.add('wrong');
+                } else {
+                    btn.classList.add('dim');
+                }
+            });
+
+            if (isRight) {
+                rightCount++;
+                playRight();
+                feedback.innerText = "⭕";
+            } else {
+                wrongCount++;
+                playWrong();
+                feedback.innerText = "❌";
+            }
+            
+            feedback.style.left = `calc(50% - 40px)`;
+            feedback.style.top = `calc(50% - 40px)`;
+            feedback.classList.add('show');
+            
+            updateScoreBoard();
+
+            setTimeout(() => {
+                feedback.classList.remove('show');
+                currentQIndex++;
+                if (currentQIndex < 10) {
+                    loadQuestion();
+                } else {
+                    showResult();
+                }
+            }, 1500);
+        }
+
+        function updateScoreBoard() {
+            document.getElementById('score-right').innerText = rightCount;
+            document.getElementById('score-wrong').innerText = wrongCount;
+        }
+
+        function showResult() {
+            showScreen('screen-result');
+            const title = document.getElementById('r-title');
+            const desc = document.getElementById('r-desc');
+            
+            if (rightCount === 10) {
+                title.innerText = "세계 박사님! 🏆";
+            } else if (rightCount >= 7) {
+                title.innerText = "정말 잘했어요! 🎉";
+            } else {
+                title.innerText = "멋진 도전이었어요! 👍";
+            }
+            
+            desc.innerText = `10문제 중에서 ${rightCount}문제를 맞혔어요.`;
+        }
+    </script>
+</body>
+</html>
