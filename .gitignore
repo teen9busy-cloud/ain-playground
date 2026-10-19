@@ -1,0 +1,4 @@
+# Local notes and scratch files
+*.txt
+.DS_Store
+Thumbs.db

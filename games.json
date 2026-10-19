@@ -1,7 +1,16 @@
 {
   "title": "아인이의 놀이터",
-  "updated": "2026-09-13",
+  "updated": "2026-10-19",
   "games": [
+    {
+      "id": "sudoku",
+      "title": "스도쿠 대탐험",
+      "emoji": "🧩",
+      "desc": "가로·세로·네모에 하나씩 쏙쏙! 원리부터 가장 쉽게 배우는 스도쿠.",
+      "skill": "논리 추론 · 집중력",
+      "file": "games/sudoku.html",
+      "color": "purple"
+    },
     {
       "id": "maze",
       "title": "미로 대탐험",

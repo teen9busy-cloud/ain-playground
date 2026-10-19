@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>스도쿠 대탐험 · 아인이의 놀이터</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F0F4F8;
+    --panel: #FFFFFF;
+    --primary: #6366F1;
+    --primary-dark: #4F46E5;
+    --accent: #F59E0B;
+    --accent-dark: #D97706;
+    --success: #10B981;
+    --danger: #EF4444;
+    --text: #1F2937;
+    --muted: #6B7280;
+    --border-light: #E2E8F0;
+    --border-heavy: #334155;
+    --highlight-row: #EFF6FF;
+    --selected-cell: #C7D2FE;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: radial-gradient(1000px 500px at 10% -10%, #E0E7FF 0%, transparent 60%),
+                radial-gradient(800px 450px at 90% 10%, #FEE2E2 0%, transparent 60%),
+                var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px 10px;
+  }
+
+  /* 홈 버튼 */
+  .home-btn {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.95);
+    color: #475569;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 15px;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #CBD5E1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: transform 0.1s;
+  }
+  .home-btn:active {
+    transform: scale(0.96);
+  }
+
+  /* 상단 헤더 */
+  .top-header {
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-left: 105px; /* 홈 버튼 공간 */
+    min-height: 48px;
+    flex-shrink: 0;
+  }
+
+  .title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  h1 {
+    font-size: clamp(20px, 3.2vh, 26px);
+    margin: 0;
+    color: var(--primary-dark);
+    font-weight: normal;
+    white-space: nowrap;
+  }
+
+  .rule-open-btn {
+    background: #FEF3C7;
+    color: #92400E;
+    border: 2px solid #FCD34D;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 2px 0 #F59E0B;
+    white-space: nowrap;
+  }
+  .rule-open-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .theme-toggle-btn {
+    background: #FFFFFF;
+    color: #4338CA;
+    border: 2px solid #A5B4FC;
+    border-radius: 12px;
+    padding: 5px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 2px 0 #818CF8;
+    white-space: nowrap;
+  }
+  .theme-toggle-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+  }
+
+  /* 단계 탭 바 */
+  .level-tabs {
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    gap: 5px;
+    background: #E2E8F0;
+    padding: 4px;
+    border-radius: 16px;
+    margin-bottom: 4px;
+    flex-shrink: 0;
+  }
+
+  .lvl-tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 6px 4px;
+    border-radius: 12px;
+    font-size: clamp(12px, 1.9vh, 15px);
+    font-family: inherit;
+    color: #475569;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .lvl-tab.active {
+    background: var(--primary);
+    color: #FFFFFF;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);
+  }
+
+  /* 메인 게임 영역 (좌: 보드 & 말풍선 / 우: 키패드 & 도구) */
+  .game-container {
+    width: 100%;
+    max-width: 960px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 0;
+  }
+
+  /* 왼쪽 보드 영역 */
+  .board-pane {
+    flex: 1.25;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  /* 친절한 원리 안내 배너 */
+  .speech-bubble {
+    width: 100%;
+    max-width: 480px;
+    background: #FFFFFF;
+    border: 3px solid #CBD5E1;
+    border-radius: 18px;
+    padding: 8px 14px;
+    font-size: clamp(14px, 2.1vh, 17px);
+    color: #1E293B;
+    text-align: center;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    word-break: keep-all;
+    line-height: 1.35;
+    transition: all 0.2s;
+  }
+  .speech-bubble.hint-state {
+    background: #FFFBEB;
+    border-color: #FBBF24;
+    color: #92400E;
+  }
+  .speech-bubble.error-state {
+    background: #FEF2F2;
+    border-color: #F87171;
+    color: #991B1B;
+  }
+  .speech-bubble.win-state {
+    background: #ECFDF5;
+    border-color: #34D399;
+    color: #065F46;
+  }
+
+  /* 스도쿠 보드 감싸는 판 */
+  .board-outer {
+    position: relative;
+    background: #FFFFFF;
+    padding: 10px;
+    border-radius: 22px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #E2E8F0;
+  }
+
+  .grid-table {
+    display: grid;
+    border: 4px solid var(--border-heavy);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--border-light);
+  }
+
+  /* 각 칸 */
+  .cell {
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    border-right: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    transition: background-color 0.12s;
+  }
+
+  /* 굵은 경계선 */
+  .cell.b-right { border-right: 3px solid var(--border-heavy); }
+  .cell.b-bottom { border-bottom: 3px solid var(--border-heavy); }
+
+  .cell.fixed {
+    background: #F8FAFC;
+  }
+
+  /* 선택 및 연관 하이라이트 */
+  .cell.selected {
+    background: var(--selected-cell) !important;
+    box-shadow: inset 0 0 0 3px var(--primary-dark);
+    z-index: 2;
+  }
+  .cell.related {
+    background: var(--highlight-row);
+  }
+  .cell.same-val {
+    background: #EDE9FE;
+  }
+  .cell.hint-glow {
+    background: #FEF3C7 !important;
+    box-shadow: inset 0 0 0 4px var(--accent);
+    animation: glowPulse 0.9s infinite alternate;
+    z-index: 3;
+  }
+  .cell.conflict-shake {
+    background: #FEE2E2 !important;
+    animation: shakeAnim 0.35s ease-in-out;
+  }
+
+  /* 토큰 (숫자 / 그림) */
+  .token {
+    width: 82%;
+    height: 82%;
+    border-radius: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    line-height: 1;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .cell.user-put .token {
+    animation: popToken 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    outline: 2px dashed rgba(0, 0, 0, 0.2);
+  }
+
+  /* 넘버블럭스 색상 */
+  .c-1 { background: #EF4444; color: #FFFFFF; }
+  .c-2 { background: #F97316; color: #FFFFFF; }
+  .c-3 { background: #FBBF24; color: #1F2937; }
+  .c-4 { background: #10B981; color: #FFFFFF; }
+  .c-5 { background: #3B82F6; color: #FFFFFF; }
+  .c-6 { background: #8B5CF6; color: #FFFFFF; }
+
+  /* 오른쪽 조작 패널 */
+  .control-pane {
+    flex: 1;
+    max-width: 320px;
+    height: 100%;
+    background: #FFFFFF;
+    border-radius: 22px;
+    padding: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    border: 2px solid #E2E8F0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  /* 판 번호 (1~5판, 새 문제) */
+  .stage-row {
+    display: flex;
+    gap: 4px;
+    justify-content: space-between;
+  }
+  .stg-btn {
+    flex: 1;
+    border: 2px solid #E2E8F0;
+    background: #F8FAFC;
+    color: #475569;
+    padding: 6px 2px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .stg-btn.active {
+    border-color: var(--primary);
+    background: #EEF2FF;
+    color: var(--primary-dark);
+    font-weight: bold;
+  }
+  .stg-btn.dice {
+    background: #FFFBEB;
+    border-color: #FDE68A;
+    color: #B45309;
+  }
+
+  /* 💡 친절한 힌트 버튼 */
+  .hint-button {
+    width: 100%;
+    background: var(--accent);
+    color: #451A03;
+    border: none;
+    border-radius: 16px;
+    padding: 11px 8px;
+    font-size: clamp(15px, 2.3vh, 18px);
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--accent-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: transform 0.08s;
+  }
+  .hint-button:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--accent-dark);
+  }
+
+  /* 키패드 그리드 */
+  .keypad-grid {
+    display: grid;
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .key-btn {
+    border: none;
+    border-radius: 16px;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+    font-size: clamp(20px, 3.2vh, 28px);
+    transition: transform 0.08s;
+  }
+  .key-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  .key-btn .key-sub {
+    font-size: 11px;
+    opacity: 0.9;
+    margin-top: 2px;
+  }
+
+  /* 하단 보조 버튼 (지우개 / 다시하기) */
+  .action-row {
+    display: flex;
+    gap: 8px;
+    padding-top: 4px;
+    border-top: 2px dashed #E2E8F0;
+  }
+
+  .erase-btn {
+    flex: 1.4;
+    background: #F1F5F9;
+    color: #334155;
+    border: 2px solid #CBD5E1;
+    border-radius: 12px;
+    padding: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #CBD5E1;
+  }
+  .erase-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+  }
+
+  .restart-btn {
+    flex: 1;
+    background: #FFF1F2;
+    color: #BE123C;
+    border: 2px solid #FECDD3;
+    border-radius: 12px;
+    padding: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #FECDD3;
+  }
+  .restart-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+  }
+
+  /* 모달 (규칙 안내 & 축하) */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-backdrop.show {
+    display: flex;
+  }
+
+  .modal-box {
+    background: #FFFFFF;
+    border-radius: 26px;
+    padding: 24px 20px;
+    text-align: center;
+    max-width: 440px;
+    width: 100%;
+    border: 5px solid var(--primary);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    animation: popToken 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .modal-box .big-icon {
+    font-size: 56px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .modal-box h2 {
+    margin: 4px 0 10px;
+    font-size: 26px;
+    color: var(--primary-dark);
+  }
+  .modal-box p {
+    margin: 0 0 16px;
+    font-size: 16px;
+    color: #475569;
+    line-height: 1.55;
+    word-break: keep-all;
+  }
+
+  .rule-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    margin-bottom: 18px;
+  }
+  .rule-card-item {
+    background: #F8FAFC;
+    border: 2px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .rule-card-item .rc-icon {
+    font-size: 26px;
+  }
+  .rule-card-item .rc-text strong {
+    color: var(--primary-dark);
+    display: block;
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+  .rule-card-item .rc-text span {
+    font-size: 13px;
+    color: #64748B;
+  }
+
+  .modal-action-btn {
+    width: 100%;
+    background: var(--primary);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 16px;
+    padding: 14px;
+    font-size: 19px;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 5px 0 var(--primary-dark);
+  }
+  .modal-action-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 var(--primary-dark);
+  }
+
+  /* 애니메이션 */
+  @keyframes popToken {
+    0% { transform: scale(0.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes glowPulse {
+    0% { transform: scale(0.96); }
+    100% { transform: scale(1.04); }
+  }
+  @keyframes shakeAnim {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+
+  /* 반응형 모바일 / 태블릿 세로 */
+  @media (max-width: 720px) {
+    .top-header { padding-left: 95px; }
+    .game-container { flex-direction: column; gap: 8px; }
+    .board-pane { flex: none; height: auto; }
+    .control-pane { max-width: 480px; width: 100%; padding: 10px; }
+    .keypad-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+    .key-btn { flex: 1 1 20%; min-height: 48px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 좌측 상단 홈 버튼 -->
+  <a class="home-btn" href="../index.html">🏠 놀이터로</a>
+
+  <!-- 상단 헤더 -->
+  <header class="top-header">
+    <div class="title-group">
+      <h1>🧩 아인이의 스도쿠</h1>
+      <button class="rule-open-btn" id="rule-btn">❓ 규칙 알아보기</button>
+    </div>
+    <div class="header-actions">
+      <button class="theme-toggle-btn" id="theme-btn">🦖 공룡 모드</button>
+    </div>
+  </header>
+
+  <!-- 단계 선택 바 -->
+  <nav class="level-tabs" id="level-bar">
+    <button class="lvl-tab active" data-lvl="1">1단계 (🌱1줄 쏙쏙)</button>
+    <button class="lvl-tab" data-lvl="2">2단계 (⭐2x2 미니)</button>
+    <button class="lvl-tab" data-lvl="3">3단계 (🌟3x3 기초)</button>
+    <button class="lvl-tab" data-lvl="4">4단계 (🚀4x4 쉬움)</button>
+    <button class="lvl-tab" data-lvl="5">5단계 (👑4x4 보통)</button>
+    <button class="lvl-tab" data-lvl="6">6단계 (🔥6x6 도전)</button>
+  </nav>
+
+  <!-- 메인 게임 영역 -->
+  <main class="game-container">
+    <!-- 왼쪽: 안내 배너 및 보드 -->
+    <section class="board-pane">
+      <div class="speech-bubble" id="guide-banner">
+        빈칸을 누르고 알맞은 친구를 넣어보세요!
+      </div>
+      <div class="board-outer">
+        <div class="grid-table" id="board-grid"></div>
+      </div>
+    </section>
+
+    <!-- 오른쪽: 판 선택, 힌트, 키패드, 지우개 -->
+    <aside class="control-pane">
+      <div class="stage-row" id="stage-bar">
+        <button class="stg-btn active" data-stg="1">1판</button>
+        <button class="stg-btn" data-stg="2">2판</button>
+        <button class="stg-btn" data-stg="3">3판</button>
+        <button class="stg-btn" data-stg="4">4판</button>
+        <button class="stg-btn" data-stg="5">5판</button>
+        <button class="stg-btn dice" data-stg="random">🎲 새 문제</button>
+      </div>
+
+      <button class="hint-button" id="hint-btn">
+        💡 힌트 보기 (도와줘요!)
+      </button>
+
+      <div class="keypad-grid" id="keypad"></div>
+
+      <div class="action-row">
+        <button class="erase-btn" id="erase-btn">🧽 지우개</button>
+        <button class="restart-btn" id="restart-btn">🔄 다시하기</button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- 1. 규칙 설명 모달 -->
+  <div class="modal-backdrop" id="rule-modal">
+    <div class="modal-box">
+      <div class="big-icon">💡</div>
+      <h2>스도쿠는 이렇게 풀어요!</h2>
+      <p>스도쿠의 비밀 규칙 3가지만 알면 누구나 스도쿠 박사가 될 수 있어요!</p>
+
+      <div class="rule-card-list">
+        <div class="rule-card-item">
+          <div class="rc-icon">↔️</div>
+          <div class="rc-text">
+            <strong>1. 가로줄에 하나씩!</strong>
+            <span>가로 한 줄에는 똑같은 친구가 겹치면 안 돼요.</span>
+          </div>
+        </div>
+        <div class="rule-card-item">
+          <div class="rc-icon">↕️</div>
+          <div class="rc-text">
+            <strong>2. 세로줄에 하나씩!</strong>
+            <span>세로 한 줄에도 친구들이 사이좋게 하나씩 들어가요.</span>
+          </div>
+        </div>
+        <div class="rule-card-item">
+          <div class="rc-icon">🔲</div>
+          <div class="rc-text">
+            <strong>3. 네모 상자에도 하나씩!</strong>
+            <span>굵은 선으로 둘러싸인 작은 네모 안에도 겹치지 않아요.</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="modal-action-btn" id="rule-close-btn">알겠어요! 문제 풀러 가기 🚀</button>
+    </div>
+  </div>
+
+  <!-- 2. 성공 축하 모달 -->
+  <div class="modal-backdrop" id="win-modal">
+    <div class="modal-box">
+      <div class="big-icon">🎉🏆🎉</div>
+      <h2 id="win-title">우와! 완벽해요!</h2>
+      <p id="win-desc">규칙을 멋지게 지켜서 모든 칸을 채웠어요!<br>아인이의 논리력이 쑥쑥 자라났어요!</p>
+      <button class="modal-action-btn" id="win-next-btn">다음 판 도전하기 🚀</button>
+    </div>
+  </div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   1. 테마 설정 (공룡 / 과일 / 숫자)
+   ============================================================ */
+const THEMES = [
+  {
+    id: 'dino',
+    name: '🦖 공룡 모드',
+    symbols: ['', '🦖', '🦕', '🦏', '🦅', '🐊', '🐢'],
+    names: ['', '티라노', '브라키오', '트리케라', '프테라', '안킬로', '스테고']
+  },
+  {
+    id: 'fruit',
+    name: '🍎 과일 모드',
+    symbols: ['', '🍎', '🍌', '🍇', '🍓', '🍊', '🍉'],
+    names: ['', '사과', '바나나', '포도', '딸기', '오렌지', '수박']
+  },
+  {
+    id: 'number',
+    name: '🔢 숫자 모드',
+    symbols: ['', '1', '2', '3', '4', '5', '6'],
+    names: ['', '1', '2', '3', '4', '5', '6']
+  }
+];
+
+let currentThemeIdx = 0; // 기본은 공룡 모드로 재미있게 시작!
+
+/* ============================================================
+   2. 단계 설정 (원리 이해를 위한 단계별 빌드업)
+   - 1단계: 1줄 4칸 (가로줄 규칙 원리 익히기, 빈칸 1개!)
+   - 2단계: 2x2 네모 (가로/세로 교차 원리 익히기, 빈칸 1~2개)
+   - 3단계: 3x3 미니 (블록 없이 가로/세로만, 빈칸 2~3개)
+   - 4단계: 4x4 쉬움 (2x2 블록 개념, 빈칸 3개)
+   - 5단계: 4x4 보통 (본격적인 추리, 빈칸 6개)
+   - 6단계: 6x6 도전 (숫자 1~6, 빈칸 10개)
+   ============================================================ */
+const STAGE_CONFIGS = {
+  1: { type: 'row', rows: 1, cols: 4, maxNum: 4, blanks: 1, name: '1단계 (🌱 1줄 쏙쏙)' },
+  2: { type: 'grid', rows: 2, cols: 2, boxR: 2, boxC: 2, maxNum: 2, blanks: 1, name: '2단계 (⭐ 2x2 미니)' },
+  3: { type: 'grid', rows: 3, cols: 3, boxR: 3, boxC: 3, maxNum: 3, blanks: 2, name: '3단계 (🌟 3x3 기초)' },
+  4: { type: 'grid', rows: 4, cols: 4, boxR: 2, boxC: 2, maxNum: 4, blanks: 3, name: '4단계 (🚀 4x4 쉬움)' },
+  5: { type: 'grid', rows: 4, cols: 4, boxR: 2, boxC: 2, maxNum: 4, blanks: 6, name: '5단계 (👑 4x4 보통)' },
+  6: { type: 'grid', rows: 6, cols: 6, boxR: 2, boxC: 3, maxNum: 6, blanks: 10, name: '6단계 (🔥 6x6 도전)' }
+};
+
+let currentLevel = 1;
+let currentStage = 1;
+
+let solution = [];
+let initialBoard = [];
+let userBoard = [];
+let selectedCell = null; // { r, c }
+let activeHintCell = null; // { r, c }
+
+/* ============================================================
+   3. 효과음 사운드 신시사이저 (Web Audio API)
+   ============================================================ */
+let audioCtx = null;
+function playSound(type) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const t = audioCtx.currentTime;
+
+    const beep = (freq, dur, delay = 0, wave = 'sine', vol = 0.12) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = wave;
+      osc.frequency.setValueAtTime(freq, t + delay);
+      gain.gain.setValueAtTime(vol, t + delay);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + delay + dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t + delay);
+      osc.stop(t + delay + dur);
+    };
+
+    if (type === 'tap') {
+      beep(550, 0.06, 0, 'sine', 0.07);
+    } else if (type === 'put') {
+      beep(523.25, 0.08, 0, 'triangle', 0.12);
+      beep(659.25, 0.12, 0.06, 'triangle', 0.12);
+    } else if (type === 'hint') {
+      beep(659.25, 0.1, 0, 'sine', 0.1);
+      beep(880.00, 0.18, 0.08, 'sine', 0.12);
+    } else if (type === 'error') {
+      beep(260, 0.15, 0, 'sawtooth', 0.08);
+      beep(200, 0.22, 0.1, 'sawtooth', 0.08);
+    } else if (type === 'erase') {
+      beep(400, 0.08, 0, 'sine', 0.08);
+    } else if (type === 'win') {
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+        beep(f, 0.2, idx * 0.1, 'triangle', 0.15);
+      });
+    }
+  } catch (e) {}
+}
+
+/* ============================================================
+   4. 보드 생성기 (난수 시드 기반 및 고정 문제)
+   ============================================================ */
+function createRNG(seed) {
+  let s = seed % 2147483647;
+  if (s <= 0) s += 2147483646;
+  return function() {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
+function shuffle(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function generatePuzzle(cfg, seed) {
+  const rng = createRNG(seed);
+
+  // 1단계: 1줄 4칸
+  if (cfg.type === 'row') {
+    const nums = shuffle([1, 2, 3, 4], rng);
+    const sol = [nums];
+    const puz = [nums.map(v => v)];
+    // 빈칸 딱 1개 뚫기
+    const blankIdx = Math.floor(rng() * 4);
+    puz[0][blankIdx] = 0;
+    return { solution: sol, puzzle: puz };
+  }
+
+  // 2단계: 2x2 네모
+  if (cfg.rows === 2 && cfg.cols === 2) {
+    const p = rng() > 0.5 ? [1, 2] : [2, 1];
+    const q = [p[1], p[0]];
+    const sol = [p, q];
+    const puz = [ [...p], [...q] ];
+    puz[0][Math.floor(rng() * 2)] = 0;
+    return { solution: sol, puzzle: puz };
+  }
+
+  // 3단계: 3x3 마법 방진
+  if (cfg.rows === 3 && cfg.cols === 3) {
+    const nums = shuffle([1, 2, 3], rng);
+    const sol = [
+      [nums[0], nums[1], nums[2]],
+      [nums[1], nums[2], nums[0]],
+      [nums[2], nums[0], nums[1]]
+    ];
+    const puz = sol.map(r => [...r]);
+    // 2~3개 빈칸 뚫기
+    let coords = [];
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) coords.push({ r, c });
+    coords = shuffle(coords, rng);
+    for (let i = 0; i < cfg.blanks; i++) {
+      puz[coords[i].r][coords[i].c] = 0;
+    }
+    return { solution: sol, puzzle: puz };
+  }
+
+  // 4~6단계: 4x4, 6x6 스도쿠
+  const { rows, cols, boxR, boxC, blanks } = cfg;
+  const size = rows;
+
+  let base = Array.from({ length: size }, (_, r) =>
+    Array.from({ length: size }, (_, c) => ((r * boxC + Math.floor(r / boxR) + c) % size) + 1)
+  );
+
+  // 숫자 치환
+  const numMap = shuffle(Array.from({ length: size }, (_, i) => i + 1), rng);
+  base = base.map(row => row.map(v => numMap[v - 1]));
+
+  // 행 밴드 섞기
+  const bands = size / boxR;
+  let newRows = [];
+  for (let b = 0; b < bands; b++) {
+    let idxs = Array.from({ length: boxR }, (_, i) => b * boxR + i);
+    idxs = shuffle(idxs, rng);
+    idxs.forEach(i => newRows.push([...base[i]]));
+  }
+  base = newRows;
+
+  // 열 스택 섞기
+  const stacks = size / boxC;
+  let colOrder = [];
+  for (let s = 0; s < stacks; s++) {
+    let idxs = Array.from({ length: boxC }, (_, i) => s * boxC + i);
+    idxs = shuffle(idxs, rng);
+    colOrder.push(...idxs);
+  }
+  base = base.map(row => colOrder.map(cIdx => row[cIdx]));
+
+  // 빈칸 뚫기
+  let puzzle = base.map(row => [...row]);
+  let allCoords = [];
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      allCoords.push({ r, c });
+    }
+  }
+  allCoords = shuffle(allCoords, rng);
+
+  let removed = 0;
+  for (let pos of allCoords) {
+    if (removed >= blanks) break;
+    const { r, c } = pos;
+    // 한 줄에 최소 1개는 남아있게 보호
+    const rowLeft = puzzle[r].filter(v => v !== 0).length;
+    const colLeft = puzzle.map(row => row[c]).filter(v => v !== 0).length;
+    if (rowLeft > 1 && colLeft > 1) {
+      puzzle[r][c] = 0;
+      removed++;
+    }
+  }
+
+  return { solution: base, puzzle };
+}
+
+/* ============================================================
+   5. 게임 초기화 및 시작
+   ============================================================ */
+function startNewGame() {
+  const cfg = STAGE_CONFIGS[currentLevel];
+  const seed = currentStage === 'random'
+    ? Math.floor(Math.random() * 899999) + 1000
+    : currentLevel * 1000 + currentStage * 43;
+
+  const res = generatePuzzle(cfg, seed);
+  solution = res.solution;
+  initialBoard = res.puzzle.map(r => [...r]);
+  userBoard = res.puzzle.map(r => [...r]);
+
+  selectedCell = null;
+  activeHintCell = null;
+
+  // 비어있는 첫 칸을 자동으로 선택
+  outer: for (let r = 0; r < cfg.rows; r++) {
+    for (let c = 0; c < cfg.cols; c++) {
+      if (userBoard[r][c] === 0) {
+        selectedCell = { r, c };
+        break outer;
+      }
+    }
+  }
+
+  updateGuideSpeech();
+  renderKeypad();
+  renderBoard();
+}
+
+/* ============================================================
+   6. 심볼 및 이름 포맷팅
+   ============================================================ */
+function getSymbol(val) {
+  if (!val) return '';
+  return THEMES[currentThemeIdx].symbols[val] || String(val);
+}
+
+function getSymbolName(val) {
+  if (!val) return '';
+  return THEMES[currentThemeIdx].names[val] || String(val);
+}
+
+/* ============================================================
+   7. 가이드 배너 말풍선 (원리 실시간 설명)
+   ============================================================ */
+function setBanner(msg, type = 'normal') {
+  const el = document.getElementById('guide-banner');
+  el.textContent = msg;
+  el.className = 'speech-bubble';
+  if (type === 'hint') el.classList.add('hint-state');
+  if (type === 'error') el.classList.add('error-state');
+  if (type === 'win') el.classList.add('win-state');
+}
+
+function updateGuideSpeech() {
+  const cfg = STAGE_CONFIGS[currentLevel];
+
+  if (!selectedCell) {
+    setBanner('빈칸을 콕! 누르고 아래에서 알맞은 친구를 골라보세요.', 'normal');
+    return;
+  }
+
+  const { r, c } = selectedCell;
+  if (initialBoard[r][c] !== 0) {
+    setBanner('이 칸은 원래 있던 친구예요! 빈칸을 눌러보세요.', 'hint');
+    return;
+  }
+
+  // 1단계 (1줄) 설명
+  if (cfg.type === 'row') {
+    const present = userBoard[0].filter(v => v !== 0);
+    const missing = [1, 2, 3, 4].filter(n => !present.includes(n));
+    if (missing.length === 1) {
+      setBanner(`한 줄에 없는 친구는 누구일까요? 힌트: ${getSymbol(missing[0])} (${getSymbolName(missing[0])}) 친구가 없어요!`, 'hint');
+      return;
+    }
+  }
+
+  // 2~6단계: 가로/세로/네모에서 빠진 숫자 추리 안내
+  const usedNums = new Set();
+  // 가로줄
+  for (let i = 0; i < cfg.cols; i++) {
+    if (i !== c && userBoard[r][i] !== 0) usedNums.add(userBoard[r][i]);
+  }
+  // 세로줄
+  for (let i = 0; i < cfg.rows; i++) {
+    if (i !== r && userBoard[i][c] !== 0) usedNums.add(userBoard[i][c]);
+  }
+  // 네모 상자 (있을 경우)
+  if (cfg.boxR && cfg.boxC && cfg.boxR < cfg.rows) {
+    const sr = Math.floor(r / cfg.boxR) * cfg.boxR;
+    const sc = Math.floor(c / cfg.boxC) * cfg.boxC;
+    for (let br = sr; br < sr + cfg.boxR; br++) {
+      for (let bc = sc; bc < sc + cfg.boxC; bc++) {
+        if ((br !== r || bc !== c) && userBoard[br][bc] !== 0) {
+          usedNums.add(userBoard[br][bc]);
+        }
+      }
+    }
+  }
+
+  const candidateNums = [];
+  for (let n = 1; n <= cfg.maxNum; n++) {
+    if (!usedNums.has(n)) candidateNums.push(n);
+  }
+
+  if (candidateNums.length === 1) {
+    const ans = candidateNums[0];
+    setBanner(`줄과 상자를 살펴보니 없는 친구가 딱 하나 있어요! 🔍 정답은 ${getSymbol(ans)} (${getSymbolName(ans)})!`, 'hint');
+  } else {
+    setBanner('가로줄과 세로줄을 둘 다 보고, 겹치지 않는 친구를 찾아보세요!', 'normal');
+  }
+}
+
+/* ============================================================
+   8. 보드 렌더링
+   ============================================================ */
+function renderBoard(conflictPoints = []) {
+  const cfg = STAGE_CONFIGS[currentLevel];
+  const grid = document.getElementById('board-grid');
+  grid.innerHTML = '';
+
+  const { rows, cols, boxR, boxC } = cfg;
+
+  // 화면 크기에 맞춘 동적 셀 크기 계산 (넷북 및 태블릿 최적화)
+  const availH = Math.min(window.innerHeight - 170, window.innerWidth - 30);
+  const maxBoardPx = Math.max(240, Math.min(420, availH));
+  const maxDim = Math.max(rows, cols);
+  const cellPx = Math.floor(maxBoardPx / maxDim);
+
+  grid.style.gridTemplateColumns = `repeat(${cols}, ${cellPx}px)`;
+  grid.style.gridTemplateRows = `repeat(${rows}, ${cellPx}px)`;
+
+  const selVal = selectedCell ? userBoard[selectedCell.r][selectedCell.c] : 0;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+
+      // 굵은 경계선 (블록이 있는 경우)
+      if (boxC && (c + 1) % boxC === 0 && c < cols - 1) cell.classList.add('b-right');
+      if (boxR && (r + 1) % boxR === 0 && r < rows - 1) cell.classList.add('b-bottom');
+
+      const isFixed = initialBoard[r][c] !== 0;
+      const val = userBoard[r][c];
+
+      if (isFixed) cell.classList.add('fixed');
+      else if (val !== 0) cell.classList.add('user-put');
+
+      // 선택된 칸 및 연관 영역 하이라이트
+      if (selectedCell) {
+        const sr = selectedCell.r;
+        const sc = selectedCell.c;
+        const sameBox = boxR && boxC &&
+          Math.floor(r / boxR) === Math.floor(sr / boxR) &&
+          Math.floor(c / boxC) === Math.floor(sc / boxC);
+
+        if (r === sr && c === sc) {
+          cell.classList.add('selected');
+        } else if (r === sr || c === sc || sameBox) {
+          cell.classList.add('related');
+        }
+
+        if (selVal !== 0 && val === selVal && !(r === sr && c === sc)) {
+          cell.classList.add('same-val');
+        }
+      }
+
+      if (activeHintCell && activeHintCell.r === r && activeHintCell.c === c) {
+        cell.classList.add('hint-glow');
+      }
+
+      if (conflictPoints.some(pt => pt.r === r && pt.c === c)) {
+        cell.classList.add('conflict-shake');
+      }
+
+      // 토큰 표시
+      if (val !== 0) {
+        const token = document.createElement('div');
+        token.className = `token c-${val}`;
+        token.textContent = getSymbol(val);
+        token.style.fontSize = `${Math.floor(cellPx * 0.52)}px`;
+        cell.appendChild(token);
+      }
+
+      // pointerdown 이벤트로 빠른 터치 지원
+      cell.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        playSound('tap');
+        selectedCell = { r, c };
+        if (activeHintCell && (activeHintCell.r !== r || activeHintCell.c !== c)) {
+          activeHintCell = null;
+        }
+        updateGuideSpeech();
+        renderBoard();
+      });
+
+      grid.appendChild(cell);
+    }
+  }
+}
+
+/* ============================================================
+   9. 키패드 렌더링
+   ============================================================ */
+function renderKeypad() {
+  const cfg = STAGE_CONFIGS[currentLevel];
+  const pad = document.getElementById('keypad');
+  pad.innerHTML = '';
+
+  const count = cfg.maxNum;
+  pad.style.gridTemplateColumns = count <= 4 ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)';
+
+  for (let n = 1; n <= count; n++) {
+    const btn = document.createElement('button');
+    btn.className = `key-btn c-${n}`;
+    btn.innerHTML = `<span>${getSymbol(n)}</span><span class="key-sub">${getSymbolName(n)}</span>`;
+
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      inputValue(n);
+    });
+
+    pad.appendChild(btn);
+  }
+}
+
+/* ============================================================
+   10. 충돌 검사
+   ============================================================ */
+function checkConflicts(r, c, val) {
+  const cfg = STAGE_CONFIGS[currentLevel];
+  const conflicts = [];
+
+  // 1단계 한 줄인 경우
+  if (cfg.type === 'row') {
+    for (let i = 0; i < cfg.cols; i++) {
+      if (i !== c && userBoard[0][i] === val) {
+        conflicts.push({ r: 0, c: i });
+      }
+    }
+    return conflicts;
+  }
+
+  // 가로줄 검사
+  for (let i = 0; i < cfg.cols; i++) {
+    if (i !== c && userBoard[r][i] === val) conflicts.push({ r, c: i });
+  }
+
+  // 세로줄 검사
+  for (let i = 0; i < cfg.rows; i++) {
+    if (i !== r && userBoard[i][c] === val) conflicts.push({ r: i, c });
+  }
+
+  // 작은 네모 상자 검사
+  if (cfg.boxR && cfg.boxC && cfg.boxR < cfg.rows) {
+    const sr = Math.floor(r / cfg.boxR) * cfg.boxR;
+    const sc = Math.floor(c / cfg.boxC) * cfg.boxC;
+    for (let br = sr; br < sr + cfg.boxR; br++) {
+      for (let bc = sc; bc < sc + cfg.boxC; bc++) {
+        if ((br !== r || bc !== c) && userBoard[br][bc] === val) {
+          conflicts.push({ r: br, c: bc });
+        }
+      }
+    }
+  }
+
+  return conflicts;
+}
+
+/* ============================================================
+   11. 숫자/그림 입력
+   ============================================================ */
+function inputValue(val) {
+  if (!selectedCell) {
+    setBanner('먼저 넣을 빈칸을 콕! 눌러주세요.', 'hint');
+    return;
+  }
+
+  const { r, c } = selectedCell;
+  if (initialBoard[r][c] !== 0) {
+    setBanner('원래 있던 칸은 바꿀 수 없어요. 비어 있는 칸을 눌러보세요.', 'hint');
+    return;
+  }
+
+  const conflicts = checkConflicts(r, c, val);
+  userBoard[r][c] = val;
+  activeHintCell = null;
+
+  if (conflicts.length > 0) {
+    playSound('error');
+    conflicts.push({ r, c });
+    setBanner(`앗! 같은 줄이나 네모 상자에 이미 ${getSymbol(val)} (${getSymbolName(val)}) 친구가 있어요! 서로 부딪혀요~`, 'error');
+    renderBoard(conflicts);
+    return;
+  }
+
+  playSound('put');
+  setBanner(`참 잘했어요! ${getSymbol(val)} (${getSymbolName(val)}) 친구가 쏙 들어갔어요!`, 'normal');
+  renderBoard();
+  checkGameWin();
+}
+
+/* ============================================================
+   12. 지우기 및 초기화
+   ============================================================ */
+function eraseCurrent() {
+  if (!selectedCell) return;
+  const { r, c } = selectedCell;
+  if (initialBoard[r][c] !== 0) return;
+
+  playSound('erase');
+  userBoard[r][c] = 0;
+  activeHintCell = null;
+  setBanner('지우개로 지웠어요! 다시 차근차근 생각해 봐요.', 'normal');
+  renderBoard();
+}
+
+function restartBoard() {
+  playSound('tap');
+  userBoard = initialBoard.map(row => [...row]);
+  activeHintCell = null;
+  setBanner('처음 상태로 되돌렸어요! 힘내서 풀어봐요.', 'normal');
+  renderBoard();
+}
+
+/* ============================================================
+   13. 스마트 힌트 (도와줘요!)
+   ============================================================ */
+function useSmartHint() {
+  const cfg = STAGE_CONFIGS[currentLevel];
+
+  // 1. 이미 힌트로 반짝이는 칸이 있다면 정답을 쏙 채워줌
+  if (activeHintCell) {
+    const { r, c } = activeHintCell;
+    const ans = solution[r][c];
+    userBoard[r][c] = ans;
+    selectedCell = { r, c };
+    activeHintCell = null;
+    playSound('put');
+    setBanner(`짜잔! 이 칸의 정답은 ${getSymbol(ans)} (${getSymbolName(ans)}) 친구였어요! 🎈`, 'win');
+    renderBoard();
+    checkGameWin();
+    return;
+  }
+
+  // 2. 비어 있거나 틀린 칸 중 가장 풀기 쉬운 칸 찾기
+  let candidate = null;
+  let maxNeighbors = -1;
+
+  for (let r = 0; r < cfg.rows; r++) {
+    for (let c = 0; c < cfg.cols; c++) {
+      if (userBoard[r][c] !== solution[r][c]) {
+        // 주변에 채워진 숫자 개수 측정
+        let count = 0;
+        for (let i = 0; i < cfg.cols; i++) if (userBoard[r][i] !== 0) count++;
+        for (let i = 0; i < cfg.rows; i++) if (userBoard[i][c] !== 0) count++;
+
+        if (count > maxNeighbors) {
+          maxNeighbors = count;
+          candidate = { r, c };
+        }
+      }
+    }
+  }
+
+  if (!candidate) return;
+
+  playSound('hint');
+  selectedCell = candidate;
+  activeHintCell = candidate;
+  setBanner(`💡 반짝이는 칸을 먼저 볼까요? 없는 친구를 찾아보세요! (힌트를 한 번 더 누르면 채워져요)`, 'hint');
+  renderBoard();
+}
+
+/* ============================================================
+   14. 성공 판정
+   ============================================================ */
+function checkGameWin() {
+  const cfg = STAGE_CONFIGS[currentLevel];
+
+  for (let r = 0; r < cfg.rows; r++) {
+    for (let c = 0; c < cfg.cols; c++) {
+      if (userBoard[r][c] === 0) return;
+      if (checkConflicts(r, c, userBoard[r][c]).length > 0) return;
+    }
+  }
+
+  playSound('win');
+  setBanner('🎉 와아아! 모든 칸을 완벽하게 맞췄어요! 최고예요!', 'win');
+  setTimeout(() => {
+    document.getElementById('win-modal').classList.add('show');
+  }, 400);
+}
+
+function nextStage() {
+  document.getElementById('win-modal').classList.remove('show');
+  if (typeof currentStage === 'number' && currentStage < 5) {
+    setStage(currentStage + 1);
+  } else {
+    setStage('random');
+  }
+}
+
+/* ============================================================
+   15. 탭 및 모드 전환
+   ============================================================ */
+function setLevel(lvl) {
+  playSound('tap');
+  currentLevel = lvl;
+  currentStage = 1;
+  updateNavUI();
+  startNewGame();
+}
+
+function setStage(stg) {
+  playSound('tap');
+  currentStage = stg;
+  updateNavUI();
+  startNewGame();
+}
+
+function toggleTheme() {
+  playSound('tap');
+  currentThemeIdx = (currentThemeIdx + 1) % THEMES.length;
+  document.getElementById('theme-btn').textContent = THEMES[currentThemeIdx].name;
+  renderKeypad();
+  renderBoard();
+  updateGuideSpeech();
+}
+
+function updateNavUI() {
+  const lvlBtns = document.querySelectorAll('#level-bar .lvl-tab');
+  lvlBtns.forEach((b) => {
+    b.classList.toggle('active', parseInt(b.dataset.lvl, 10) === currentLevel);
+  });
+
+  const stgBtns = document.querySelectorAll('#stage-bar .stg-btn');
+  stgBtns.forEach((b) => {
+    if (b.dataset.stg === 'random') {
+      b.classList.toggle('active', currentStage === 'random');
+    } else {
+      b.classList.toggle('active', parseInt(b.dataset.stg, 10) === currentStage);
+    }
+  });
+}
+
+/* ============================================================
+   16. 이벤트 리스너 등록
+   ============================================================ */
+document.querySelectorAll('#level-bar .lvl-tab').forEach(b => {
+  b.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    setLevel(parseInt(b.dataset.lvl, 10));
+  });
+});
+
+document.querySelectorAll('#stage-bar .stg-btn').forEach(b => {
+  b.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    const stg = b.dataset.stg === 'random' ? 'random' : parseInt(b.dataset.stg, 10);
+    setStage(stg);
+  });
+});
+
+document.getElementById('theme-btn').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  toggleTheme();
+});
+
+document.getElementById('hint-btn').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  useSmartHint();
+});
+
+document.getElementById('erase-btn').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  eraseCurrent();
+});
+
+document.getElementById('restart-btn').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  restartBoard();
+});
+
+// 모달
+const ruleModal = document.getElementById('rule-modal');
+document.getElementById('rule-btn').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  playSound('tap');
+  ruleModal.classList.add('show');
+});
+document.getElementById('rule-close-btn').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  playSound('tap');
+  ruleModal.classList.remove('show');
+});
+
+document.getElementById('win-next-btn').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  nextStage();
+});
+
+// 키보드 지원 (넷북 키보드 호환)
+window.addEventListener('keydown', (e) => {
+  if (e.repeat) return;
+  const cfg = STAGE_CONFIGS[currentLevel];
+  if (e.key >= '1' && e.key <= String(cfg.maxNum)) {
+    inputValue(parseInt(e.key, 10));
+  } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
+    eraseCurrent();
+  } else if (selectedCell && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+    e.preventDefault();
+    let { r, c } = selectedCell;
+    if (e.key === 'ArrowUp') r = (r - 1 + cfg.rows) % cfg.rows;
+    if (e.key === 'ArrowDown') r = (r + 1) % cfg.rows;
+    if (e.key === 'ArrowLeft') c = (c - 1 + cfg.cols) % cfg.cols;
+    if (e.key === 'ArrowRight') c = (c + 1) % cfg.cols;
+    selectedCell = { r, c };
+    playSound('tap');
+    updateGuideSpeech();
+    renderBoard();
+  }
+});
+
+window.addEventListener('resize', () => renderBoard());
+
+// 시작
+updateNavUI();
+startNewGame();
+</script>
+</body>
+</html>

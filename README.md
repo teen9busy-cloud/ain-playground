@@ -6,9 +6,8 @@
 
 ```
 index.html        놀이터 첫 화면 (게임 카드 목록)
-admin.html        게임 추가 화면 (코드 붙여넣기 → 자동 업로드)
 games.json        게임 목록 데이터
-games/            게임 파일들 (maze, math, coding, puzzle, clock, memory, hangul, pattern)
+games/            게임 파일들 (sudoku, maze, math, coding, puzzle, clock, memory, hangul, pattern, bull, spot, world-flags)
 ```
 
 ## 처음 한 번만 하는 설정
@@ -18,16 +17,9 @@ games/            게임 파일들 (maze, math, coding, puzzle, clock, memory, h
 3. 저장소의 Settings → Pages 로 들어가서 Source를 `Deploy from a branch`, 브랜치를 `main` / `/ (root)` 로 지정하고 저장합니다.
 4. 1~2분 뒤 `https://<깃허브아이디>.github.io/ain-playground/` 주소가 열립니다. 이 주소를 아이 태블릿과 넷북 홈 화면에 추가해 두면 앱처럼 쓸 수 있습니다.
 
-## 새 게임 추가하기
+## 게임 추가 및 유지 관리
 
-주소 뒤에 `admin.html` 을 붙여 관리자 화면으로 들어갑니다.
-처음 한 번만 깃허브 아이디, 저장소 이름, 액세스 토큰을 입력해 두면 그다음부터는 코드를 붙여넣고 버튼만 누르면 됩니다.
-
-토큰은 깃허브 → Settings → Developer settings → Personal access tokens → Fine-grained tokens 에서
-이 저장소에 대해 **Contents: Read and write** 권한으로 만듭니다.
-
-토큰은 입력한 브라우저에만 저장되고 다른 곳으로 전송되지 않습니다.
-게임을 올리는 작업은 어른 컴퓨터에서만 하고, 아이가 쓰는 기기에는 토큰을 저장하지 마세요.
+AI 어시스턴트(Antigravity)에게 게임 추가/수정을 요청하면 코드를 직접 리포지토리에 반영하고 배포합니다.
 
 ## 새 게임을 만들 때 지켜야 할 것
 

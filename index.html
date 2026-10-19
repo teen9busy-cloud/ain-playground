@@ -81,8 +81,7 @@ footer a{color:#9ca3af;border-bottom:1px dotted #d1d5db}
 <main class="grid" id="grid"></main>
 
 <footer>
-  놀이터에 새 게임 넣기 →
-  <a href="admin.html" style="display:inline-block;min-height:52px;line-height:52px;padding:0 26px;font-size:18px">🔧 게임 추가하기</a>
+  아인이와 함께 매일매일 재미있게 놀아요! 🦖🎈
 </footer>
 
 <script>
@@ -90,6 +89,7 @@ footer a{color:#9ca3af;border-bottom:1px dotted #d1d5db}
 
 /* games.json을 못 읽는 경우(오프라인·file://)를 위한 기본 목록 */
 const FALLBACK={games:[
+ {id:'sudoku',title:'스도쿠 대탐험',emoji:'🧩',desc:'가로·세로·네모에 하나씩 쏙쏙! 원리부터 배우는 스도쿠.',skill:'논리력 · 집중',file:'games/sudoku.html',color:'purple'},
  {id:'maze',title:'미로 대탐험',emoji:'🌀',desc:'공룡·자동차·로켓을 골라서 미로를 탈출해요.',skill:'길찾기 · 방향 감각',file:'games/maze.html',color:'green'},
  {id:'math',title:'큐브 산수',emoji:'🧮',desc:'더하기·빼기·곱하기·나누기를 블록으로 배워요.',skill:'수와 연산',file:'games/math.html',color:'purple'},
  {id:'coding',title:'코딩 대탐험',emoji:'🤖',desc:'명령을 순서대로 놓아 로봇을 움직여요.',skill:'순서 · 논리',file:'games/coding.html',color:'blue'},
